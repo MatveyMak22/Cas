@@ -3,308 +3,324 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Royal Bet Premium</title>
+    <title>Royal Bet Ultimate</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
-            --bg: #090c10;
-            --card: #161b22;
-            --nav: rgba(22, 27, 34, 0.96);
-            --accent: #238636; /* Зеленый "дорогой" цвет */
-            --accent-blue: #2f81f7;
-            --text: #f0f6fc;
-            --text-sub: #8b949e;
+            --bg: #0d1117;
+            --card-bg: #161b22;
+            --nav-bg: rgba(22, 27, 34, 0.98);
+            --accent: #2ea043;
+            --accent-hover: #3fb950;
             --danger: #da3633;
+            --blue: #2f81f7;
+            --gold: #e3b341;
+            --text-main: #f0f6fc;
+            --text-sub: #8b949e;
             --border: #30363d;
         }
 
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
         body {
             background-color: var(--bg);
-            color: var(--text);
+            color: var(--text-main);
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            padding-bottom: 95px;
-            -webkit-font-smoothing: antialiased;
+            margin: 0; padding: 0;
+            padding-bottom: 100px;
             user-select: none;
+            overflow-x: hidden;
         }
 
-        /* HEADER */
+        /* --- HEADER & TOP BAR --- */
         .header {
-            position: sticky;
-            top: 0;
-            background: rgba(9, 12, 16, 0.85);
+            position: sticky; top: 0; z-index: 50;
+            background: rgba(13, 17, 23, 0.95);
             backdrop-filter: blur(12px);
             padding: 12px 16px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
             border-bottom: 1px solid var(--border);
-            z-index: 50;
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
         }
-        .logo { font-weight: 800; font-size: 19px; letter-spacing: -0.5px; }
+        .logo { font-weight: 900; font-size: 20px; font-style: italic; letter-spacing: -1px; }
         .logo span { color: var(--accent); }
-        .balance {
-            background: #21262d;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: 600;
-            border: 1px solid var(--border);
-            display: flex;
-            align-items: center;
-            gap: 6px;
+        .balance-chip {
+            background: #21262d; padding: 6px 14px; border-radius: 100px;
+            border: 1px solid var(--border); font-weight: 700; font-size: 14px;
+            display: flex; align-items: center; gap: 6px;
         }
 
-        /* TABS */
-        .sport-scroll {
-            display: flex;
-            gap: 8px;
-            padding: 12px 16px;
-            overflow-x: auto;
-            scrollbar-width: none;
-        }
-        .sport-scroll::-webkit-scrollbar { display: none; }
-        .tab {
-            padding: 8px 16px;
-            background: var(--card);
-            border-radius: 100px;
-            font-size: 13px;
-            color: var(--text-sub);
-            border: 1px solid var(--border);
-            white-space: nowrap;
-            transition: 0.2s;
-        }
-        .tab.active {
-            background: var(--text);
-            color: var(--bg);
-            font-weight: 700;
-            border-color: var(--text);
-        }
-
-        /* CARDS */
-        .container { padding: 0 16px; animation: fadeIn 0.4s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        .card {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 12px;
-        }
-        
-        .page { display: none; }
-        .page.active { display: block; }
-
-        /* SPORT MATCH STYLES */
-        .match-header {
-            display: flex;
-            justify-content: space-between;
-            font-size: 11px;
-            color: var(--text-sub);
-            margin-bottom: 12px;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
-        .live-indic { color: var(--danger); display: flex; align-items: center; gap: 4px; }
-        .dot { width: 5px; height: 5px; background: var(--danger); border-radius: 50%; animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
-
-        .teams {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 16px;
-        }
-        .team-name { width: 35%; font-size: 13px; font-weight: 600; line-height: 1.3; }
-        .score { 
-            font-size: 20px; 
-            font-weight: 800; 
-            letter-spacing: 2px; 
-            color: var(--text);
-            font-variant-numeric: tabular-nums;
-        }
-
-        .odds { display: flex; gap: 8px; }
-        .odd-btn {
-            flex: 1;
-            background: #21262d;
-            border-radius: 8px;
-            padding: 10px 0;
-            text-align: center;
-            cursor: pointer;
-            transition: background 0.2s;
-            position: relative;
-            overflow: hidden;
-        }
-        .odd-btn:active { background: #30363d; }
-        .odd-name { font-size: 10px; color: var(--text-sub); display: block; margin-bottom: 2px; }
-        .odd-val { font-size: 14px; font-weight: 700; color: var(--accent-blue); }
-        
-        /* Effect when odds change */
-        .changed-up { animation: flashGreen 0.6s; }
-        .changed-down { animation: flashRed 0.6s; }
-        @keyframes flashGreen { 0% {background: rgba(46, 160, 67, 0.4);} 100% {background: #21262d;} }
-        @keyframes flashRed { 0% {background: rgba(218, 54, 51, 0.4);} 100% {background: #21262d;} }
-
-        /* GAMES (Mines/Dice) UI */
-        .input-row { margin-bottom: 15px; }
-        input {
-            width: 100%;
-            background: #0d1117;
-            border: 1px solid var(--border);
-            padding: 14px;
-            border-radius: 8px;
-            color: white;
-            font-size: 16px;
-            box-sizing: border-box;
-            outline: none;
-        }
-        .action-btn {
-            width: 100%;
-            padding: 16px;
-            background: var(--accent);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 700;
-            cursor: pointer;
-        }
-        
-        /* MINES GRID */
-        .grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-top: 20px; }
-        .cell {
-            aspect-ratio: 1;
-            background: #21262d;
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 22px;
-            cursor: pointer;
-            border-bottom: 3px solid #161b22;
-        }
-        .cell.open { background: #30363d; border-bottom: 0; cursor: default; }
-        .cell.win { background: rgba(35, 134, 54, 0.2); border: 1px solid var(--accent); }
-        .cell.loss { background: rgba(218, 54, 51, 0.2); border: 1px solid var(--danger); }
-
-        /* DICE 3D */
-        .scene { perspective: 800px; height: 160px; display: flex; justify-content: center; align-items: center; }
-        .cube { position: relative; width: 70px; height: 70px; transform-style: preserve-3d; transform: rotateX(-30deg) rotateY(-45deg); transition: transform 1s ease; }
-        .face { position: absolute; width: 70px; height: 70px; background: rgba(47, 129, 247, 0.9); border: 2px solid #fff; display: flex; justify-content: center; align-items: center; font-size: 30px; font-weight: bold; color: #fff; }
-        .f1 { transform: translateZ(35px); } .f6 { transform: rotateY(180deg) translateZ(35px); }
-        .f2 { transform: rotateX(90deg) translateZ(35px); } .f5 { transform: rotateX(-90deg) translateZ(35px); }
-        .f3 { transform: rotateY(90deg) translateZ(35px); } .f4 { transform: rotateY(-90deg) translateZ(35px); }
-
-        /* NAV */
+        /* --- NAVIGATION --- */
         .nav {
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            background: var(--nav);
-            backdrop-filter: blur(10px);
+            position: fixed; bottom: 0; width: 100%;
+            background: var(--nav-bg);
             border-top: 1px solid var(--border);
-            display: flex;
-            justify-content: space-around;
-            padding: 10px 0 20px 0;
-            z-index: 100;
+            display: flex; justify-content: space-around;
+            padding: 10px 0 25px 0; z-index: 90;
+            backdrop-filter: blur(10px);
         }
-        .nav-btn {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            color: var(--text-sub);
-            font-size: 10px;
-            gap: 4px;
+        .nav-item {
+            display: flex; flex-direction: column; align-items: center;
+            color: var(--text-sub); font-size: 10px; gap: 5px;
+            transition: 0.2s; width: 20%; cursor: pointer;
         }
-        .nav-btn.active { color: var(--text); }
-        .nav-icon { font-size: 20px; }
+        .nav-item.active { color: var(--text-main); transform: translateY(-2px); }
+        .nav-icon { font-size: 22px; }
 
+        /* --- PAGES LAYOUT --- */
+        .page { display: none; padding: 16px; animation: fadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .page.active { display: block; }
+        @keyframes fadeIn { from {opacity:0; transform:translateY(10px)} to {opacity:1; transform:translateY(0)} }
+
+        /* --- UI ELEMENTS --- */
+        .card {
+            background: var(--card-bg); border: 1px solid var(--border);
+            border-radius: 16px; padding: 16px; margin-bottom: 16px;
+            position: relative; overflow: hidden;
+        }
+        
+        .btn {
+            width: 100%; padding: 16px; border: none; border-radius: 12px;
+            background: var(--accent); color: white; font-weight: 800; font-size: 16px;
+            cursor: pointer; transition: 0.15s; text-transform: uppercase; letter-spacing: 0.5px;
+            box-shadow: 0 4px 0 #238636;
+        }
+        .btn:active { transform: translateY(4px); box-shadow: none; }
+        .btn.secondary { background: #21262d; box-shadow: 0 4px 0 #161b22; border: 1px solid var(--border); }
+        .btn.danger { background: var(--danger); box-shadow: 0 4px 0 #b31d1a; }
+
+        input.inp-field {
+            width: 100%; background: #090c10; border: 1px solid var(--border);
+            padding: 14px; border-radius: 10px; color: white; font-size: 16px;
+            outline: none; transition: 0.2s; margin-bottom: 10px;
+        }
+        input.inp-field:focus { border-color: var(--accent); }
+        .label-text { font-size: 12px; color: var(--text-sub); margin-bottom: 6px; display: block; font-weight: 600; }
+
+        /* --- SPORT FEED STYLES --- */
+        .sport-filter { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 10px; scrollbar-width: none;}
+        .filter-chip {
+            padding: 8px 16px; background: var(--card-bg); border-radius: 20px;
+            font-size: 13px; color: var(--text-sub); white-space: nowrap; border: 1px solid var(--border);
+            transition: 0.2s; cursor: pointer;
+        }
+        .filter-chip.active { background: var(--text-main); color: var(--bg); font-weight: 800; border-color: white; }
+
+        .match-card .league { font-size: 10px; text-transform: uppercase; color: var(--text-sub); font-weight: 700; margin-bottom: 10px; display: flex; justify-content: space-between; }
+        .live-indic { color: var(--danger); display: flex; align-items: center; gap: 4px; }
+        .blink-dot { width: 6px; height: 6px; background: var(--danger); border-radius: 50%; animation: pulse 1s infinite; }
+        @keyframes pulse { 50% {opacity: 0.4} }
+
+        .teams-cont { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .team-name { width: 40%; font-size: 13px; font-weight: 700; line-height: 1.2; }
+        .score-box { background: #090c10; padding: 4px 12px; border-radius: 8px; font-weight: 900; font-size: 18px; letter-spacing: 2px; border: 1px solid var(--border); }
+
+        .coeffs-grid { display: flex; gap: 8px; }
+        .coef-btn {
+            flex: 1; background: #21262d; border-radius: 8px; padding: 10px 0;
+            text-align: center; cursor: pointer; transition: 0.2s; border: 1px solid transparent;
+        }
+        .coef-btn:active { background: #30363d; }
+        .coef-btn.selected { border-color: var(--accent); background: rgba(46, 160, 67, 0.15); color: var(--accent); }
+        .c-name { font-size: 10px; color: var(--text-sub); display: block; }
+        .c-val { font-size: 14px; font-weight: 800; display: block; }
+
+        /* --- BET SLIP (POPUP) --- */
+        .slip-overlay {
+            position: fixed; bottom: 85px; left: 10px; right: 10px;
+            background: #161b22; border: 1px solid var(--border);
+            border-radius: 16px; padding: 16px; z-index: 100;
+            box-shadow: 0 -10px 40px rgba(0,0,0,0.6);
+            display: none; animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .slip-overlay.show { display: block; }
+        @keyframes slideUp { from {transform: translateY(100px); opacity:0} to {transform: translateY(0); opacity:1} }
+
+        .slip-head { display: flex; justify-content: space-between; margin-bottom: 12px; font-weight: 700; font-size: 14px; }
+        .slip-tag { background: var(--accent); padding: 2px 8px; border-radius: 6px; font-size: 11px; margin-left: 8px; }
+        .slip-info { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 13px; color: var(--text-sub); }
+        .kef-big { color: var(--gold); font-weight: 800; font-size: 18px; }
+
+        /* --- HISTORY --- */
+        .hist-filter { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 15px; }
+        .h-tab { flex: 1; text-align: center; padding: 12px; font-size: 14px; color: var(--text-sub); border-bottom: 2px solid transparent; transition: 0.2s; }
+        .h-tab.active { color: var(--text-main); border-color: var(--accent); font-weight: 700; }
+        
+        .bet-card { border-left: 3px solid var(--border); padding-left: 12px; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid #21262d; }
+        .bet-card.win { border-left-color: var(--accent); }
+        .bet-card.lose { border-left-color: var(--danger); }
+        .bet-card.active { border-left-color: var(--gold); }
+        .bet-status { float: right; font-size: 10px; font-weight: 800; text-transform: uppercase; }
+
+        /* --- MINES GRID --- */
+        .mines-wrapper { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-top: 20px; }
+        .mine-cell {
+            aspect-ratio: 1; background: #21262d; border-radius: 8px;
+            border-bottom: 4px solid #0d1117; cursor: pointer;
+            display: flex; justify-content: center; align-items: center;
+            font-size: 24px; transition: 0.1s;
+        }
+        .mine-cell:active { border-bottom: 0; transform: translateY(4px); }
+        .mine-cell.revealed { background: #30363d; border-bottom: 0; cursor: default; }
+        .mine-cell.gem { background: rgba(46, 160, 67, 0.2); border: 1px solid var(--accent); }
+        .mine-cell.boom { background: rgba(218, 54, 51, 0.2); border: 1px solid var(--danger); }
+
+        /* --- DICE 3D --- */
+        .dice-stage { height: 180px; display: flex; justify-content: center; align-items: center; perspective: 800px; margin-bottom: 20px; }
+        .cube { width: 80px; height: 80px; position: relative; transform-style: preserve-3d; transition: transform 1.5s cubic-bezier(0.19, 1, 0.22, 1); }
+        .face { position: absolute; width: 80px; height: 80px; background: linear-gradient(135deg, #2f81f7, #1f6feb); border: 2px solid #fff; border-radius: 12px; display: flex; justify-content: center; align-items: center; font-size: 32px; font-weight: bold; color: white; box-shadow: inset 0 0 20px rgba(0,0,0,0.3); }
+        .f1 { transform: translateZ(40px); } .f6 { transform: rotateY(180deg) translateZ(40px); }
+        .f2 { transform: rotateX(90deg) translateZ(40px); } .f5 { transform: rotateX(-90deg) translateZ(40px); }
+        .f3 { transform: rotateY(90deg) translateZ(40px); } .f4 { transform: rotateY(-90deg) translateZ(40px); }
+
+        /* --- WIN MODAL --- */
+        .modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85); z-index: 200;
+            display: none; justify-content: center; align-items: center;
+            animation: fadeIn 0.3s;
+        }
+        .modal-box {
+            background: var(--card-bg); width: 80%; border-radius: 24px;
+            padding: 30px 20px; text-align: center; border: 1px solid var(--border);
+            box-shadow: 0 20px 50px rgba(46, 160, 67, 0.2);
+            position: relative; overflow: hidden;
+        }
+        .win-glow {
+            position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+            background: radial-gradient(circle, rgba(46, 160, 67, 0.2) 0%, transparent 70%);
+            animation: rotate 10s linear infinite; pointer-events: none;
+        }
+        @keyframes rotate { from {transform: rotate(0deg)} to {transform: rotate(360deg)} }
+
+        /* --- ADMIN --- */
+        .admin-panel { display: none; margin-top: 30px; border-top: 1px solid var(--border); padding-top: 20px; }
     </style>
 </head>
 <body>
 
     <div class="header">
         <div class="logo">ROYAL<span>BET</span></div>
-        <div class="balance">
+        <div class="balance-chip">
             <span style="color:var(--accent)">₽</span>
-            <span id="bal-disp">25000</span>
+            <span id="header-bal">0</span>
         </div>
     </div>
 
-    <!-- SPORT PAGE -->
+    <!-- 1. СПОРТ -->
     <div id="p-sport" class="page active">
-        <div class="sport-scroll">
-            <div class="tab active" onclick="switchSport('football', this)">⚽ Футбол</div>
-            <div class="tab" onclick="switchSport('hockey', this)">🏒 Хоккей</div>
-            <div class="tab" onclick="switchSport('tennis', this)">🎾 Теннис</div>
-            <div class="tab" onclick="switchSport('basket', this)">🏀 Баскет</div>
-            <div class="tab" onclick="switchSport('table', this)">🏓 Настолка</div>
+        <div class="sport-filter">
+            <div class="filter-chip active" onclick="setSport('football', this)">⚽ Футбол</div>
+            <div class="filter-chip" onclick="setSport('hockey', this)">🏒 Хоккей</div>
+            <div class="filter-chip" onclick="setSport('tennis', this)">🎾 Теннис</div>
+            <div class="filter-chip" onclick="setSport('basket', this)">🏀 Баскет</div>
         </div>
-        <div id="feed" class="container"></div>
+        <div id="sport-feed" style="padding-bottom: 120px;"></div>
     </div>
 
-    <!-- MINES PAGE -->
+    <!-- 2. ИСТОРИЯ СТАВОК -->
+    <div id="p-bets" class="page">
+        <div class="hist-filter">
+            <div class="h-tab active" onclick="renderHistory('active', this)">Активные</div>
+            <div class="h-tab" onclick="renderHistory('settled', this)">Рассчитанные</div>
+        </div>
+        <div id="bets-list"></div>
+    </div>
+
+    <!-- 3. MINES -->
     <div id="p-mines" class="page">
-        <div class="container" style="padding-top:20px;">
-            <h2>Mines</h2>
-            <div class="card">
-                <input type="number" id="m-bet" value="1000" placeholder="Ставка">
-                <div style="margin-top:10px"></div>
-                <input type="number" id="m-cnt" value="3" placeholder="Мин (1-24)">
-                <div style="margin-top:15px"></div>
-                <button class="action-btn" id="m-start" onclick="minesRun()">ИГРАТЬ</button>
-                <button class="action-btn" id="m-cash" onclick="minesEnd()" style="display:none; background:var(--accent-blue)">ЗАБРАТЬ</button>
-            </div>
-            <div class="grid" id="m-grid"></div>
+        <div class="card">
+            <span class="label-text">Размер ставки (мин 15₽)</span>
+            <input type="number" id="m-bet" class="inp-field" value="100">
+            
+            <span class="label-text">Количество мин (3-24)</span>
+            <input type="number" id="m-count" class="inp-field" value="3">
+            
+            <div style="height:10px"></div>
+            <button class="btn" id="m-start" onclick="minesStart()">Начать игру</button>
+            <button class="btn" id="m-cash" onclick="minesCashout()" style="display:none; background:var(--blue)">Забрать выигрыш</button>
         </div>
+        <div class="mines-wrapper" id="m-grid"></div>
     </div>
 
-    <!-- DICE PAGE -->
+    <!-- 4. DICE -->
     <div id="p-dice" class="page">
-        <div class="container" style="padding-top:20px;">
-            <h2>Dice 3D</h2>
-            <div class="scene">
-                <div class="cube" id="cube">
-                    <div class="face f1">1</div><div class="face f6">6</div>
-                    <div class="face f2">2</div><div class="face f5">5</div>
-                    <div class="face f3">3</div><div class="face f4">4</div>
-                </div>
+        <div class="dice-stage">
+            <div class="cube" id="cube">
+                <div class="face f1">1</div><div class="face f6">6</div>
+                <div class="face f2">2</div><div class="face f5">5</div>
+                <div class="face f3">3</div><div class="face f4">4</div>
             </div>
-            <div class="card">
-                <input type="number" id="d-bet" value="1000">
-                <div style="display:flex; gap:10px; margin:15px 0;">
-                    <div class="odd-btn" onclick="diceSet('odd')"><span class="odd-val">НЕЧЕТ (x1.9)</span></div>
-                    <div class="odd-btn" onclick="diceSet('even')"><span class="odd-val">ЧЕТ (x1.9)</span></div>
-                </div>
-                <button class="action-btn" onclick="diceRoll()">БРОСИТЬ</button>
+        </div>
+        <div class="card">
+            <span class="label-text">Размер ставки (мин 15₽)</span>
+            <input type="number" id="d-bet" class="inp-field" value="100">
+            
+            <div style="display:flex; gap:10px; margin: 15px 0;">
+                <button class="btn secondary" id="d-odd" onclick="diceSelect('odd', this)">Нечет (x1.9)</button>
+                <button class="btn secondary" id="d-even" onclick="diceSelect('even', this)">Чет (x1.9)</button>
             </div>
+            
+            <button class="btn" onclick="diceRoll()">Бросок</button>
         </div>
     </div>
 
-    <!-- WALLET PAGE -->
+    <!-- 5. КОШЕЛЕК & АДМИНКА -->
     <div id="p-wallet" class="page">
-        <div class="container" style="text-align:center; padding-top:40px;">
-            <div style="font-size:12px; color:var(--text-sub)">Общий баланс</div>
-            <div style="font-size:40px; font-weight:800; margin:10px 0">
-                <span style="color:var(--accent)">₽</span> <span id="bal-big">25000</span>
+        <div class="card" style="text-align:center; padding: 40px 20px;">
+            <div style="color:var(--text-sub); font-size:12px; margin-bottom:10px;">Общий баланс счета</div>
+            <div style="font-size:42px; font-weight:900; color:white; margin-bottom:20px;">
+                <span style="color:var(--accent)">₽</span> <span id="w-bal">0</span>
             </div>
-            <div class="card" style="margin-top:30px">
-                <div style="font-size:12px; color:var(--text-sub); margin-bottom:10px">Способ пополнения</div>
-                <button class="action-btn" style="background:#21262d; border:1px solid var(--border)" onclick="alert('Технические работы на шлюзе')">💳 Банковская карта</button>
-                <button class="action-btn" style="background:#21262d; border:1px solid var(--border); margin-top:10px" onclick="alert('Технические работы на шлюзе')">💎 Crypto (TON)</button>
+            <button class="btn secondary" onclick="tg.showAlert('Пополнение через СБП временно недоступно')">Пополнить баланс</button>
+            
+            <!-- Секретная кнопка админки -->
+            <div style="margin-top:50px; opacity:0.3; font-size:12px;" onclick="toggleAdmin()">Версия v4.2.0 (Tap 5x for Admin)</div>
+            
+            <div id="admin" class="admin-panel">
+                <h4 style="color:var(--danger)">Admin Console</h4>
+                <input type="number" id="adm-sum" class="inp-field" placeholder="Сумма баланса">
+                <button class="btn" style="background:#21262d; margin-bottom:10px;" onclick="setAdminBal()">Установить баланс</button>
+                <button class="btn danger" onclick="fullReset()">WIPE DATA (Сброс)</button>
             </div>
         </div>
     </div>
 
     <!-- BOTTOM NAV -->
     <div class="nav">
-        <div class="nav-btn active" onclick="go('sport', this)"><div class="nav-icon">🏆</div>Спорт</div>
-        <div class="nav-btn" onclick="go('mines', this)"><div class="nav-icon">💣</div>Mines</div>
-        <div class="nav-btn" onclick="go('dice', this)"><div class="nav-icon">🎲</div>Dice</div>
-        <div class="nav-btn" onclick="go('wallet', this)"><div class="nav-icon">💳</div>Баланс</div>
+        <div class="nav-item active" onclick="nav('sport', this)"><div class="nav-icon">🏆</div>Спорт</div>
+        <div class="nav-item" onclick="nav('bets', this)"><div class="nav-icon">🧾</div>Ставки</div>
+        <div class="nav-item" onclick="nav('mines', this)"><div class="nav-icon">💣</div>Mines</div>
+        <div class="nav-item" onclick="nav('dice', this)"><div class="nav-icon">🎲</div>Dice</div>
+        <div class="nav-item" onclick="nav('wallet', this)"><div class="nav-icon">👤</div>Профиль</div>
+    </div>
+
+    <!-- BET SLIP -->
+    <div id="slip" class="slip-overlay">
+        <div class="slip-head">
+            <span id="slip-title">Купон <span class="slip-tag">0</span></span>
+            <span style="color:var(--danger)" onclick="clearSlip()">Очистить</span>
+        </div>
+        <div class="slip-info">
+            <span>Итоговый коэффициент:</span>
+            <span class="kef-big" id="slip-kef">1.00</span>
+        </div>
+        <input type="number" id="slip-stake" class="inp-field" placeholder="Сумма ставки (₽)" oninput="calcWin()">
+        <div style="text-align:right; font-size:12px; color:var(--text-sub); margin-bottom:10px;">
+            Выигрыш: <span style="color:white; font-weight:bold" id="slip-win">0</span> ₽
+        </div>
+        <button class="btn" onclick="placeBet()">СДЕЛАТЬ СТАВКУ</button>
+    </div>
+
+    <!-- WIN MODAL -->
+    <div id="modal" class="modal" onclick="closeModal()">
+        <div class="modal-box" onclick="event.stopPropagation()">
+            <div class="win-glow"></div>
+            <h2 style="color:var(--gold); margin:0;">ПОБЕДА! 🏆</h2>
+            <p style="color:var(--text-sub); margin-top:5px;" id="win-src">Sport Betting</p>
+            <h1 style="font-size:40px; margin:15px 0;" id="win-sum">0 ₽</h1>
+            <button class="btn" onclick="closeModal()">ЗАБРАТЬ</button>
+        </div>
     </div>
 
     <script>
@@ -312,286 +328,356 @@
         tg.expand();
 
         // --- GLOBAL STATE ---
-        let balance = 25000;
-        const updateBal = (v) => {
-            balance += v;
-            document.getElementById('bal-disp').innerText = Math.floor(balance);
-            document.getElementById('bal-big').innerText = Math.floor(balance);
+        let state = JSON.parse(localStorage.getItem('royal_state')) || {
+            balance: 15000,
+            matches: [],
+            bets: [],
+            lastLogin: Date.now()
         };
 
-        function go(page, el) {
+        let slip = [];
+        let activeSport = 'football';
+
+        // --- INIT ---
+        updateUI();
+        if(state.matches.length === 0) initMatches();
+        setInterval(gameLoop, 2000); // Игровой цикл (2 сек)
+
+        // --- CORE FUNCTIONS ---
+        function save() {
+            localStorage.setItem('royal_state', JSON.stringify(state));
+            updateUI();
+        }
+
+        function updateUI() {
+            document.getElementById('header-bal').innerText = state.balance.toLocaleString();
+            document.getElementById('w-bal').innerText = state.balance.toLocaleString();
+        }
+
+        function nav(page, el) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.getElementById('p-'+page).classList.add('active');
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
             el.classList.add('active');
-            if(page === 'sport' && matches.length === 0) switchSport('football', document.querySelector('.tab'));
+            
+            if(page === 'sport') renderMatches();
+            if(page === 'bets') renderHistory('active');
         }
-
-        // ==========================================
-        //         BIG DATABASE (REAL NAMES)
-        // ==========================================
-        const DB = {
-            football: [
-                "Real Madrid", "Barcelona", "Atletico", "Sevilla", "Valencia", "Betis", // Spain
-                "Man City", "Arsenal", "Liverpool", "Man Utd", "Chelsea", "Tottenham", "Newcastle", // England
-                "Bayern Munich", "Dortmund", "Leipzig", "Leverkusen", "Eintracht", // Germany
-                "PSG", "Monaco", "Marseille", "Lyon", "Lille", // France
-                "Inter", "Juventus", "Milan", "Napoli", "Roma", "Lazio", "Atalanta", // Italy
-                "Zenit", "Spartak", "CSKA", "Dynamo", "Lokomotiv", "Krasnodar", "Rostov", // Russia
-                "Benfica", "Porto", "Sporting", "Ajax", "PSV", "Feyenoord", "Galatasaray" // Others
-            ],
-            hockey: [
-                "CSKA Moscow", "SKA St. Petersburg", "Dynamo Moscow", "Spartak", "Lokomotiv", "Avangard", "Ak Bars", "Metallurg", "Salavat Yulaev", "Traktor", // KHL
-                "NY Rangers", "Boston Bruins", "Toronto Maple Leafs", "Tampa Bay Lightning", "Florida Panthers", "Detroit Red Wings", // NHL East
-                "Colorado Avalanche", "Dallas Stars", "Vegas Golden Knights", "Edmonton Oilers", "Vancouver Canucks", "LA Kings", "Chicago Blackhawks" // NHL West
-            ],
-            tennis: [
-                "Novak Djokovic", "Carlos Alcaraz", "Daniil Medvedev", "Jannik Sinner", "Andrey Rublev", 
-                "Alexander Zverev", "Stefanos Tsitsipas", "Holger Rune", "Hubert Hurkacz", "Taylor Fritz", 
-                "Casper Ruud", "Alex de Minaur", "Tommy Paul", "Grigor Dimitrov", "Karen Khachanov", 
-                "Frances Tiafoe", "Ben Shelton", "Ugo Humbert", "Nicolas Jarry", "Adrian Mannarino"
-            ],
-            basket: [
-                "LA Lakers", "Boston Celtics", "Golden State Warriors", "Chicago Bulls", "Miami Heat", 
-                "Denver Nuggets", "Milwaukee Bucks", "Phoenix Suns", "Dallas Mavericks", "NY Knicks",
-                "Philadelphia 76ers", "Cleveland Cavaliers", "LA Clippers", "San Antonio Spurs"
-            ],
-            table: [
-                "Fan Zhendong", "Wang Chuqin", "Ma Long", "Liang Jingkun", "Lin Gaoyuan", 
-                "Felix Lebrun", "Hugo Calderano", "Lin Yun-Ju", "Tomokazu Harimoto", "Dimitrij Ovtcharov",
-                "Dang Qiu", "Darko Jorgic", "Quadri Aruna", "Jang Woojin", "Truls Moregard"
-            ]
-        };
 
         // --- SPORT ENGINE ---
-        let currentSport = '';
-        let matches = [];
-        let timer = null;
+        const DB = {
+            football: ["Real Madrid","Barcelona","Man City","Liverpool","Arsenal","Bayern","PSG","Juventus","Inter","Milan","Zenit","Spartak"],
+            hockey: ["SKA","CSKA","Rangers","Bruins","Avangard","Ak Bars","Dynamo","Tampa Bay","Vegas","Colorado"],
+            tennis: ["Djokovic","Alcaraz","Medvedev","Sinner","Rublev","Zverev","Tsitsipas","Rune"],
+            basket: ["Lakers","Celtics","Warriors","Bulls","Heat","Nuggets","Suns","Bucks"]
+        };
 
-        function shuffle(arr) {
-            return arr.map(v=>({v,r:Math.random()})).sort((a,b)=>a.r-b.r).map(x=>x.v);
-        }
-
-        function switchSport(type, tab) {
-            currentSport = type;
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            tab.classList.add('active');
-            generateMatches(type);
-        }
-
-        function generateMatches(type) {
-            clearInterval(timer);
-            const feed = document.getElementById('feed');
-            feed.innerHTML = '';
-            matches = [];
-
-            const list = shuffle([...DB[type]]); // Копия массива чтобы не ломать оригинал
-            // Генерируем до 15 матчей
-            const count = Math.min(15, Math.floor(list.length / 2));
-
-            for(let i=0; i<count; i++) {
-                let m = {
-                    id: i,
-                    t1: list[i*2],
-                    t2: list[i*2+1],
-                    s1: Math.floor(Math.random()*2), // Старт 0 или 1
-                    s2: Math.floor(Math.random()*2),
-                    time: Math.floor(Math.random()*60),
-                    sport: type,
-                    set: 1
-                };
-                m.coef = getCoef(m.s1, m.s2);
-                matches.push(m);
-                
-                // HTML
-                let el = document.createElement('div');
-                el.className = 'card';
-                el.id = `m-${i}`;
-                el.innerHTML = renderMatchHTML(m);
-                feed.appendChild(el);
-            }
-
-            timer = setInterval(liveUpdate, 2000); // Быстрое обновление (2 сек)
-        }
-
-        function renderMatchHTML(m) {
-            let info = getLiveInfo(m);
-            // Для тенниса/настолки нет ничьей
-            let drawBtn = (m.sport === 'tennis' || m.sport === 'table') ? '' : 
-                `<div class="odd-btn" onclick="bet()"><span class="odd-name">X</span><span class="odd-val" id="ox-${m.id}">${m.coef.x}</span></div>`;
-
-            return `
-                <div class="match-header">
-                    <span>${getLeague(m.sport)}</span>
-                    <div class="live-indic"><div class="dot"></div> ${info}</div>
-                </div>
-                <div class="teams">
-                    <div class="team-name">${m.t1}</div>
-                    <div class="score" id="s-${m.id}">${m.s1} : ${m.s2}</div>
-                    <div class="team-name" style="text-align:right">${m.t2}</div>
-                </div>
-                <div class="odds">
-                    <div class="odd-btn" onclick="bet()"><span class="odd-name">П1</span><span class="odd-val" id="o1-${m.id}">${m.coef.w1}</span></div>
-                    ${drawBtn}
-                    <div class="odd-btn" onclick="bet()"><span class="odd-name">П2</span><span class="odd-val" id="o2-${m.id}">${m.coef.w2}</span></div>
-                </div>
-            `;
-        }
-
-        function getLeague(s) {
-            if(s==='football') return "Champions League";
-            if(s==='hockey') return "NHL / KHL Live";
-            if(s==='tennis') return "ATP World Tour";
-            if(s==='basket') return "NBA Season";
-            if(s==='table') return "WTT Star Contender";
-            return "Live Event";
-        }
-
-        function getLiveInfo(m) {
-            if(m.sport==='football') return `${m.time}'`;
-            if(m.sport==='hockey') return `P${(m.time<20?1:(m.time<40?2:3))} ${m.time%20}'`;
-            if(m.sport==='basket') return `Q${(m.time<12?1:(m.time<24?2:3))} ${m.time%12}'`;
-            if(m.sport==='tennis' || m.sport==='table') return `Set ${m.set}`;
-            return 'Live';
-        }
-
-        function getCoef(s1, s2) {
-            let d = s1 - s2;
-            let base = 1.90;
-            // Упрощенная математика кэфов
-            let w1 = (base - (d * 0.2)).toFixed(2);
-            let w2 = (base + (d * 0.2)).toFixed(2);
-            let x = (3.20 + Math.abs(d)*0.1).toFixed(2);
-            
-            if(w1 < 1.01) w1 = 1.01; if(w2 < 1.01) w2 = 1.01;
-            return { w1, w2, x };
-        }
-
-        function liveUpdate() {
-            matches.forEach(m => {
-                // Шанс гола/очка
-                if(Math.random() > 0.65) {
-                    // Кто забил?
-                    let scorer = Math.random() > 0.5 ? 1 : 2;
-                    
-                    // Логика очков
-                    let points = 1; 
-                    if(m.sport === 'basket') points = Math.random()>0.6 ? 2 : 3;
-                    
-                    if(scorer===1) m.s1 += points; else m.s2 += points;
-                    m.time++;
-
-                    // Пересчет кэфов
-                    let newCoef = getCoef(m.s1, m.s2);
-                    
-                    // DOM Update
-                    let scoreEl = document.getElementById(`s-${m.id}`);
-                    if(scoreEl) scoreEl.innerText = `${m.s1} : ${m.s2}`;
-                    
-                    updateOdd(`o1-${m.id}`, newCoef.w1, m.coef.w1);
-                    updateOdd(`o2-${m.id}`, newCoef.w2, m.coef.w2);
-                    if(document.getElementById(`ox-${m.id}`)) updateOdd(`ox-${m.id}`, newCoef.x, m.coef.x);
-
-                    m.coef = newCoef;
+        function initMatches() {
+            state.matches = [];
+            ['football','hockey','tennis','basket'].forEach(s => {
+                let t = [...DB[s]].sort(()=>Math.random()-0.5);
+                for(let i=0; i<4; i++) {
+                    if(!t[i*2]) break;
+                    state.matches.push({
+                        id: Date.now()+i+Math.random(),
+                        t1: t[i*2], t2: t[i*2+1],
+                        s1: 0, s2: 0, time: 0, sport: s,
+                        k1: (1.7+Math.random()).toFixed(2),
+                        kx: (3.0+Math.random()).toFixed(2),
+                        k2: (1.7+Math.random()).toFixed(2),
+                        finished: false
+                    });
                 }
+            });
+            save();
+        }
+
+        function gameLoop() {
+            let changed = false;
+            state.matches.forEach(m => {
+                if(m.finished) return;
+                
+                // Время идет (медленнее и реалистичнее)
+                m.time += Math.floor(Math.random()*2) + 1; 
+
+                // Вероятность гола
+                let chance = 0.03; // 3% за тик
+                if(Math.random() < chance) {
+                    Math.random()>0.5 ? m.s1++ : m.s2++;
+                    // Динамические кэфы
+                    let shift = (m.s1 - m.s2) * 0.15;
+                    m.k1 = Math.max(1.05, (parseFloat(m.k1) - shift).toFixed(2));
+                    m.k2 = Math.max(1.05, (parseFloat(m.k2) + shift).toFixed(2));
+                    changed = true;
+                }
+
+                if(m.time >= 90) { m.finished = true; checkBets(); changed = true; }
+            });
+
+            if(state.matches.every(m=>m.finished)) setTimeout(initMatches, 5000); // Рестарт лиги
+            if(changed) { save(); if(document.getElementById('p-sport').classList.contains('active')) renderMatches(); }
+        }
+
+        function setSport(s, el) {
+            activeSport = s;
+            document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+            el.classList.add('active');
+            renderMatches();
+        }
+
+        function renderMatches() {
+            const feed = document.getElementById('sport-feed'); feed.innerHTML = '';
+            state.matches.filter(m => m.sport === activeSport && !m.finished).forEach(m => {
+                let s1 = isInSlip(m.id,'1')?'selected':'';
+                let sX = isInSlip(m.id,'x')?'selected':'';
+                let s2 = isInSlip(m.id,'2')?'selected':'';
+                
+                let html = `
+                <div class="card match-card">
+                    <div class="league"><span>${m.sport.toUpperCase()} PRO LEAGUE</span> <div class="live-indic"><div class="blink-dot"></div> ${m.time}'</div></div>
+                    <div class="teams-cont">
+                        <div class="team-name">${m.t1}</div>
+                        <div class="score-box">${m.s1} : ${m.s2}</div>
+                        <div class="team-name" style="text-align:right">${m.t2}</div>
+                    </div>
+                    <div class="coeffs-grid">
+                        <div class="coef-btn ${s1}" onclick="togSlip(${m.id},'1',${m.k1},'${m.t1}')"><span class="c-name">П1</span><span class="c-val">${m.k1}</span></div>
+                        ${m.sport!=='tennis' ? `<div class="coef-btn ${sX}" onclick="togSlip(${m.id},'x',${m.kx},'Ничья')"><span class="c-name">X</span><span class="c-val">${m.kx}</span></div>` : ''}
+                        <div class="coef-btn ${s2}" onclick="togSlip(${m.id},'2',${m.k2},'${m.t2}')"><span class="c-name">П2</span><span class="c-val">${m.k2}</span></div>
+                    </div>
+                </div>`;
+                feed.innerHTML += html;
             });
         }
 
-        function updateOdd(id, newVal, oldVal) {
-            let el = document.getElementById(id);
-            if(!el) return;
-            el.innerText = newVal;
-            let p = el.parentElement;
-            p.classList.remove('changed-up', 'changed-down');
-            void p.offsetWidth; // trigger reflow
-            if(newVal > oldVal) p.classList.add('changed-up');
-            else if(newVal < oldVal) p.classList.add('changed-down');
-        }
+        // --- BETTING SLIP ---
+        function isInSlip(id, type) { return slip.find(x => x.id===id && x.type===type); }
 
-        function bet() {
-            if(confirm("Сделать ставку 1000₽?")) {
-                if(balance<1000) return alert("Мало средств");
-                updateBal(-1000);
-                tg.showAlert("Ставка принята!");
+        function togSlip(id, type, k, name) {
+            // Удаляем если есть
+            let idx = slip.findIndex(x => x.id === id);
+            if(idx >= 0) {
+                // Если кликнули то же самое - убираем совсем
+                if(slip[idx].type === type) slip.splice(idx, 1);
+                else slip[idx] = {id, type, k, name}; // Иначе заменяем
+            } else {
+                slip.push({id, type, k, name});
             }
+            updateSlipUI(); renderMatches();
         }
 
-        // --- MINES ---
-        let mData = {act:false, grid:[], bet:0, mult:1};
-        function minesRun() {
-            if(mData.act) return;
+        function updateSlipUI() {
+            let el = document.getElementById('slip');
+            if(slip.length === 0) { el.classList.remove('show'); return; }
+            el.classList.add('show');
+            
+            let totalK = slip.reduce((a,b) => a * b.k, 1).toFixed(2);
+            document.querySelector('.slip-tag').innerText = slip.length > 1 ? `Экспресс (${slip.length})` : 'Ординар';
+            document.getElementById('slip-kef').innerText = totalK;
+            calcWin();
+        }
+
+        function calcWin() {
+            let s = +document.getElementById('slip-stake').value;
+            let k = +document.getElementById('slip-kef').innerText;
+            document.getElementById('slip-win').innerText = Math.floor(s * k);
+        }
+
+        function clearSlip() { slip=[]; updateSlipUI(); renderMatches(); }
+
+        function placeBet() {
+            let stake = +document.getElementById('slip-stake').value;
+            if(stake < 15) return tg.showAlert("Минимальная ставка 15₽");
+            if(stake > state.balance) return tg.showAlert("Недостаточно средств");
+
+            state.balance -= stake;
+            let tk = +document.getElementById('slip-kef').innerText;
+            
+            state.bets.unshift({
+                date: new Date().toLocaleTimeString(),
+                type: slip.length > 1 ? 'express' : 'single',
+                items: [...slip],
+                stake: stake,
+                k: tk,
+                status: 'active'
+            });
+            save(); clearSlip();
+            tg.showAlert("✅ Ставка принята!");
+        }
+
+        function checkBets() {
+            state.bets.forEach(b => {
+                if(b.status !== 'active') return;
+                
+                let win = true; 
+                let active = false;
+
+                b.items.forEach(i => {
+                    let m = state.matches.find(x => x.id === i.id);
+                    if(!m) return; 
+                    if(!m.finished) { active = true; return; }
+
+                    let res = 'x';
+                    if(m.s1 > m.s2) res = '1';
+                    if(m.s2 > m.s1) res = '2';
+                    if(i.type !== res) win = false;
+                });
+
+                if(!active) {
+                    if(win) {
+                        b.status = 'win';
+                        let winSum = Math.floor(b.stake * b.k);
+                        state.balance += winSum;
+                        showWin(winSum, "Sport Betting");
+                    } else {
+                        b.status = 'lose';
+                    }
+                }
+            });
+            save();
+            if(document.getElementById('p-bets').classList.contains('active')) renderHistory('active');
+        }
+
+        // --- HISTORY RENDER ---
+        function renderHistory(filter, tabEl) {
+            if(tabEl) {
+                document.querySelectorAll('.h-tab').forEach(x => x.classList.remove('active'));
+                tabEl.classList.add('active');
+            }
+            const el = document.getElementById('bets-list'); el.innerHTML = '';
+            
+            let list = state.bets.filter(b => filter==='active' ? b.status==='active' : b.status!=='active');
+            if(list.length === 0) el.innerHTML = '<div style="text-align:center; color:#555; margin-top:20px">Список пуст</div>';
+
+            list.forEach(b => {
+                let det = b.items.map(i => `${i.name} (${i.type==='x'?'X':('П'+i.type)})`).join(', ');
+                let html = `
+                <div class="bet-card ${b.status}">
+                    <div class="bet-status" style="color:${b.status==='win'?'var(--accent)':(b.status==='lose'?'var(--danger)':'var(--gold)')}">
+                        ${b.status==='win'?'ВЫИГРЫШ':(b.status==='lose'?'ПРОИГРЫШ':'В ИГРЕ')}
+                    </div>
+                    <div style="font-weight:bold; font-size:14px;">${b.type==='express'?'Экспресс':'Ординар'} <span style="color:var(--gold)">x${b.k}</span></div>
+                    <div style="font-size:11px; color:#888; margin:5px 0">${det}</div>
+                    <div style="font-size:13px; font-weight:700">${b.stake}₽ &rarr; ${Math.floor(b.stake*b.k)}₽</div>
+                </div>`;
+                el.innerHTML += html;
+            });
+        }
+
+        // --- MINES ENGINE ---
+        let mGame = {act:false, grid:[], bet:0, mult:1, count:3};
+        function minesStart() {
             let b = +document.getElementById('m-bet').value;
-            let c = +document.getElementById('m-cnt').value;
-            if(b>balance) return alert("Нет денег");
-            updateBal(-b);
-            mData = {act:true, bet:b, mult:1, grid:Array(25).fill(0)};
+            let c = +document.getElementById('m-count').value;
+            if(b<15) return tg.showAlert("Мин 15₽");
+            if(c<3||c>24) return tg.showAlert("Мины: 3-24");
+            if(b>state.balance) return tg.showAlert("Нет денег");
+
+            state.balance -= b; save();
+            mGame = {act:true, bet:b, count:c, mult:1, grid:Array(25).fill(0)};
+            
+            let placed=0; 
+            while(placed<c){ let r=Math.floor(Math.random()*25); if(!mGame.grid[r]){mGame.grid[r]=1; placed++} }
+
             document.getElementById('m-start').style.display='none';
             document.getElementById('m-cash').style.display='block';
-            document.getElementById('m-cash').innerText = `ЗАБРАТЬ ${b}`;
+            document.getElementById('m-cash').innerText = `Забрать ${b} ₽`;
             
-            let p=0; while(p<c){ let r=Math.floor(Math.random()*25); if(!mData.grid[r]){mData.grid[r]=1; p++}}
-            
-            let h = document.getElementById('m-grid'); h.innerHTML='';
-            for(let i=0;i<25;i++){
-                let d=document.createElement('div'); d.className='cell';
-                d.onclick=()=>mineClick(i,d); h.appendChild(d);
+            let g = document.getElementById('m-grid'); g.innerHTML='';
+            for(let i=0; i<25; i++) {
+                let d=document.createElement('div'); d.className='mine-cell';
+                d.onclick=()=>mineHit(i,d); g.appendChild(d);
             }
         }
-        function mineClick(i, el) {
-            if(!mData.act || el.classList.contains('open')) return;
-            el.classList.add('open');
-            if(mData.grid[i]) { // BOOM
-                el.classList.add('loss'); el.innerText='💥';
-                mData.act=false; tg.showAlert("Взрыв!");
-                resetMines();
+        function mineHit(i, el) {
+            if(!mGame.act || el.classList.contains('revealed')) return;
+            el.classList.add('revealed');
+            
+            if(mGame.grid[i]) {
+                el.classList.add('boom'); el.innerText='💣'; mGame.act=false;
+                tg.HapticFeedback.notificationOccurred('error');
+                revealMines();
+                setTimeout(()=>resetMines(), 2000);
             } else {
-                el.classList.add('win'); el.innerText='💎';
-                mData.mult*=1.15;
-                let w = Math.floor(mData.bet*mData.mult);
-                document.getElementById('m-cash').innerText = `ЗАБРАТЬ ${w}`;
+                el.classList.add('gem'); el.innerText='💎';
+                tg.HapticFeedback.impactOccurred('light');
+                // Сложность: чем больше мин, тем быстрее растет кэф
+                let risk = 1 + (mGame.count / 20); 
+                mGame.mult *= risk;
+                let win = Math.floor(mGame.bet * mGame.mult);
+                document.getElementById('m-cash').innerText = `Забрать ${win} ₽`;
             }
         }
-        function minesEnd(){
-            if(!mData.act) return;
-            let w = Math.floor(mData.bet*mData.mult);
-            updateBal(w); tg.showAlert(`Выигрыш: ${w}`);
-            mData.act=false; resetMines();
+        function minesCashout() {
+            if(!mGame.act) return;
+            let w = Math.floor(mGame.bet * mGame.mult);
+            state.balance += w; save();
+            showWin(w, "Mines");
+            mGame.act=false; revealMines(); setTimeout(()=>resetMines(), 2000);
         }
-        function resetMines(){
+        function revealMines() {
+            document.querySelectorAll('.mine-cell').forEach((e,i)=>{
+                if(mGame.grid[i]) { e.classList.add('revealed','boom'); e.innerText='💣'; }
+            });
+        }
+        function resetMines() {
             document.getElementById('m-start').style.display='block';
             document.getElementById('m-cash').style.display='none';
         }
 
-        // --- DICE ---
-        let dType = null;
-        function diceSet(t) { dType = t; tg.showAlert("Выбрано: "+t); }
+        // --- DICE ENGINE ---
+        let dPick = null;
+        function diceSelect(t, el) {
+            dPick=t; document.querySelectorAll('#d-odd, #d-even').forEach(x=>x.classList.remove('selected'));
+            el.classList.add('selected');
+        }
         function diceRoll() {
             let b = +document.getElementById('d-bet').value;
-            if(b>balance) return alert("Нет денег");
-            if(!dType) return alert("Выберите ЧЕТ/НЕЧЕТ");
-            updateBal(-b);
-            
+            if(b<15) return tg.showAlert("Мин 15₽");
+            if(!dPick) return tg.showAlert("Выберите исход");
+            if(b>state.balance) return tg.showAlert("Нет денег");
+
+            state.balance -= b; save();
             let res = Math.floor(Math.random()*6)+1;
-            // Анимация вращения CSS
-            let rx = (Math.random()*10+5)*360;
-            let ry = (Math.random()*10+5)*360;
-            // Корректировка угла под результат (упрощенно для примера всегда падаем красиво)
-            // В реальном проекте тут нужна карта углов
             
-            document.getElementById('cube').style.transform = `rotateX(${rx}deg) rotateY(${ry}deg)`;
+            // 3D вращение
+            let x = (Math.random()*4+4)*360; 
+            let y = (Math.random()*4+4)*360;
+            // Подгон углов
+            if(res===1) {x+=0;y+=0;} if(res===6) {x+=0;y+=180;}
+            if(res===2) {x+=90;y+=0;} if(res===5) {x+=-90;y+=0;}
+            if(res===3) {x+=0;y+=-90;} if(res===4) {x+=0;y+=90;}
+
+            document.getElementById('cube').style.transform = `rotateX(${x}deg) rotateY(${y}deg)`;
             
-            setTimeout(()=>{
-                let win = (dType==='odd' && res%2!==0) || (dType==='even' && res%2===0);
+            setTimeout(() => {
+                let win = (dPick==='odd' && res%2!==0) || (dPick==='even' && res%2===0);
                 if(win) {
-                    updateBal(Math.floor(b*1.9));
-                    tg.showAlert(`Выпало ${res}. Победа!`);
-                } else tg.showAlert(`Выпало ${res}.`);
-            }, 1100);
+                    let w = Math.floor(b*1.9);
+                    state.balance += w; save();
+                    showWin(w, "Dice 3D");
+                }
+            }, 1600);
         }
 
-        // INIT
-        switchSport('football', document.querySelector('.tab'));
-        minesRun(); mData.act=false; resetMines(); // Init grid
+        // --- UTILS ---
+        function showWin(sum, src) {
+            document.getElementById('win-sum').innerText = sum + " ₽";
+            document.getElementById('win-src').innerText = src;
+            document.getElementById('modal').style.display = 'flex';
+            tg.HapticFeedback.notificationOccurred('success');
+        }
+        function closeModal() { document.getElementById('modal').style.display='none'; }
+
+        // --- ADMIN ---
+        let taps=0;
+        function toggleAdmin() {
+            taps++;
+            if(taps===5) { document.getElementById('admin').style.display='block'; tg.showAlert("Admin Mode ON"); }
+        }
+        function setAdminBal() { state.balance = +document.getElementById('adm-sum').value; save(); tg.showAlert("Баланс обновлен"); }
+        function fullReset() { localStorage.clear(); location.reload(); }
+
     </script>
 </body>
 </html>
