@@ -3,14 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Royal Bet Ultimate</title>
+    <title>Royal Bet Ultimate V2</title>
+    <!-- Подключаем Telegram Script -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
+        /* --- ГЛОБАЛЬНЫЕ СТИЛИ --- */
         :root {
             --bg: #0d1117;
             --card-bg: #161b22;
             --nav-bg: rgba(22, 27, 34, 0.98);
-            --accent: #2ea043;
+            --accent: #2ea043; /* Зеленый "Win" */
             --accent-hover: #3fb950;
             --danger: #da3633;
             --blue: #2f81f7;
@@ -27,12 +29,12 @@
             color: var(--text-main);
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             margin: 0; padding: 0;
-            padding-bottom: 100px;
+            padding-bottom: 120px; /* Отступ под купон и меню */
             user-select: none;
             overflow-x: hidden;
         }
 
-        /* --- HEADER & TOP BAR --- */
+        /* --- ШАПКА --- */
         .header {
             position: sticky; top: 0; z-index: 50;
             background: rgba(13, 17, 23, 0.95);
@@ -50,7 +52,7 @@
             display: flex; align-items: center; gap: 6px;
         }
 
-        /* --- NAVIGATION --- */
+        /* --- НАВИГАЦИЯ --- */
         .nav {
             position: fixed; bottom: 0; width: 100%;
             background: var(--nav-bg);
@@ -67,12 +69,12 @@
         .nav-item.active { color: var(--text-main); transform: translateY(-2px); }
         .nav-icon { font-size: 22px; }
 
-        /* --- PAGES LAYOUT --- */
-        .page { display: none; padding: 16px; animation: fadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        /* --- СТРАНИЦЫ --- */
+        .page { display: none; padding: 16px; animation: fadeIn 0.3s; }
         .page.active { display: block; }
         @keyframes fadeIn { from {opacity:0; transform:translateY(10px)} to {opacity:1; transform:translateY(0)} }
 
-        /* --- UI ELEMENTS --- */
+        /* --- КАРТОЧКИ И КНОПКИ --- */
         .card {
             background: var(--card-bg); border: 1px solid var(--border);
             border-radius: 16px; padding: 16px; margin-bottom: 16px;
@@ -88,6 +90,7 @@
         .btn:active { transform: translateY(4px); box-shadow: none; }
         .btn.secondary { background: #21262d; box-shadow: 0 4px 0 #161b22; border: 1px solid var(--border); }
         .btn.danger { background: var(--danger); box-shadow: 0 4px 0 #b31d1a; }
+        .btn.blue { background: var(--blue); box-shadow: 0 4px 0 #1c68d9; }
 
         input.inp-field {
             width: 100%; background: #090c10; border: 1px solid var(--border);
@@ -97,7 +100,7 @@
         input.inp-field:focus { border-color: var(--accent); }
         .label-text { font-size: 12px; color: var(--text-sub); margin-bottom: 6px; display: block; font-weight: 600; }
 
-        /* --- SPORT FEED STYLES --- */
+        /* --- СПОРТ ЛЕНТА --- */
         .sport-filter { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 10px; scrollbar-width: none;}
         .filter-chip {
             padding: 8px 16px; background: var(--card-bg); border-radius: 20px;
@@ -125,7 +128,7 @@
         .c-name { font-size: 10px; color: var(--text-sub); display: block; }
         .c-val { font-size: 14px; font-weight: 800; display: block; }
 
-        /* --- BET SLIP (POPUP) --- */
+        /* --- КУПОН (Bet Slip) --- */
         .slip-overlay {
             position: fixed; bottom: 85px; left: 10px; right: 10px;
             background: #161b22; border: 1px solid var(--border);
@@ -141,7 +144,7 @@
         .slip-info { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 13px; color: var(--text-sub); }
         .kef-big { color: var(--gold); font-weight: 800; font-size: 18px; }
 
-        /* --- HISTORY --- */
+        /* --- ИСТОРИЯ СТАВОК --- */
         .hist-filter { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 15px; }
         .h-tab { flex: 1; text-align: center; padding: 12px; font-size: 14px; color: var(--text-sub); border-bottom: 2px solid transparent; transition: 0.2s; }
         .h-tab.active { color: var(--text-main); border-color: var(--accent); font-weight: 700; }
@@ -173,7 +176,7 @@
         .f2 { transform: rotateX(90deg) translateZ(40px); } .f5 { transform: rotateX(-90deg) translateZ(40px); }
         .f3 { transform: rotateY(90deg) translateZ(40px); } .f4 { transform: rotateY(-90deg) translateZ(40px); }
 
-        /* --- WIN MODAL --- */
+        /* --- ПОБЕДНОЕ ОКНО (MODAL) --- */
         .modal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.85); z-index: 200;
@@ -181,7 +184,7 @@
             animation: fadeIn 0.3s;
         }
         .modal-box {
-            background: var(--card-bg); width: 80%; border-radius: 24px;
+            background: var(--card-bg); width: 85%; border-radius: 24px;
             padding: 30px 20px; text-align: center; border: 1px solid var(--border);
             box-shadow: 0 20px 50px rgba(46, 160, 67, 0.2);
             position: relative; overflow: hidden;
@@ -192,8 +195,9 @@
             animation: rotate 10s linear infinite; pointer-events: none;
         }
         @keyframes rotate { from {transform: rotate(0deg)} to {transform: rotate(360deg)} }
+        .win-info-row { display:flex; justify-content: space-around; font-size: 13px; color: var(--text-sub); margin-bottom: 20px; }
 
-        /* --- ADMIN --- */
+        /* --- ADMIN PANEL --- */
         .admin-panel { display: none; margin-top: 30px; border-top: 1px solid var(--border); padding-top: 20px; }
     </style>
 </head>
@@ -230,15 +234,15 @@
     <!-- 3. MINES -->
     <div id="p-mines" class="page">
         <div class="card">
-            <span class="label-text">Размер ставки (мин 15₽)</span>
-            <input type="number" id="m-bet" class="inp-field" value="100">
+            <span class="label-text">Сумма ставки (мин 15₽)</span>
+            <input type="number" id="m-bet" class="inp-field" value="100" placeholder="100">
             
-            <span class="label-text">Количество мин (3-24)</span>
-            <input type="number" id="m-count" class="inp-field" value="3">
+            <span class="label-text">Количество мин (от 3 до 24)</span>
+            <input type="number" id="m-count" class="inp-field" value="3" placeholder="3">
             
             <div style="height:10px"></div>
-            <button class="btn" id="m-start" onclick="minesStart()">Начать игру</button>
-            <button class="btn" id="m-cash" onclick="minesCashout()" style="display:none; background:var(--blue)">Забрать выигрыш</button>
+            <button class="btn" id="m-start" onclick="minesStart()">ИГРАТЬ</button>
+            <button class="btn blue" id="m-cash" onclick="minesCashout()" style="display:none;">ЗАБРАТЬ ВЫИГРЫШ</button>
         </div>
         <div class="mines-wrapper" id="m-grid"></div>
     </div>
@@ -253,7 +257,7 @@
             </div>
         </div>
         <div class="card">
-            <span class="label-text">Размер ставки (мин 15₽)</span>
+            <span class="label-text">Сумма ставки (мин 15₽)</span>
             <input type="number" id="d-bet" class="inp-field" value="100">
             
             <div style="display:flex; gap:10px; margin: 15px 0;">
@@ -261,7 +265,7 @@
                 <button class="btn secondary" id="d-even" onclick="diceSelect('even', this)">Чет (x1.9)</button>
             </div>
             
-            <button class="btn" onclick="diceRoll()">Бросок</button>
+            <button class="btn" onclick="diceRoll()">БРОСИТЬ КУБИК</button>
         </div>
     </div>
 
@@ -272,16 +276,16 @@
             <div style="font-size:42px; font-weight:900; color:white; margin-bottom:20px;">
                 <span style="color:var(--accent)">₽</span> <span id="w-bal">0</span>
             </div>
-            <button class="btn secondary" onclick="tg.showAlert('Пополнение через СБП временно недоступно')">Пополнить баланс</button>
+            <button class="btn secondary" onclick="notify('Пополнение через СБП временно недоступно.\nВедутся технические работы.')">Пополнить баланс</button>
             
             <!-- Секретная кнопка админки -->
-            <div style="margin-top:50px; opacity:0.3; font-size:12px;" onclick="toggleAdmin()">Версия v4.2.0 (Tap 5x for Admin)</div>
+            <div style="margin-top:50px; opacity:0.3; font-size:12px;" onclick="toggleAdmin()">Версия v5.0.1 (Tap 5x for Admin)</div>
             
             <div id="admin" class="admin-panel">
                 <h4 style="color:var(--danger)">Admin Console</h4>
                 <input type="number" id="adm-sum" class="inp-field" placeholder="Сумма баланса">
                 <button class="btn" style="background:#21262d; margin-bottom:10px;" onclick="setAdminBal()">Установить баланс</button>
-                <button class="btn danger" onclick="fullReset()">WIPE DATA (Сброс)</button>
+                <button class="btn danger" onclick="fullReset()">Сброс данных (Wipe)</button>
             </div>
         </div>
     </div>
@@ -318,18 +322,32 @@
             <div class="win-glow"></div>
             <h2 style="color:var(--gold); margin:0;">ПОБЕДА! 🏆</h2>
             <p style="color:var(--text-sub); margin-top:5px;" id="win-src">Sport Betting</p>
-            <h1 style="font-size:40px; margin:15px 0;" id="win-sum">0 ₽</h1>
-            <button class="btn" onclick="closeModal()">ЗАБРАТЬ</button>
+            <h1 style="font-size:40px; margin:20px 0;" id="win-sum">0 ₽</h1>
+            
+            <div class="win-info-row">
+                 <div>Ставка: <b id="win-bet-val" style="color:white">0</b></div>
+                 <div>Кэф: <b id="win-kef-val" style="color:white">x0</b></div>
+            </div>
+
+            <button class="btn" onclick="closeModal()">ОТЛИЧНО</button>
         </div>
     </div>
 
     <script>
+        // Инициализация (Безопасная)
         const tg = window.Telegram.WebApp;
-        tg.expand();
+        try { tg.expand(); } catch(e) { console.log("Not in TG"); }
+
+        // Wrapper для уведомлений (чтобы работало в браузере)
+        function notify(msg) {
+            if(tg && tg.showAlert) tg.showAlert(msg);
+            else alert(msg);
+        }
 
         // --- GLOBAL STATE ---
-        let state = JSON.parse(localStorage.getItem('royal_state')) || {
-            balance: 15000,
+        // Используем уникальный ключ, чтобы стереть старые баги
+        let state = JSON.parse(localStorage.getItem('royal_ultimate_v2')) || {
+            balance: 10000,
             matches: [],
             bets: [],
             lastLogin: Date.now()
@@ -340,18 +358,21 @@
 
         // --- INIT ---
         updateUI();
-        if(state.matches.length === 0) initMatches();
-        setInterval(gameLoop, 2000); // Игровой цикл (2 сек)
+        // Если матчей нет, создаем сразу
+        if(!state.matches || state.matches.length === 0) initMatches();
+        
+        // Запуск таймера
+        setInterval(gameLoop, 3000); 
 
         // --- CORE FUNCTIONS ---
         function save() {
-            localStorage.setItem('royal_state', JSON.stringify(state));
+            localStorage.setItem('royal_ultimate_v2', JSON.stringify(state));
             updateUI();
         }
 
         function updateUI() {
-            document.getElementById('header-bal').innerText = state.balance.toLocaleString();
-            document.getElementById('w-bal').innerText = state.balance.toLocaleString();
+            document.getElementById('header-bal').innerText = Math.floor(state.balance).toLocaleString();
+            document.getElementById('w-bal').innerText = Math.floor(state.balance).toLocaleString();
         }
 
         function nav(page, el) {
@@ -382,9 +403,9 @@
                         id: Date.now()+i+Math.random(),
                         t1: t[i*2], t2: t[i*2+1],
                         s1: 0, s2: 0, time: 0, sport: s,
-                        k1: (1.7+Math.random()).toFixed(2),
-                        kx: (3.0+Math.random()).toFixed(2),
-                        k2: (1.7+Math.random()).toFixed(2),
+                        k1: (1.6+Math.random()).toFixed(2),
+                        kx: (3.1+Math.random()).toFixed(2),
+                        k2: (1.6+Math.random()).toFixed(2),
                         finished: false
                     });
                 }
@@ -397,11 +418,11 @@
             state.matches.forEach(m => {
                 if(m.finished) return;
                 
-                // Время идет (медленнее и реалистичнее)
+                // Время идет (медленно, реалистично)
                 m.time += Math.floor(Math.random()*2) + 1; 
 
                 // Вероятность гола
-                let chance = 0.03; // 3% за тик
+                let chance = 0.04; // 4% за тик
                 if(Math.random() < chance) {
                     Math.random()>0.5 ? m.s1++ : m.s2++;
                     // Динамические кэфы
@@ -414,7 +435,7 @@
                 if(m.time >= 90) { m.finished = true; checkBets(); changed = true; }
             });
 
-            if(state.matches.every(m=>m.finished)) setTimeout(initMatches, 5000); // Рестарт лиги
+            if(state.matches.every(m=>m.finished)) setTimeout(initMatches, 3000); 
             if(changed) { save(); if(document.getElementById('p-sport').classList.contains('active')) renderMatches(); }
         }
 
@@ -454,12 +475,10 @@
         function isInSlip(id, type) { return slip.find(x => x.id===id && x.type===type); }
 
         function togSlip(id, type, k, name) {
-            // Удаляем если есть
             let idx = slip.findIndex(x => x.id === id);
             if(idx >= 0) {
-                // Если кликнули то же самое - убираем совсем
-                if(slip[idx].type === type) slip.splice(idx, 1);
-                else slip[idx] = {id, type, k, name}; // Иначе заменяем
+                if(slip[idx].type === type) slip.splice(idx, 1); // remove if same
+                else slip[idx] = {id, type, k, name}; // replace if diff
             } else {
                 slip.push({id, type, k, name});
             }
@@ -471,6 +490,7 @@
             if(slip.length === 0) { el.classList.remove('show'); return; }
             el.classList.add('show');
             
+            // Перемножение (экспресс)
             let totalK = slip.reduce((a,b) => a * b.k, 1).toFixed(2);
             document.querySelector('.slip-tag').innerText = slip.length > 1 ? `Экспресс (${slip.length})` : 'Ординар';
             document.getElementById('slip-kef').innerText = totalK;
@@ -487,8 +507,8 @@
 
         function placeBet() {
             let stake = +document.getElementById('slip-stake').value;
-            if(stake < 15) return tg.showAlert("Минимальная ставка 15₽");
-            if(stake > state.balance) return tg.showAlert("Недостаточно средств");
+            if(stake < 15) return notify("Минимальная ставка 15₽");
+            if(stake > state.balance) return notify("Недостаточно средств");
 
             state.balance -= stake;
             let tk = +document.getElementById('slip-kef').innerText;
@@ -502,7 +522,7 @@
                 status: 'active'
             });
             save(); clearSlip();
-            tg.showAlert("✅ Ставка принята!");
+            notify("✅ Ставка принята!");
         }
 
         function checkBets() {
@@ -528,7 +548,7 @@
                         b.status = 'win';
                         let winSum = Math.floor(b.stake * b.k);
                         state.balance += winSum;
-                        showWin(winSum, "Sport Betting");
+                        showWin(winSum, "Sport Betting", b.stake, b.k);
                     } else {
                         b.status = 'lose';
                     }
@@ -569,9 +589,9 @@
         function minesStart() {
             let b = +document.getElementById('m-bet').value;
             let c = +document.getElementById('m-count').value;
-            if(b<15) return tg.showAlert("Мин 15₽");
-            if(c<3||c>24) return tg.showAlert("Мины: 3-24");
-            if(b>state.balance) return tg.showAlert("Нет денег");
+            if(b<15) return notify("Мин 15₽");
+            if(c<3||c>24) return notify("Мины: 3-24");
+            if(b>state.balance) return notify("Нет денег");
 
             state.balance -= b; save();
             mGame = {act:true, bet:b, count:c, mult:1, grid:Array(25).fill(0)};
@@ -581,7 +601,7 @@
 
             document.getElementById('m-start').style.display='none';
             document.getElementById('m-cash').style.display='block';
-            document.getElementById('m-cash').innerText = `Забрать ${b} ₽`;
+            document.getElementById('m-cash').innerText = `ЗАБРАТЬ ${b} ₽`;
             
             let g = document.getElementById('m-grid'); g.innerHTML='';
             for(let i=0; i<25; i++) {
@@ -595,24 +615,23 @@
             
             if(mGame.grid[i]) {
                 el.classList.add('boom'); el.innerText='💣'; mGame.act=false;
-                tg.HapticFeedback.notificationOccurred('error');
+                try{ tg.HapticFeedback.notificationOccurred('error'); } catch(e){}
                 revealMines();
                 setTimeout(()=>resetMines(), 2000);
             } else {
                 el.classList.add('gem'); el.innerText='💎';
-                tg.HapticFeedback.impactOccurred('light');
-                // Сложность: чем больше мин, тем быстрее растет кэф
+                try{ tg.HapticFeedback.impactOccurred('light'); } catch(e){}
                 let risk = 1 + (mGame.count / 20); 
                 mGame.mult *= risk;
                 let win = Math.floor(mGame.bet * mGame.mult);
-                document.getElementById('m-cash').innerText = `Забрать ${win} ₽`;
+                document.getElementById('m-cash').innerText = `ЗАБРАТЬ ${win} ₽`;
             }
         }
         function minesCashout() {
             if(!mGame.act) return;
             let w = Math.floor(mGame.bet * mGame.mult);
             state.balance += w; save();
-            showWin(w, "Mines");
+            showWin(w, "Mines", mGame.bet, mGame.mult.toFixed(2));
             mGame.act=false; revealMines(); setTimeout(()=>resetMines(), 2000);
         }
         function revealMines() {
@@ -623,6 +642,7 @@
         function resetMines() {
             document.getElementById('m-start').style.display='block';
             document.getElementById('m-cash').style.display='none';
+            document.getElementById('m-grid').innerHTML = '';
         }
 
         // --- DICE ENGINE ---
@@ -633,9 +653,9 @@
         }
         function diceRoll() {
             let b = +document.getElementById('d-bet').value;
-            if(b<15) return tg.showAlert("Мин 15₽");
-            if(!dPick) return tg.showAlert("Выберите исход");
-            if(b>state.balance) return tg.showAlert("Нет денег");
+            if(b<15) return notify("Мин 15₽");
+            if(!dPick) return notify("Выберите исход");
+            if(b>state.balance) return notify("Нет денег");
 
             state.balance -= b; save();
             let res = Math.floor(Math.random()*6)+1;
@@ -655,17 +675,19 @@
                 if(win) {
                     let w = Math.floor(b*1.9);
                     state.balance += w; save();
-                    showWin(w, "Dice 3D");
+                    showWin(w, "Dice 3D", b, "1.90");
                 }
             }, 1600);
         }
 
         // --- UTILS ---
-        function showWin(sum, src) {
+        function showWin(sum, src, bet, k) {
             document.getElementById('win-sum').innerText = sum + " ₽";
             document.getElementById('win-src').innerText = src;
+            document.getElementById('win-bet-val').innerText = bet;
+            document.getElementById('win-kef-val').innerText = "x"+k;
             document.getElementById('modal').style.display = 'flex';
-            tg.HapticFeedback.notificationOccurred('success');
+            try{ tg.HapticFeedback.notificationOccurred('success'); } catch(e){}
         }
         function closeModal() { document.getElementById('modal').style.display='none'; }
 
@@ -673,10 +695,10 @@
         let taps=0;
         function toggleAdmin() {
             taps++;
-            if(taps===5) { document.getElementById('admin').style.display='block'; tg.showAlert("Admin Mode ON"); }
+            if(taps===5) { document.getElementById('admin').style.display='block'; notify("Admin Mode ON"); }
         }
-        function setAdminBal() { state.balance = +document.getElementById('adm-sum').value; save(); tg.showAlert("Баланс обновлен"); }
-        function fullReset() { localStorage.clear(); location.reload(); }
+        function setAdminBal() { state.balance = +document.getElementById('adm-sum').value; save(); notify("Баланс обновлен"); }
+        function fullReset() { localStorage.removeItem('royal_ultimate_v2'); location.reload(); }
 
     </script>
 </body>
