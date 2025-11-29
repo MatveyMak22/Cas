@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Casino Bot</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root {
+            --bg: #0f172a;     /* Темно-синий фон */
+            --card: #1e293b;   /* Цвет карточек */
+            --accent: #3b82f6; /* Акцент (синий) */
+            --text: #f1f5f9;   /* Текст */
+            --green: #22c55e;
+            --red: #ef4444;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: sans-serif;
+            margin: 0;
+            padding-bottom: 90px;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* HEADER */
+        .header {
+            background: var(--card);
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+        .money { color: var(--green); }
+
+        /* NAV BAR */
+        .nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background: var(--card);
+            display: flex;
+            justify-content: space-around;
+            padding: 12px 0;
+            border-top: 1px solid #334155;
+            z-index: 100;
+        }
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 10px;
+            color: #64748b;
+            cursor: pointer;
+        }
+        .nav-item.active { color: var(--accent); }
+        .nav-icon { font-size: 20px; margin-bottom: 2px; }
+
+        /* PAGES */
+        .page { display: none; padding: 20px; animation: fade 0.3s; }
+        .page.active { display: block; }
+        @keyframes fade { from {opacity: 0;} to {opacity: 1;} }
+
+        h2 { margin-top: 0; }
+
+        /* UI ELEMENTS */
+        .panel {
+            background: var(--card);
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+        }
+        
+        input {
+            background: var(--bg);
+            border: 1px solid #334155;
+            color: white;
+            padding: 10px;
+            width: 100%;
+            border-radius: 8px;
+            box-sizing: border-box;
+            margin: 5px 0 15px 0;
+            outline: none;
+        }
+
+        button.btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            width: 100%;
+            padding: 14px;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button.btn:active { opacity: 0.8; transform: scale(0.98); }
+
+        /* MINES GAME */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            margin-top: 15px;
+        }
+        .cell {
+            aspect-ratio: 1;
+            background: var(--card);
+            border: 1px solid #334155;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .cell.revealed { background: #334155; }
+        .cell.bomb { background: var(--red); }
+        .cell.gem { background: var(--green); }
+
+        /* DICE GAME */
+        .dice-scene {
+            height: 150px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            perspective: 600px;
+        }
+        .cube {
+            width: 60px;
+            height: 60px;
+            position: relative;
+            transform-style: preserve-3d;
+            transform: rotateX(-30deg) rotateY(-45deg);
+            transition: transform 1s ease-out;
+        }
+        .face {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background: rgba(59, 130, 246, 0.9);
+            border: 2px solid white;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .f1 { transform: translateZ(30px); }
+        .f6 { transform: rotateY(180deg) translateZ(30px); }
+        .f2 { transform: rotateX(90deg) translateZ(30px); }
+        .f5 { transform: rotateX(-90deg) translateZ(30px); }
+        .f3 { transform: rotateY(90deg) translateZ(30px); }
+        .f4 { transform: rotateY(-90deg) translateZ(30px); }
+
+        .tags { display: flex; gap: 10px; margin-bottom: 10px; }
+        .tag {
+            flex: 1;
+            background: var(--card);
+            border: 1px solid #334155;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        .tag.selected { background: rgba(59, 130, 246, 0.2); border-color: var(--accent); color: var(--accent); }
+
+        /* SPORTS */
+        .match {
+            background: var(--card);
+            border-radius: 10px;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #334155;
+        }
+        .match-info { font-size: 12px; color: #94a3b8; display: flex; justify-content: space-between; margin-bottom: 8px;}
+        .teams { display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 10px; }
+        .odds { display: flex; gap: 5px; }
+        .odd { flex: 1; background: #334155; padding: 6px; border-radius: 6px; text-align: center; font-size: 12px; cursor: pointer;}
+        .odd:active { background: #475569; }
+
+    </style>
+</head>
+<body>
+
+    <!-- ВЕРХНЯЯ ПАНЕЛЬ -->
+    <div class="header">
+        <div>Casino Bot</div>
+        <div class="money" id="balance-display">1000 $</div>
+    </div>
+
+    <!-- СТРАНИЦА: МИНЕР -->
+    <div id="p-mines" class="page active">
+        <h2>💣 Mines</h2>
+        <div class="panel">
+            <label>Ставка ($):</label>
+            <input type="number" id="m-bet" value="50">
+            <label>Кол-во мин (1-24):</label>
+            <input type="number" id="m-count" value="3">
+            <button class="btn" onclick="minesStart()">ИГРАТЬ</button>
+            <button class="btn" id="m-cashout" onclick="minesCashout()" style="display:none; margin-top:10px; background:var(--green)">ЗАБРАТЬ</button>
+        </div>
+        <div class="grid" id="m-grid"></div>
+    </div>
+
+    <!-- СТРАНИЦА: КУБИК -->
+    <div id="p-dice" class="page">
+        <h2>🎲 Dice 3D</h2>
+        <div class="dice-scene">
+            <div class="cube" id="cube">
+                <div class="face f1">1</div><div class="face f6">6</div>
+                <div class="face f2">2</div><div class="face f5">5</div>
+                <div class="face f3">3</div><div class="face f4">4</div>
+            </div>
+        </div>
+        <div class="panel">
+            <input type="number" id="d-bet" value="50" placeholder="Ставка">
+            <div class="tags">
+                <div class="tag" onclick="selDice('odd', this)">Нечет</div>
+                <div class="tag" onclick="selDice('even', this)">Чет</div>
+            </div>
+            <div class="tags">
+                <div class="tag" onclick="selDice('under', this)">< 3</div>
+                <div class="tag" onclick="selDice('over', this)">> 3</div>
+            </div>
+            <button class="btn" onclick="diceRoll()">БРОСИТЬ</button>
+        </div>
+    </div>
+
+    <!-- СТРАНИЦА: СПОРТ -->
+    <div id="p-sport" class="page">
+        <h2>⚽ Live Sport</h2>
+        <div id="sport-list">
+            <div style="text-align:center; padding:20px; color:#94a3b8">Загрузка матчей...</div>
+        </div>
+    </div>
+
+    <!-- СТРАНИЦА: КОШЕЛЕК -->
+    <div id="p-wallet" class="page">
+        <h2>💳 Кошелек</h2>
+        <div class="panel" style="text-align: center; padding: 40px 20px;">
+            <p style="color:#94a3b8">Ваш баланс</p>
+            <h1 style="font-size: 40px; margin: 10px 0; color:var(--green)">$ <span id="w-bal">1000</span></h1>
+            
+            <!-- КНОПКА ПОПОЛНЕНИЯ -->
+            <button class="btn" style="margin-top: 20px;" onclick="tg.showAlert('Временно недоступно')">
+                Пополнить баланс
+            </button>
+        </div>
+    </div>
+
+    <!-- НИЖНЕЕ МЕНЮ -->
+    <div class="nav">
+        <div class="nav-item active" onclick="go('mines', this)">
+            <div class="nav-icon">💣</div> Mines
+        </div>
+        <div class="nav-item" onclick="go('dice', this)">
+            <div class="nav-icon">🎲</div> Dice
+        </div>
+        <div class="nav-item" onclick="go('sport', this)">
+            <div class="nav-icon">⚽</div> Sport
+        </div>
+        <div class="nav-item" onclick="go('wallet', this)">
+            <div class="nav-icon">💳</div> Wallet
+        </div>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand(); 
+
+        let balance = 1000;
+        function updBal(v) {
+            balance += v;
+            document.getElementById('balance-display').innerText = Math.floor(balance) + ' $';
+            document.getElementById('w-bal').innerText = Math.floor(balance);
+        }
+
+        // НАВИГАЦИЯ
+        function go(id, el) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById('p-'+id).classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+            el.classList.add('active');
+            if(id === 'sport') loadSport();
+        }
+
+        // --- МИНЕР ---
+        let mGrid = [], mActive = false, mBet = 0, mMult = 1;
+        function minesStart() {
+            if(mActive) return;
+            const bet = +document.getElementById('m-bet').value;
+            const cnt = +document.getElementById('m-count').value;
+            if(bet > balance) return tg.showAlert("Мало денег!");
+            
+            updBal(-bet);
+            mBet = bet; mMult = 1; mActive = true;
+            document.getElementById('m-cashout').style.display = 'block';
+            document.getElementById('m-cashout').innerText = `ЗАБРАТЬ (${bet})`;
+
+            mGrid = Array(25).fill(0); // 0 - пусто, 1 - мина
+            let placed = 0;
+            while(placed < cnt) {
+                let r = Math.floor(Math.random()*25);
+                if(mGrid[r]===0) { mGrid[r]=1; placed++; }
+            }
+
+            const div = document.getElementById('m-grid');
+            div.innerHTML = '';
+            for(let i=0; i<25; i++) {
+                let c = document.createElement('div');
+                c.className = 'cell';
+                c.onclick = () => minesOpen(i, c);
+                div.appendChild(c);
+            }
+        }
+
+        function minesOpen(i, el) {
+            if(!mActive || el.classList.contains('revealed')) return;
+            el.classList.add('revealed');
+            
+            if(mGrid[i] === 1) { // BOOM
+                el.classList.add('bomb');
+                el.innerText = '💥';
+                mActive = false;
+                document.getElementById('m-cashout').style.display = 'none';
+                tg.showAlert("Вы проиграли!");
+                // Show all
+                const all = document.querySelectorAll('.cell');
+                mGrid.forEach((v, k) => { if(v===1) { all[k].classList.add('bomb'); all[k].innerText='💣'; }});
+            } else { // GEM
+                el.classList.add('gem');
+                el.innerText = '💎';
+                mMult *= 1.15; // Простой множитель
+                let win = Math.floor(mBet * mMult);
+                document.getElementById('m-cashout').innerText = `ЗАБРАТЬ (${win})`;
+            }
+        }
+        function minesCashout() {
+            if(!mActive) return;
+            let win = Math.floor(mBet * mMult);
+            updBal(win);
+            mActive = false;
+            document.getElementById('m-cashout').style.display = 'none';
+            tg.showAlert(`Вы забрали ${win}$`);
+        }
+
+        // --- КУБИК ---
+        let dSel = null;
+        function selDice(type, el) {
+            dSel = type;
+            document.querySelectorAll('.tag').forEach(t => t.classList.remove('selected'));
+            el.classList.add('selected');
+        }
+        function diceRoll() {
+            const bet = +document.getElementById('d-bet').value;
+            if(bet > balance) return tg.showAlert("Мало денег!");
+            if(!dSel) return tg.showAlert("Выберите исход!");
+            
+            updBal(-bet);
+            
+            // Анимация
+            const rx = (Math.floor(Math.random()*10)+5)*90;
+            const ry = (Math.floor(Math.random()*10)+5)*90;
+            document.getElementById('cube').style.transform = `rotateX(${rx}deg) rotateY(${ry}deg)`;
+
+            setTimeout(() => {
+                const res = Math.floor(Math.random()*6)+1;
+                let win = false;
+                if(dSel === 'odd' && res%2!==0) win=true;
+                if(dSel === 'even' && res%2===0) win=true;
+                if(dSel === 'under' && res<3) win=true; // 1,2
+                if(dSel === 'over' && res>3) win=true; // 4,5,6
+                
+                if(win) {
+                    updBal(bet*2);
+                    tg.showAlert(`Выпало ${res}. Победа!`);
+                } else {
+                    tg.showAlert(`Выпало ${res}. Поражение.`);
+                }
+            }, 1000);
+        }
+
+        // --- СПОРТ API ---
+        async function loadSport() {
+            const list = document.getElementById('sport-list');
+            list.innerHTML = '<div style="text-align:center; padding:20px;">Загрузка...</div>';
+            
+            // ТВОЙ КЛЮЧ
+            const API_KEY = "01155331-e8dd-44a1-b714-41437104dd29";
+
+            try {
+                // Стандартный адрес API Football
+                const res = await fetch("https://v3.football.api-sports.io/fixtures?live=all", {
+                    method: "GET",
+                    headers: {
+                        "x-rapidapi-host": "v3.football.api-sports.io",
+                        "x-rapidapi-key": API_KEY
+                    }
+                });
+                
+                const json = await res.json();
+                
+                if(!json.response || json.response.length === 0) {
+                    list.innerHTML = '<div style="text-align:center; padding:20px;">Нет лайв матчей сейчас (или ошибка ключа)</div>';
+                    return;
+                }
+
+                list.innerHTML = '';
+                // Показываем первые 10
+                json.response.slice(0, 10).forEach(m => {
+                    // Фейковые кэфы, так как API их не всегда отдает в free тарифе
+                    let c1 = (Math.random()+1.5).toFixed(2);
+                    let c2 = (Math.random()+1.5).toFixed(2);
+                    
+                    let item = document.createElement('div');
+                    item.className = 'match';
+                    item.innerHTML = `
+                        <div class="match-info">
+                            <span>${m.league.name}</span>
+                            <span style="color:var(--red)">${m.fixture.status.elapsed}'</span>
+                        </div>
+                        <div class="teams">
+                            <span>${m.teams.home.name}</span>
+                            <span style="background:#334155; padding:2px 6px; border-radius:4px">${m.goals.home}:${m.goals.away}</span>
+                            <span>${m.teams.away.name}</span>
+                        </div>
+                        <div class="odds">
+                            <div class="odd" onclick="betSport('${m.teams.home.name}', ${c1})">П1 ${c1}</div>
+                            <div class="odd" onclick="betSport('Draw', 3.0)">X 3.00</div>
+                            <div class="odd" onclick="betSport('${m.teams.away.name}', ${c2})">П2 ${c2}</div>
+                        </div>
+                    `;
+                    list.appendChild(item);
+                });
+
+            } catch(e) {
+                console.error(e);
+                list.innerHTML = '<div style="text-align:center; color:red">Ошибка подключения к API</div>';
+            }
+        }
+
+        function betSport(team, k) {
+            if(confirm(`Поставить 100$ на ${team} (x${k})?`)) {
+                 if(100 > balance) return tg.showAlert("Мало денег");
+                 updBal(-100);
+                 tg.showAlert("Ставка принята!");
+            }
+        }
+
+    </script>
+</body>
+</html>
