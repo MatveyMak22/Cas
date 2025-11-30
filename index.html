@@ -102,7 +102,7 @@
         .cf-btn:active { background: rgba(255,255,255,0.05); }
         .cf-btn b { display: block; color: var(--accent); font-size: 13px; margin-top: 2px; }
 
-        /* --- MATCH DETAIL VIEW (New) --- */
+        /* --- MATCH DETAIL VIEW --- */
         #p-match-detail { padding: 0; height: 100%; display: none; }
         #p-match-detail.active { display: flex; flex-direction: column; }
         
@@ -147,7 +147,7 @@
         .nav-item.active { color: var(--text-main); }
         .nav-item.active i { color: #2ea043; transform: translateY(-3px); }
 
-        /* --- OTHER GAMES STYLES (Dice/Mines) --- */
+        /* --- GAMES STYLES --- */
         .dice-stage { height: 200px; display: flex; align-items: center; justify-content: center; perspective: 800px; }
         .cube { width: 80px; height: 80px; position: relative; transform-style: preserve-3d; transition: transform 1.5s; }
         .face { position: absolute; width: 80px; height: 80px; border: 2px solid #a371f7; background: radial-gradient(circle, rgba(163,113,247,0.2), #161b22); display: flex; align-items: center; justify-content: center; font-size: 30px; color: #fff; }
@@ -158,6 +158,12 @@
         .cell { aspect-ratio: 1; background: #21262d; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 16px; border: 1px solid rgba(255,255,255,0.05); }
         .cell.gem { background: rgba(46,160,67,0.2); border-color: #2ea043; color: #2ea043; }
         .cell.bomb { background: rgba(218,54,51,0.2); border-color: var(--danger); color: var(--danger); }
+        
+        /* Referral Card */
+        .ref-card { background: linear-gradient(135deg, #1c2128, #161b22); border: 1px solid var(--border); border-radius: 16px; padding: 20px; text-align: center; margin-top: 15px; }
+        .ref-stat { display: flex; justify-content: space-around; margin: 15px 0; }
+        .rs-box { font-size: 12px; color: var(--text-muted); }
+        .rs-box b { display: block; font-size: 16px; color: #fff; margin-top: 4px; }
     </style>
 </head>
 <body>
@@ -165,49 +171,39 @@
     <header id="main-header">
         <div class="bal-wrap">
             <span class="bal-label">БАЛАНС</span>
-            <span class="bal-val" id="ui-balance">Loading...</span>
+            <span class="bal-val" id="ui-balance">Загрузка...</span>
         </div>
         <button class="btn-add" onclick="App.deposit()">Пополнить</button>
     </header>
 
     <main>
-        <!-- MATCH DETAIL VIEW (OVERLAY) -->
+        <!-- MATCH DETAIL OVERLAY -->
         <section id="p-match-detail">
             <div class="match-hero">
                 <div class="hero-top">
                     <button class="back-btn" onclick="App.nav('sport')"><i class="fas fa-chevron-left"></i> Назад</button>
-                    <span id="md-league" style="font-size: 12px; color: rgba(255,255,255,0.7); text-transform: uppercase;">Premier League</span>
-                    <div style="width: 60px;"></div> <!-- Spacer -->
+                    <span id="md-league" style="font-size: 12px; color: rgba(255,255,255,0.7); text-transform: uppercase;">LEAGUE</span>
+                    <div style="width: 60px;"></div>
                 </div>
-                
-                <!-- Scoreboard -->
                 <div class="scoreboard">
                     <div class="sb-team">
                         <div class="team-logo" id="md-logo1" style="background:#ff9800;">H</div>
                         <span id="md-name1" style="font-weight:bold; font-size:14px; margin-top:5px;">Home</span>
                     </div>
                     <div>
-                        <div class="sb-score" id="md-score">2 : 1</div>
-                        <div class="sb-meta" id="md-time">LIVE 65'</div>
+                        <div class="sb-score" id="md-score">0 : 0</div>
+                        <div class="sb-meta" id="md-time">LIVE</div>
                     </div>
                     <div class="sb-team">
                         <div class="team-logo" id="md-logo2" style="background:#2196f3;">A</div>
                         <span id="md-name2" style="font-weight:bold; font-size:14px; margin-top:5px;">Away</span>
                     </div>
                 </div>
-
-                <!-- Specific Container for Tennis Table -->
                 <div id="md-tennis-stats" style="display:none;"></div>
             </div>
-
             <div class="bet-sheet">
                 <h3 style="margin-top:0;">Основные исходы</h3>
-                <div class="cf-grid" id="md-coeffs">
-                    <!-- Buttons injected via JS -->
-                </div>
-                <div style="margin-top:20px; color:var(--text-muted); font-size:12px; text-align:center;">
-                    Больше исходов доступно в полной версии
-                </div>
+                <div class="cf-grid" id="md-coeffs"></div>
             </div>
         </section>
 
@@ -281,6 +277,18 @@
                 <div style="width:70px; height:70px; background:#21262d; border-radius:50%; margin:0 auto 10px; display:flex; align-items:center; justify-content:center; font-size:24px;">👤</div>
                 <h3>ID: <span id="prof-id">...</span></h3>
             </div>
+
+            <!-- Referral Card -->
+            <div class="ref-card">
+                <h3>🤝 Партнерка</h3>
+                <p style="font-size:12px; color:var(--text-muted); margin-bottom:15px;">Приглашай друзей и получай <b>50₽</b></p>
+                <div class="ref-stat">
+                    <div class="rs-box">Приглашено<b>0</b></div>
+                    <div class="rs-box">Доход<b>0 ₽</b></div>
+                </div>
+                <button class="btn-main" style="font-size:14px; padding:10px;" onclick="App.shareRef()">Пригласить</button>
+            </div>
+
             <h4 style="margin-bottom:10px; margin-top:20px;">История</h4>
             <div id="history-list" style="font-size:12px;"></div>
         </section>
@@ -295,41 +303,71 @@
     <script>
         const tg = window.Telegram.WebApp;
 
+        // --- MAIN APP (BACKEND CONNECTED) ---
         const App = {
-            bal: 50.00,
-            hist: [],
+            userId: 0,
+            bal: 0,
             
-            init: function() {
+            init: async function() {
                 tg.ready(); tg.expand();
                 const u = tg.initDataUnsafe?.user;
-                document.getElementById('prof-id').innerText = u ? u.id : 'Demo User';
-                this.load();
+                this.userId = u ? u.id : 12345; // Fallback ID for browser test
+                document.getElementById('prof-id').innerText = this.userId;
+
+                await this.fetchData();
                 Mines.init();
                 Sport.init();
             },
 
-            load: function() {
-                const d = localStorage.getItem('bet_app_v5');
-                if(d) { const j = JSON.parse(d); this.bal = j.bal; this.hist = j.hist || []; }
-                this.upd();
+            // 1. GET USER DATA FROM SERVER
+            fetchData: async function() {
+                try {
+                    let res = await fetch(`/api/user/${this.userId}`);
+                    let data = await res.json();
+                    this.bal = data.balance;
+                    this.updateUI(data.history);
+                } catch(e) { console.error('API Error:', e); }
             },
 
-            save: function() {
-                localStorage.setItem('bet_app_v5', JSON.stringify({bal: this.bal, hist: this.hist}));
-                this.upd();
+            // 2. SEND BET TO SERVER
+            sendBet: async function(game, bet, win, coeff) {
+                try {
+                    // Optimistic UI update
+                    this.bal = this.bal - bet + win; 
+                    this.updateUI();
+
+                    let res = await fetch('/api/bet', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({
+                            user_id: this.userId,
+                            game: game,
+                            bet: bet,
+                            win: win,
+                            coeff: coeff
+                        })
+                    });
+                    let data = await res.json();
+                    if(data.status === 'ok') {
+                        this.bal = data.new_balance; // Sync with server truth
+                        this.fetchData(); // Refresh history
+                    }
+                } catch(e) { tg.showAlert("Ошибка связи с сервером"); }
             },
 
-            upd: function() {
+            updateUI: function(history) {
                 document.getElementById('ui-balance').innerText = this.bal.toFixed(2) + ' ₽';
-                const hl = document.getElementById('history-list');
-                hl.innerHTML = this.hist.slice(0,10).map(h => `
-                    <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.05);">
-                        <span>${h.g}</span><span style="color:${h.w>0?'#2ea043':'#da3633'}">${h.w>0?'+'+h.w:h.w}</span>
-                    </div>`).join('');
+                if(history) {
+                    const hl = document.getElementById('history-list');
+                    hl.innerHTML = history.slice(0,10).map(h => `
+                        <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.05);">
+                            <span>${h.game} (x${h.coeff})</span>
+                            <span style="color:${h.w>0?'#2ea043':'#da3633'}">${h.w>0?'+'+h.w:h.w}</span>
+                        </div>`).join('');
+                }
             },
 
             nav: function(p) {
-                // Hide Match Detail Logic
                 document.getElementById('p-match-detail').classList.remove('active');
                 document.getElementById('main-header').style.display = 'flex';
                 document.getElementById('main-nav').style.display = 'flex';
@@ -343,9 +381,11 @@
                 if(p==='profile') document.querySelectorAll('.nav-item')[2].classList.add('active');
             },
 
-            deposit: function() { tg.showAlert('Пополнение через бота'); }
+            deposit: function() { tg.showPopup({title:'Пополнение', message:'Используйте бота для пополнения'}); },
+            shareRef: function() { tg.openTelegramLink(`https://t.me/share/url?url=https://t.me/YOUR_BOT?start=${this.userId}&text=Бонус+50₽`); }
         };
 
+        // --- SPORT ENGINE (SMART SORT & DETAIL VIEW) ---
         const Sport = {
             matches: [],
             curCat: 'football',
@@ -375,21 +415,16 @@
                         id: Math.random(), cat: cat, isLive: true,
                         t1: tms.pop(), t2: tms.pop(),
                         time: 0, s1: 0, s2: 0,
-                        // Tennis specific logic
-                        sets: cat === 'tennis' ? [[0,0]] : null, 
-                        setScore: [0, 0],
-                        timestamp: now - 3600000 // Started 1 hour ago
+                        sets: cat === 'tennis' ? [[0,0]] : null, setScore: [0,0],
+                        timestamp: now - 3600000 
                     });
-
                     // 2. Upcoming Sorted
                     for(let i=0; i<3; i++) {
                         const mins = (i+1) * 45 + Math.floor(Math.random()*30);
                         this.matches.push({
                             id: Math.random(), cat: cat, isLive: false,
-                            t1: tms.length ? tms.pop() : 'Team A', 
-                            t2: tms.length ? tms.pop() : 'Team B',
-                            time: 0, s1: 0, s2: 0,
-                            sets: null,
+                            t1: tms.length ? tms.pop() : 'Team A', t2: tms.length ? tms.pop() : 'Team B',
+                            time: 0, s1: 0, s2: 0, sets: null,
                             timestamp: now + (mins * 60000)
                         });
                     }
@@ -399,25 +434,16 @@
             tick: function() {
                 this.matches.forEach(m => {
                     if(m.isLive) {
-                        m.time++; // Minutes simulation (or seconds for tennis)
-                        
-                        // Scoring Logic
+                        m.time++;
                         if(Math.random() < 0.1) {
                             const who = Math.random() > 0.5 ? 0 : 1;
-                            
                             if(m.cat === 'tennis') {
-                                // Complex Tennis Logic for Table (Points -> Sets)
                                 let curSetIdx = m.sets.length - 1;
                                 m.sets[curSetIdx][who]++;
-                                // Check Set Win (Simple logic: to 11)
                                 if(m.sets[curSetIdx][who] >= 11 && (m.sets[curSetIdx][who] - m.sets[curSetIdx][1-who] >= 2)) {
-                                    m.setScore[who]++;
-                                    m.sets.push([0,0]); // Start new set
+                                    m.setScore[who]++; m.sets.push([0,0]);
                                 }
-                                // Main score display is Set Score
-                                m.s1 = m.setScore[0];
-                                m.s2 = m.setScore[1];
-
+                                m.s1 = m.setScore[0]; m.s2 = m.setScore[1];
                             } else if (m.cat === 'basketball') {
                                 m[who===0?'s1':'s2'] += (Math.random()>0.7 ? 3 : 2);
                             } else {
@@ -426,8 +452,6 @@
                         }
                     }
                 });
-                
-                // Re-render active view
                 if(document.getElementById('p-sport').classList.contains('active')) this.render();
                 if(document.getElementById('p-match-detail').classList.contains('active') && this.detailId) {
                     this.renderDetail(this.matches.find(x => x.id === this.detailId));
@@ -443,7 +467,6 @@
 
             render: function() {
                 const list = this.matches.filter(m => m.cat === this.curCat);
-                // SORTING: Live First, then by Timestamp
                 list.sort((a, b) => {
                     if(a.isLive && !b.isLive) return -1;
                     if(!a.isLive && b.isLive) return 1;
@@ -478,45 +501,28 @@
                 this.detailId = id;
                 const m = this.matches.find(x => x.id === id);
                 if(!m) return;
-
-                // Hide main layout
                 document.querySelectorAll('.page').forEach(e => e.classList.remove('active'));
                 document.getElementById('main-header').style.display = 'none';
                 document.getElementById('main-nav').style.display = 'none';
-                
-                const page = document.getElementById('p-match-detail');
-                page.classList.add('active');
-                
+                document.getElementById('p-match-detail').classList.add('active');
                 this.renderDetail(m);
             },
 
             renderDetail: function(m) {
-                // Header Info
                 document.getElementById('md-league').innerText = m.cat.toUpperCase();
                 document.getElementById('md-name1').innerText = m.t1;
                 document.getElementById('md-name2').innerText = m.t2;
-                
-                // Colors for Teams (Fake Logos)
                 document.getElementById('md-logo1').innerText = m.t1[0];
-                document.getElementById('md-logo1').style.background = '#ff9800'; // Orange (Home)
                 document.getElementById('md-logo2').innerText = m.t2[0];
-                document.getElementById('md-logo2').style.background = '#212121'; // Black (Away)
-
                 document.getElementById('md-score').innerText = `${m.s1} : ${m.s2}`;
                 document.getElementById('md-time').innerText = m.isLive 
                     ? `LIVE ${m.cat==='tennis' ? 'Сет ' + m.sets.length : Math.floor(m.time/60)+"'"}` 
                     : 'Ожидание';
 
-                // TENNIS TABLE LOGIC
                 const tennisDiv = document.getElementById('md-tennis-stats');
                 if(m.cat === 'tennis' && m.sets) {
                     tennisDiv.style.display = 'block';
-                    
-                    // Build Table Headers
-                    let ths = '<th></th>';
-                    for(let i=1; i<=5; i++) ths += `<th>${i} сет</th>`;
-                    
-                    // Build Rows
+                    let ths = '<th></th>'; for(let i=1; i<=5; i++) ths += `<th>${i} сет</th>`;
                     const buildRow = (teamIdx, color) => {
                         let tds = `<td><div class="team-label"><div class="tennis-logo-mini" style="background:${color}; color:white">${m[teamIdx===0?'t1':'t2'][0]}</div> ${m[teamIdx===0?'t1':'t2'].slice(0,6)}..</div></td>`;
                         for(let i=0; i<5; i++) {
@@ -526,32 +532,19 @@
                         }
                         return `<tr>${tds}</tr>`;
                     };
+                    tennisDiv.innerHTML = `<table class="tennis-sets"><thead><tr>${ths}</tr></thead><tbody>${buildRow(0, '#ff9800')}${buildRow(1, '#212121')}</tbody></table>`;
+                } else { tennisDiv.style.display = 'none'; }
 
-                    tennisDiv.innerHTML = `
-                        <table class="tennis-sets">
-                            <thead><tr>${ths}</tr></thead>
-                            <tbody>
-                                ${buildRow(0, '#ff9800')}
-                                ${buildRow(1, '#212121')}
-                            </tbody>
-                        </table>
-                    `;
-                } else {
-                    tennisDiv.style.display = 'none';
-                }
-
-                // Buttons
                 document.getElementById('md-coeffs').innerHTML = `
                     <button class="cf-btn" onclick="Sport.bet(50)">П1 <b>1.85</b></button>
                     <button class="cf-btn" onclick="Sport.bet(50)">X <b>3.40</b></button>
-                    <button class="cf-btn" onclick="Sport.bet(50)">П2 <b>2.10</b></button>
-                `;
+                    <button class="cf-btn" onclick="Sport.bet(50)">П2 <b>2.10</b></button>`;
             },
 
             bet: function(amt) {
                 if(App.bal < amt) return tg.showAlert('Недостаточно средств');
-                App.bal -= amt;
-                App.save();
+                // Send sport bet to server immediately
+                App.sendBet('Sport Bet', amt, 0, 0); // 0 win means loss for now (simulation)
                 tg.showAlert('Ставка принята!');
             }
         };
@@ -568,7 +561,10 @@
             start: function() {
                 const bet = parseFloat(document.getElementById('m-bet').value);
                 if(bet > App.bal) return tg.showAlert('Мало денег');
-                App.bal -= bet; App.save();
+                
+                // Visual deduction
+                document.getElementById('ui-balance').innerText = (App.bal - bet).toFixed(2) + ' ₽';
+                
                 this.active = true; this.bet = bet; this.mines = parseInt(document.getElementById('m-cnt').value);
                 this.grid = Array(25).fill(0);
                 let c=0; while(c<this.mines) { let r=Math.floor(Math.random()*25); if(this.grid[r]===0){this.grid[r]=1; c++;} }
@@ -579,18 +575,30 @@
             click: function(idx, el) {
                 if(!this.active || el.classList.contains('active')) return;
                 el.classList.add('active');
-                if(this.grid[idx]===1) { el.classList.add('bomb'); el.innerHTML='💣'; this.end(false); }
-                else { 
+                if(this.grid[idx]===1) { 
+                    el.classList.add('bomb'); el.innerHTML='💣'; 
+                    this.end(false); 
+                } else { 
                     el.classList.add('gem'); el.innerHTML='💎'; this.step++;
                     const m = (25-(this.step-1))/(25-this.mines-(this.step-1));
                     this.win = this.bet * Math.pow(m*0.98, this.step);
                     document.getElementById('m-cash').innerText = `Забрать ${this.win.toFixed(0)} ₽`;
                 }
             },
-            cashout: function() { App.bal+=this.win; App.hist.unshift({g:'Mines', w:this.win.toFixed(0)}); App.save(); this.end(true); },
+            cashout: function() { this.end(true); },
             end: function(w) { 
                 this.active=false; document.getElementById('m-btn').style.display='block'; document.getElementById('m-cash').style.display='none';
-                if(!w) App.hist.unshift({g:'Mines', w:-this.bet}); App.save();
+                
+                // Send result to server
+                const winAmount = w ? this.win : 0;
+                const coeff = w ? (this.win / this.bet) : 0;
+                App.sendBet('Mines', this.bet, winAmount, coeff.toFixed(2));
+
+                if(!w) {
+                    document.querySelectorAll('.cell').forEach((c, i) => {
+                        if(this.grid[i]===1) { c.innerHTML = '💣'; if(!c.classList.contains('bomb')) c.style.opacity = 0.5; }
+                    });
+                }
             }
         };
 
@@ -598,15 +606,19 @@
             roll: function() {
                 const bet = parseFloat(document.getElementById('d-bet').value);
                 if(bet > App.bal) return tg.showAlert('Мало денег');
-                App.bal -= bet; App.save();
+                
+                // Visual deduction
+                document.getElementById('ui-balance').innerText = (App.bal - bet).toFixed(2) + ' ₽';
+                
                 const res = Math.floor(Math.random()*6)+1;
                 const m = {1:[0,0], 6:[0,180], 2:[0,-90], 5:[0,90], 3:[-90,0], 4:[90,0]};
                 document.getElementById('d-cube').style.transform = `rotateX(${m[res][0]+720}deg) rotateY(${m[res][1]+720}deg)`;
+                
                 setTimeout(() => {
                     const win = (res%2===0 && this.type==='even') || (res%2!==0 && this.type==='odd');
-                    if(win) { App.bal += bet*1.9; App.hist.unshift({g:'Dice', w:(bet*1.9).toFixed(0)}); }
-                    else App.hist.unshift({g:'Dice', w:-bet});
-                    App.save();
+                    const winAmount = win ? bet * 1.9 : 0;
+                    
+                    App.sendBet('Dice', bet, winAmount, 1.9);
                     tg.showAlert(win ? `Победа! ${res}` : `Луз. ${res}`);
                 }, 1600);
             },
