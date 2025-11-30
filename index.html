@@ -3,20 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Royal Bet Ultimate V2</title>
-    <!-- Подключаем Telegram Script -->
+    <title>Royal Bet Platinum</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        /* --- ГЛОБАЛЬНЫЕ СТИЛИ --- */
+        /* =========================================
+           GLOBAL STYLES & THEME
+           ========================================= */
         :root {
-            --bg: #0d1117;
+            --bg-color: #0d1117;
             --card-bg: #161b22;
             --nav-bg: rgba(22, 27, 34, 0.98);
-            --accent: #2ea043; /* Зеленый "Win" */
-            --accent-hover: #3fb950;
-            --danger: #da3633;
-            --blue: #2f81f7;
-            --gold: #e3b341;
+            --accent: #2ea043;      /* Зеленый Win */
+            --accent-glow: rgba(46, 160, 67, 0.4);
+            --danger: #da3633;      /* Красный Lose */
+            --blue: #2f81f7;        /* Синий Action */
+            --gold: #e3b341;        /* Золотой Premium */
             --text-main: #f0f6fc;
             --text-sub: #8b949e;
             --border: #30363d;
@@ -25,16 +26,16 @@
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
         body {
-            background-color: var(--bg);
+            background-color: var(--bg-color);
             color: var(--text-main);
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             margin: 0; padding: 0;
-            padding-bottom: 120px; /* Отступ под купон и меню */
+            padding-bottom: 110px; /* Отступ для меню и купона */
             user-select: none;
             overflow-x: hidden;
         }
 
-        /* --- ШАПКА --- */
+        /* --- HEADER --- */
         .header {
             position: sticky; top: 0; z-index: 50;
             background: rgba(13, 17, 23, 0.95);
@@ -50,9 +51,10 @@
             background: #21262d; padding: 6px 14px; border-radius: 100px;
             border: 1px solid var(--border); font-weight: 700; font-size: 14px;
             display: flex; align-items: center; gap: 6px;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
         }
 
-        /* --- НАВИГАЦИЯ --- */
+        /* --- NAVIGATION BAR --- */
         .nav {
             position: fixed; bottom: 0; width: 100%;
             background: var(--nav-bg);
@@ -67,14 +69,14 @@
             transition: 0.2s; width: 20%; cursor: pointer;
         }
         .nav-item.active { color: var(--text-main); transform: translateY(-2px); }
-        .nav-icon { font-size: 22px; }
+        .nav-icon { font-size: 22px; margin-bottom: 2px; }
 
-        /* --- СТРАНИЦЫ --- */
-        .page { display: none; padding: 16px; animation: fadeIn 0.3s; }
+        /* --- PAGES --- */
+        .page { display: none; padding: 16px; animation: fadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         .page.active { display: block; }
         @keyframes fadeIn { from {opacity:0; transform:translateY(10px)} to {opacity:1; transform:translateY(0)} }
 
-        /* --- КАРТОЧКИ И КНОПКИ --- */
+        /* --- CARDS & BUTTONS --- */
         .card {
             background: var(--card-bg); border: 1px solid var(--border);
             border-radius: 16px; padding: 16px; margin-bottom: 16px;
@@ -85,7 +87,7 @@
             width: 100%; padding: 16px; border: none; border-radius: 12px;
             background: var(--accent); color: white; font-weight: 800; font-size: 16px;
             cursor: pointer; transition: 0.15s; text-transform: uppercase; letter-spacing: 0.5px;
-            box-shadow: 0 4px 0 #238636;
+            box-shadow: 0 4px 0 #1f6b2e; margin-top: 10px;
         }
         .btn:active { transform: translateY(4px); box-shadow: none; }
         .btn.secondary { background: #21262d; box-shadow: 0 4px 0 #161b22; border: 1px solid var(--border); }
@@ -100,14 +102,14 @@
         input.inp-field:focus { border-color: var(--accent); }
         .label-text { font-size: 12px; color: var(--text-sub); margin-bottom: 6px; display: block; font-weight: 600; }
 
-        /* --- СПОРТ ЛЕНТА --- */
+        /* --- SPORT FEED --- */
         .sport-filter { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 10px; scrollbar-width: none;}
         .filter-chip {
             padding: 8px 16px; background: var(--card-bg); border-radius: 20px;
             font-size: 13px; color: var(--text-sub); white-space: nowrap; border: 1px solid var(--border);
             transition: 0.2s; cursor: pointer;
         }
-        .filter-chip.active { background: var(--text-main); color: var(--bg); font-weight: 800; border-color: white; }
+        .filter-chip.active { background: var(--text-main); color: var(--bg-color); font-weight: 800; border-color: white; }
 
         .match-card .league { font-size: 10px; text-transform: uppercase; color: var(--text-sub); font-weight: 700; margin-bottom: 10px; display: flex; justify-content: space-between; }
         .live-indic { color: var(--danger); display: flex; align-items: center; gap: 4px; }
@@ -128,12 +130,12 @@
         .c-name { font-size: 10px; color: var(--text-sub); display: block; }
         .c-val { font-size: 14px; font-weight: 800; display: block; }
 
-        /* --- КУПОН (Bet Slip) --- */
+        /* --- BET SLIP (COUPON) --- */
         .slip-overlay {
             position: fixed; bottom: 85px; left: 10px; right: 10px;
-            background: #161b22; border: 1px solid var(--border);
+            background: #161b22; border: 1px solid var(--accent);
             border-radius: 16px; padding: 16px; z-index: 100;
-            box-shadow: 0 -10px 40px rgba(0,0,0,0.6);
+            box-shadow: 0 -10px 40px rgba(0,0,0,0.8);
             display: none; animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
         .slip-overlay.show { display: block; }
@@ -144,7 +146,7 @@
         .slip-info { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 13px; color: var(--text-sub); }
         .kef-big { color: var(--gold); font-weight: 800; font-size: 18px; }
 
-        /* --- ИСТОРИЯ СТАВОК --- */
+        /* --- HISTORY --- */
         .hist-filter { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 15px; }
         .h-tab { flex: 1; text-align: center; padding: 12px; font-size: 14px; color: var(--text-sub); border-bottom: 2px solid transparent; transition: 0.2s; }
         .h-tab.active { color: var(--text-main); border-color: var(--accent); font-weight: 700; }
@@ -176,7 +178,7 @@
         .f2 { transform: rotateX(90deg) translateZ(40px); } .f5 { transform: rotateX(-90deg) translateZ(40px); }
         .f3 { transform: rotateY(90deg) translateZ(40px); } .f4 { transform: rotateY(-90deg) translateZ(40px); }
 
-        /* --- ПОБЕДНОЕ ОКНО (MODAL) --- */
+        /* --- WIN MODAL --- */
         .modal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.85); z-index: 200;
@@ -279,7 +281,7 @@
             <button class="btn secondary" onclick="notify('Пополнение через СБП временно недоступно.\nВедутся технические работы.')">Пополнить баланс</button>
             
             <!-- Секретная кнопка админки -->
-            <div style="margin-top:50px; opacity:0.3; font-size:12px;" onclick="toggleAdmin()">Версия v5.0.1 (Tap 5x for Admin)</div>
+            <div style="margin-top:50px; opacity:0.3; font-size:12px;" onclick="toggleAdmin()">Версия v7.0.0 (Tap 5x for Admin)</div>
             
             <div id="admin" class="admin-panel">
                 <h4 style="color:var(--danger)">Admin Console</h4>
@@ -334,39 +336,55 @@
     </div>
 
     <script>
-        // Инициализация (Безопасная)
-        const tg = window.Telegram.WebApp;
+        // ==========================================
+        // 1. БЕЗОПАСНАЯ ИНИЦИАЛИЗАЦИЯ (ФИКС ОШИБОК)
+        // ==========================================
+        // Создаем заглушку, если Telegram API не найден (чтобы работало в браузере)
+        const tg = window.Telegram?.WebApp || { 
+            expand: ()=>{}, 
+            showAlert: (msg)=>alert(msg), 
+            HapticFeedback: { 
+                notificationOccurred: ()=>{}, 
+                impactOccurred: ()=>{} 
+            } 
+        };
+
+        // Пытаемся расширить окно, но если ошибка — игнорируем
         try { tg.expand(); } catch(e) { console.log("Not in TG"); }
 
-        // Wrapper для уведомлений (чтобы работало в браузере)
+        // Универсальная функция уведомлений
         function notify(msg) {
-            if(tg && tg.showAlert) tg.showAlert(msg);
+            if(tg.showAlert) tg.showAlert(msg);
             else alert(msg);
         }
 
-        // --- GLOBAL STATE ---
-        // Используем уникальный ключ, чтобы стереть старые баги
-        let state = JSON.parse(localStorage.getItem('royal_ultimate_v2')) || {
+        // ==========================================
+        // 2. БАЗА ДАННЫХ И СОХРАНЕНИЯ
+        // ==========================================
+        // Используем НОВЫЙ ключ 'royal_platinum_v1', чтобы стереть старые ошибки
+        let state = {
             balance: 10000,
             matches: [],
             bets: [],
             lastLogin: Date.now()
         };
 
+        // Загрузка
+        try {
+            const saved = localStorage.getItem('royal_platinum_v1');
+            if(saved) state = JSON.parse(saved);
+        } catch(e) { console.error("Save load error", e); }
+
         let slip = [];
         let activeSport = 'football';
 
-        // --- INIT ---
+        // Инициализация при старте
         updateUI();
-        // Если матчей нет, создаем сразу
         if(!state.matches || state.matches.length === 0) initMatches();
-        
-        // Запуск таймера
-        setInterval(gameLoop, 3000); 
+        setInterval(gameLoop, 3000); // Запуск симуляции спорта
 
-        // --- CORE FUNCTIONS ---
         function save() {
-            localStorage.setItem('royal_ultimate_v2', JSON.stringify(state));
+            localStorage.setItem('royal_platinum_v1', JSON.stringify(state));
             updateUI();
         }
 
@@ -375,6 +393,9 @@
             document.getElementById('w-bal').innerText = Math.floor(state.balance).toLocaleString();
         }
 
+        // ==========================================
+        // 3. НАВИГАЦИЯ
+        // ==========================================
         function nav(page, el) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.getElementById('p-'+page).classList.add('active');
@@ -385,7 +406,9 @@
             if(page === 'bets') renderHistory('active');
         }
 
-        // --- SPORT ENGINE ---
+        // ==========================================
+        // 4. СПОРТИВНЫЙ ДВИЖОК
+        // ==========================================
         const DB = {
             football: ["Real Madrid","Barcelona","Man City","Liverpool","Arsenal","Bayern","PSG","Juventus","Inter","Milan","Zenit","Spartak"],
             hockey: ["SKA","CSKA","Rangers","Bruins","Avangard","Ak Bars","Dynamo","Tampa Bay","Vegas","Colorado"],
@@ -418,14 +441,12 @@
             state.matches.forEach(m => {
                 if(m.finished) return;
                 
-                // Время идет (медленно, реалистично)
                 m.time += Math.floor(Math.random()*2) + 1; 
 
-                // Вероятность гола
-                let chance = 0.04; // 4% за тик
+                // Вероятность гола (редкая)
+                let chance = 0.04; 
                 if(Math.random() < chance) {
                     Math.random()>0.5 ? m.s1++ : m.s2++;
-                    // Динамические кэфы
                     let shift = (m.s1 - m.s2) * 0.15;
                     m.k1 = Math.max(1.05, (parseFloat(m.k1) - shift).toFixed(2));
                     m.k2 = Math.max(1.05, (parseFloat(m.k2) + shift).toFixed(2));
@@ -471,14 +492,16 @@
             });
         }
 
-        // --- BETTING SLIP ---
+        // ==========================================
+        // 5. КУПОН (BET SLIP)
+        // ==========================================
         function isInSlip(id, type) { return slip.find(x => x.id===id && x.type===type); }
 
         function togSlip(id, type, k, name) {
             let idx = slip.findIndex(x => x.id === id);
             if(idx >= 0) {
-                if(slip[idx].type === type) slip.splice(idx, 1); // remove if same
-                else slip[idx] = {id, type, k, name}; // replace if diff
+                if(slip[idx].type === type) slip.splice(idx, 1); 
+                else slip[idx] = {id, type, k, name}; 
             } else {
                 slip.push({id, type, k, name});
             }
@@ -490,7 +513,6 @@
             if(slip.length === 0) { el.classList.remove('show'); return; }
             el.classList.add('show');
             
-            // Перемножение (экспресс)
             let totalK = slip.reduce((a,b) => a * b.k, 1).toFixed(2);
             document.querySelector('.slip-tag').innerText = slip.length > 1 ? `Экспресс (${slip.length})` : 'Ординар';
             document.getElementById('slip-kef').innerText = totalK;
@@ -558,7 +580,9 @@
             if(document.getElementById('p-bets').classList.contains('active')) renderHistory('active');
         }
 
-        // --- HISTORY RENDER ---
+        // ==========================================
+        // 6. ИСТОРИЯ
+        // ==========================================
         function renderHistory(filter, tabEl) {
             if(tabEl) {
                 document.querySelectorAll('.h-tab').forEach(x => x.classList.remove('active'));
@@ -584,7 +608,9 @@
             });
         }
 
-        // --- MINES ENGINE ---
+        // ==========================================
+        // 7. MINES
+        // ==========================================
         let mGame = {act:false, grid:[], bet:0, mult:1, count:3};
         function minesStart() {
             let b = +document.getElementById('m-bet').value;
@@ -645,7 +671,9 @@
             document.getElementById('m-grid').innerHTML = '';
         }
 
-        // --- DICE ENGINE ---
+        // ==========================================
+        // 8. DICE
+        // ==========================================
         let dPick = null;
         function diceSelect(t, el) {
             dPick=t; document.querySelectorAll('#d-odd, #d-even').forEach(x=>x.classList.remove('selected'));
@@ -663,7 +691,6 @@
             // 3D вращение
             let x = (Math.random()*4+4)*360; 
             let y = (Math.random()*4+4)*360;
-            // Подгон углов
             if(res===1) {x+=0;y+=0;} if(res===6) {x+=0;y+=180;}
             if(res===2) {x+=90;y+=0;} if(res===5) {x+=-90;y+=0;}
             if(res===3) {x+=0;y+=-90;} if(res===4) {x+=0;y+=90;}
@@ -680,7 +707,9 @@
             }, 1600);
         }
 
-        // --- UTILS ---
+        // ==========================================
+        // 9. UTILS & ADMIN
+        // ==========================================
         function showWin(sum, src, bet, k) {
             document.getElementById('win-sum').innerText = sum + " ₽";
             document.getElementById('win-src').innerText = src;
@@ -691,14 +720,13 @@
         }
         function closeModal() { document.getElementById('modal').style.display='none'; }
 
-        // --- ADMIN ---
         let taps=0;
         function toggleAdmin() {
             taps++;
             if(taps===5) { document.getElementById('admin').style.display='block'; notify("Admin Mode ON"); }
         }
         function setAdminBal() { state.balance = +document.getElementById('adm-sum').value; save(); notify("Баланс обновлен"); }
-        function fullReset() { localStorage.removeItem('royal_ultimate_v2'); location.reload(); }
+        function fullReset() { localStorage.clear(); location.reload(); }
 
     </script>
 </body>
