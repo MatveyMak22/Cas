@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Betting App Pro</title>
+    <title>Betting Mini App</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         :root {
@@ -17,10 +18,8 @@
             --text-muted: #8b949e;
             --border: #30363d;
             
-            /* Game Colors */
             --g-mines: linear-gradient(135deg, #f85149, #da3633);
             --g-dice: linear-gradient(135deg, #a371f7, #8957e5);
-            --g-sport: linear-gradient(135deg, #2f81f7, #1f6feb);
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; user-select: none; }
@@ -38,7 +37,7 @@
 
         /* --- HEADER --- */
         header {
-            padding: 15px 20px;
+            padding: 10px 15px;
             background: rgba(13, 17, 23, 0.95);
             backdrop-filter: blur(10px);
             border-bottom: 1px solid var(--border);
@@ -50,115 +49,134 @@
         }
         .bal-wrap { display: flex; flex-direction: column; }
         .bal-label { font-size: 10px; color: var(--text-muted); font-weight: 700; letter-spacing: 0.5px; }
-        .bal-val { font-size: 18px; font-weight: 800; color: #fff; text-shadow: 0 0 15px rgba(46, 160, 67, 0.5); }
+        .bal-val { font-size: 18px; font-weight: 800; color: #fff; text-shadow: 0 0 15px rgba(46, 160, 67, 0.3); }
         .btn-add { 
             background: #1f6feb; color: white; border: none; 
-            padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: bold;
+            padding: 8px 14px; border-radius: 10px; font-size: 12px; font-weight: bold;
+            box-shadow: 0 0 10px rgba(31, 111, 235, 0.3);
         }
 
         /* --- MAIN SCROLL --- */
-        main { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 90px; }
-        .page { display: none; animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        main { flex: 1; overflow-y: auto; padding: 15px; padding-bottom: 90px; }
+        .page { display: none; animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
         .page.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* --- GAMES MENU (BEAUTIFUL) --- */
-        .games-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        /* --- GAMES MENU --- */
+        .games-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .g-card {
-            height: 140px;
-            border-radius: 20px;
+            height: 120px;
+            border-radius: 16px;
             position: relative;
             overflow: hidden;
             cursor: pointer;
-            border: 1px solid rgba(255,255,255,0.1);
-            transition: transform 0.2s;
+            border: 1px solid rgba(255,255,255,0.05);
+            background: var(--bg-card);
+            padding: 15px;
             display: flex;
             flex-direction: column;
             justify-content: flex-end;
-            padding: 15px;
         }
-        .g-card:active { transform: scale(0.96); }
-        .g-card.wide { grid-column: span 2; height: 120px; background: var(--g-sport); }
+        .g-card:active { transform: scale(0.98); opacity: 0.8; }
+        .g-card.wide { grid-column: span 2; height: 100px; background: linear-gradient(135deg, #1f6feb, #0d4a9e); }
         .g-card.mines { background: var(--g-mines); }
         .g-card.dice { background: var(--g-dice); }
         
-        .g-icon { position: absolute; top: 10px; right: 10px; font-size: 60px; opacity: 0.3; transform: rotate(-10deg); color: #fff; }
-        .g-title { font-size: 18px; font-weight: 800; color: #fff; z-index: 2; margin: 0; }
-        .g-sub { font-size: 12px; color: rgba(255,255,255,0.8); z-index: 2; }
+        .g-icon { position: absolute; top: 10px; right: 10px; font-size: 50px; opacity: 0.2; transform: rotate(-10deg); color: #fff; }
+        .g-title { font-size: 16px; font-weight: 800; color: #fff; z-index: 2; margin: 0; }
+        .g-sub { font-size: 11px; color: rgba(255,255,255,0.8); z-index: 2; }
 
         /* --- SPORT SECTION --- */
         .sport-cats {
-            display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 15px;
+            display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 5px;
             scrollbar-width: none;
         }
         .cat-btn {
             background: var(--bg-card); border: 1px solid var(--border); color: var(--text-muted);
-            padding: 8px 16px; border-radius: 20px; font-size: 13px; white-space: nowrap; transition: 0.2s;
+            padding: 8px 14px; border-radius: 20px; font-size: 12px; white-space: nowrap; transition: 0.2s;
         }
-        .cat-btn.active { background: #fff; color: #000; border-color: #fff; font-weight: bold; }
+        .cat-btn.active { background: #fff; color: #000; border-color: #fff; font-weight: 700; }
+        .cat-btn i { margin-right: 5px; }
 
         .match-card {
-            background: var(--bg-card); border-radius: 16px; padding: 15px; margin-bottom: 12px;
-            border: 1px solid var(--border); position: relative;
+            background: var(--bg-card); border-radius: 14px; padding: 12px; margin-bottom: 10px;
+            border: 1px solid var(--border);
         }
-        .live-dot { width: 8px; height: 8px; background: var(--danger); border-radius: 50%; display: inline-block; margin-right: 5px; animation: blink 1s infinite; }
-        @keyframes blink { 50% { opacity: 0.4; } }
+        .match-header { display: flex; justify-content: space-between; font-size: 10px; color: var(--text-muted); margin-bottom: 8px; }
         
-        .teams-row { display: flex; justify-content: space-between; align-items: center; margin: 12px 0; }
-        .team-name { font-size: 14px; font-weight: 600; width: 40%; }
-        .match-score { font-size: 20px; font-weight: 800; color: #fff; letter-spacing: 2px; }
+        .live-badge { color: #f85149; font-weight: bold; display: flex; align-items: center; gap: 4px; }
+        .live-dot { width: 6px; height: 6px; background: #f85149; border-radius: 50%; animation: blink 1s infinite; }
+        @keyframes blink { 50% { opacity: 0.3; } }
         
-        .cf-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-        .cf-btn { 
-            background: rgba(255,255,255,0.05); border-radius: 8px; padding: 8px; 
-            text-align: center; font-size: 12px; color: var(--text-muted); cursor: pointer;
-        }
-        .cf-btn b { display: block; color: var(--accent); font-size: 14px; margin-top: 2px; }
-        .cf-btn:active { background: rgba(255,255,255,0.1); }
+        .upcoming-badge { color: var(--text-muted); display: flex; align-items: center; gap: 4px; }
 
-        /* --- DICE 3D FIXED --- */
-        .dice-stage {
-            height: 250px; display: flex; align-items: center; justify-content: center;
-            perspective: 1000px; overflow: hidden;
+        .teams-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .team-name { font-size: 13px; font-weight: 600; width: 40%; line-height: 1.2; }
+        .match-score { font-size: 18px; font-weight: 800; color: #fff; letter-spacing: 1px; width: 20%; text-align: center;}
+        
+        .cf-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+        .cf-btn { 
+            background: #21262d; border-radius: 8px; padding: 8px 4px; 
+            text-align: center; font-size: 11px; color: var(--text-muted); cursor: pointer;
+            border: 1px solid transparent;
         }
-        .cube {
-            width: 100px; height: 100px; position: relative;
-            transform-style: preserve-3d; transition: transform 1.5s cubic-bezier(0.19, 1, 0.22, 1);
-        }
-        .face {
-            position: absolute; width: 100px; height: 100px;
-            background: rgba(137, 87, 229, 0.2); border: 2px solid #a371f7;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 40px; font-weight: bold; color: #fff;
-            box-shadow: 0 0 20px rgba(163, 113, 247, 0.4) inset;
-            border-radius: 10px;
-            background: radial-gradient(circle, rgba(163,113,247,0.4) 0%, rgba(22,27,34,1) 100%);
-        }
-        .f1 { transform: rotateY(0deg) translateZ(50px); }
-        .f6 { transform: rotateY(180deg) translateZ(50px); }
-        .f2 { transform: rotateY(90deg) translateZ(50px); }
-        .f5 { transform: rotateY(-90deg) translateZ(50px); }
-        .f4 { transform: rotateX(90deg) translateZ(50px); }
-        .f3 { transform: rotateX(-90deg) translateZ(50px); }
+        .cf-btn.win { border-color: var(--accent); background: rgba(46,160,67,0.1); }
+        .cf-btn b { display: block; color: var(--accent); font-size: 13px; margin-top: 2px; }
 
         /* --- UI CONTROLS --- */
         .control-panel { background: var(--bg-card); padding: 15px; border-radius: 16px; border: 1px solid var(--border); }
-        input[type="number"] {
+        input[type="number"], input[type="text"] {
             width: 100%; background: #090c10; border: 1px solid var(--border);
-            padding: 14px; border-radius: 10px; color: white; font-size: 16px; margin-bottom: 10px;
+            padding: 12px; border-radius: 10px; color: white; font-size: 16px; margin-bottom: 10px;
         }
         .btn-main {
             width: 100%; padding: 14px; border-radius: 12px; font-size: 16px; font-weight: 700; border: none;
             background: var(--accent-gradient); color: white; box-shadow: 0 5px 15px rgba(35, 134, 54, 0.4);
+            cursor: pointer;
         }
         .btn-main:active { transform: scale(0.98); }
 
-        /* --- BOTTOM NAV --- */
+        /* --- DICE 3D --- */
+        .dice-stage { height: 200px; display: flex; align-items: center; justify-content: center; perspective: 800px; }
+        .cube { width: 80px; height: 80px; position: relative; transform-style: preserve-3d; transition: transform 1.5s cubic-bezier(0.19, 1, 0.22, 1); }
+        .face { 
+            position: absolute; width: 80px; height: 80px; border: 2px solid #a371f7;
+            background: radial-gradient(circle, rgba(163,113,247,0.2) 0%, #161b22 100%);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 30px; font-weight: bold; color: #fff; border-radius: 8px;
+        }
+        .f1 { transform: rotateY(0deg) translateZ(40px); } .f6 { transform: rotateY(180deg) translateZ(40px); }
+        .f2 { transform: rotateY(90deg) translateZ(40px); } .f5 { transform: rotateY(-90deg) translateZ(40px); }
+        .f4 { transform: rotateX(90deg) translateZ(40px); } .f3 { transform: rotateX(-90deg) translateZ(40px); }
+
+        /* --- MINES --- */
+        .mines-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-bottom: 15px; }
+        .cell {
+            aspect-ratio: 1; background: #21262d; border-radius: 6px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; font-size: 16px;
+            border: 1px solid rgba(255,255,255,0.05); transition: 0.1s;
+        }
+        .cell.active { background: #30363d; }
+        .cell.gem { background: rgba(46,160,67,0.2); border-color: #2ea043; color: #2ea043; }
+        .cell.bomb { background: rgba(218,54,51,0.2); border-color: var(--danger); color: var(--danger); }
+
+        /* --- REFERRAL CARD --- */
+        .ref-card {
+            background: linear-gradient(135deg, #1c2128, #161b22);
+            border: 1px solid var(--border);
+            border-radius: 16px; padding: 20px; text-align: center;
+            margin-top: 15px;
+        }
+        .ref-stat { display: flex; justify-content: space-around; margin: 15px 0; }
+        .rs-box { font-size: 12px; color: var(--text-muted); }
+        .rs-box b { display: block; font-size: 16px; color: #fff; margin-top: 4px; }
+
+        /* --- NAV --- */
         nav {
             position: fixed; bottom: 0; width: 100%; height: 75px;
             background: var(--bg-nav); border-top: 1px solid var(--border);
             display: flex; justify-content: space-around; align-items: center;
-            padding-bottom: 10px;
+            padding-bottom: 10px; z-index: 99;
         }
         .nav-item {
             display: flex; flex-direction: column; align-items: center; gap: 4px;
@@ -166,205 +184,232 @@
         }
         .nav-item i { font-size: 20px; transition: 0.2s; }
         .nav-item.active { color: var(--text-main); }
-        .nav-item.active i { color: #2ea043; transform: translateY(-3px); text-shadow: 0 0 10px rgba(46,160,67,0.6); }
-
-        /* --- MINES GRID --- */
-        .mines-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-bottom: 15px; }
-        .cell {
-            aspect-ratio: 1; background: #21262d; border-radius: 8px; cursor: pointer;
-            display: flex; align-items: center; justify-content: center; font-size: 18px;
-            transition: 0.1s; border: 1px solid rgba(255,255,255,0.05);
-        }
-        .cell.active { background: #30363d; }
-        .cell.gem { background: rgba(46,160,67,0.2); border-color: #2ea043; color: #2ea043; box-shadow: 0 0 10px rgba(46,160,67,0.3); }
-        .cell.bomb { background: rgba(218,54,51,0.2); border-color: var(--danger); color: var(--danger); }
-        
-        .empty-state {
-            text-align: center; color: var(--text-muted); padding: 40px 0;
-        }
+        .nav-item.active i { color: #2ea043; transform: translateY(-3px); }
     </style>
 </head>
 <body>
 
     <header>
         <div class="bal-wrap">
-            <span class="bal-label">MAIN BALANCE</span>
-            <span class="bal-val" id="ui-balance">0.00 ₽</span>
+            <span class="bal-label">БАЛАНС</span>
+            <span class="bal-val" id="ui-balance">50.00 ₽</span>
         </div>
         <button class="btn-add" onclick="App.deposit()">Пополнить</button>
     </header>
 
     <main>
-        <!-- GAMES MENU -->
+        <!-- LOBBY -->
         <section id="p-menu" class="page active">
-            <h2 style="margin-top:0">Лобби</h2>
+            <h2 style="margin-top:0">Игры</h2>
             <div class="games-grid">
-                <!-- Sport Card -->
                 <div class="g-card wide" onclick="App.nav('sport')">
                     <i class="fas fa-trophy g-icon"></i>
                     <h3 class="g-title">Live Спорт</h3>
-                    <span class="g-sub">Футбол, Хоккей, Теннис</span>
+                    <span class="g-sub">Ставки на матчи</span>
                 </div>
-                <!-- Mines Card -->
                 <div class="g-card mines" onclick="App.nav('mines')">
                     <i class="fas fa-bomb g-icon"></i>
                     <h3 class="g-title">Mines</h3>
                     <span class="g-sub">Сапер на деньги</span>
                 </div>
-                <!-- Dice Card -->
                 <div class="g-card dice" onclick="App.nav('dice')">
                     <i class="fas fa-dice-d20 g-icon"></i>
-                    <h3 class="g-title">Dice 3D</h3>
-                    <span class="g-sub">Кубик удачи</span>
+                    <h3 class="g-title">Dice</h3>
+                    <span class="g-sub">Кубик x1.90</span>
                 </div>
             </div>
-            
-            <h3 style="margin-top: 25px">Промо и Акции</h3>
-            <div style="background: linear-gradient(45deg, #1f6feb, #8957e5); padding: 15px; border-radius: 15px; color: white;">
-                <b>🎁 Бонус за друга</b>
-                <div style="font-size: 12px; opacity: 0.8; margin-top:5px;">Пригласи и получи 50₽ на счет</div>
+
+            <!-- Promo/Ref Teaser -->
+            <div style="margin-top: 20px; padding: 15px; border-radius: 12px; background: rgba(31, 111, 235, 0.1); border: 1px solid rgba(31, 111, 235, 0.3); display: flex; align-items: center; justify-content: space-between;">
+                <div>
+                    <div style="font-weight: bold; font-size: 14px;">Пригласи друга</div>
+                    <div style="font-size: 11px; color: var(--text-muted);">Получи 50₽ за каждого</div>
+                </div>
+                <button onclick="App.nav('profile')" style="background: #1f6feb; border: none; color: white; padding: 6px 12px; border-radius: 8px; font-size: 12px;">Go</button>
             </div>
         </section>
 
-        <!-- SPORT SECTION -->
+        <!-- SPORT -->
         <section id="p-sport" class="page">
-            <h2 style="margin-top:0">Ставки</h2>
+            <h2 style="margin-top:0">Линия</h2>
             
             <div class="sport-cats">
-                <button class="cat-btn active" onclick="Sport.filter('football', this)">⚽ Футбол</button>
-                <button class="cat-btn" onclick="Sport.filter('hockey', this)">🏒 Хоккей</button>
-                <button class="cat-btn" onclick="Sport.filter('tennis', this)">🏓 Теннис</button>
-                <button class="cat-btn" onclick="Sport.filter('basketball', this)">🏀 Баскет</button>
+                <button class="cat-btn active" onclick="Sport.filter('football', this)"><i class="fas fa-futbol"></i> Футбол</button>
+                <button class="cat-btn" onclick="Sport.filter('hockey', this)"><i class="fas fa-hockey-puck"></i> Хоккей</button>
+                <button class="cat-btn" onclick="Sport.filter('basketball', this)"><i class="fas fa-basketball-ball"></i> Баскет</button>
+                <button class="cat-btn" onclick="Sport.filter('tennis', this)"><i class="fas fa-table-tennis"></i> Теннис</button>
             </div>
 
             <div id="sport-feed">
-                <!-- Matches Injected Here -->
+                <!-- JS Injects matches here -->
             </div>
         </section>
 
-        <!-- MINES SECTION -->
+        <!-- MINES -->
         <section id="p-mines" class="page">
             <div style="display:flex; align-items:center; gap:10px; margin-bottom:15px;">
-                <i class="fas fa-chevron-left" onclick="App.nav('menu')" style="padding:10px;"></i>
+                <i class="fas fa-chevron-left" onclick="App.nav('menu')" style="padding:10px; cursor:pointer;"></i>
                 <h2>Mines</h2>
             </div>
             
             <div class="control-panel">
-                <input type="number" id="m-bet" value="10" placeholder="Ставка">
-                <div style="display:flex; justify-content:space-between; margin-bottom:10px; font-size:14px;">
-                    <span>Мин: <b id="m-cnt-val">3</b></span>
+                <input type="number" id="m-bet" value="50" placeholder="Ставка">
+                <div style="display:flex; justify-content:space-between; margin-bottom:10px; font-size:13px;">
+                    <span>Мины: <b id="m-cnt-val">3</b></span>
                     <span>Кэф: <b id="m-coef" style="color:var(--accent)">x1.00</b></span>
                 </div>
                 <input type="range" id="m-cnt" min="3" max="24" value="3" style="width:100%; margin-bottom:15px;" oninput="Mines.updInput()">
                 
-                <button id="m-btn" class="btn-main" onclick="Mines.start()">ИГРАТЬ</button>
-                <button id="m-cash" class="btn-main" style="background:#d29922; display:none;" onclick="Mines.cashout()">ЗАБРАТЬ</button>
+                <button id="m-btn" class="btn-main" onclick="Mines.start()">Играть</button>
+                <button id="m-cash" class="btn-main" style="background:#d29922; display:none;" onclick="Mines.cashout()">Забрать</button>
             </div>
             <br>
             <div class="mines-grid" id="m-grid"></div>
         </section>
 
-        <!-- DICE SECTION -->
+        <!-- DICE -->
         <section id="p-dice" class="page">
             <div style="display:flex; align-items:center; gap:10px; margin-bottom:15px;">
-                <i class="fas fa-chevron-left" onclick="App.nav('menu')" style="padding:10px;"></i>
-                <h2>Dice</h2>
+                <i class="fas fa-chevron-left" onclick="App.nav('menu')" style="padding:10px; cursor:pointer;"></i>
+                <h2>Dice 3D</h2>
             </div>
 
             <div class="dice-stage">
                 <div class="cube" id="d-cube">
-                    <div class="face f1">1</div>
-                    <div class="face f2">2</div>
-                    <div class="face f3">3</div>
-                    <div class="face f4">4</div>
-                    <div class="face f5">5</div>
-                    <div class="face f6">6</div>
+                    <div class="face f1">1</div><div class="face f2">2</div><div class="face f3">3</div>
+                    <div class="face f4">4</div><div class="face f5">5</div><div class="face f6">6</div>
                 </div>
             </div>
 
             <div class="control-panel">
-                <input type="number" id="d-bet" value="10" placeholder="Ставка">
+                <input type="number" id="d-bet" value="50" placeholder="Ставка">
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:15px;">
-                    <button class="cf-btn" id="d-even" onclick="Dice.type('even')" style="font-size:14px; background:var(--bg-body); border:1px solid var(--border);">
+                    <button class="cf-btn" id="d-even" onclick="Dice.type('even')" style="background:var(--bg-body); border:1px solid var(--border); font-size:14px; padding:12px;">
                         ЧЕТ <br> <b style="color:#a371f7">x1.90</b>
                     </button>
-                    <button class="cf-btn" id="d-odd" onclick="Dice.type('odd')" style="font-size:14px; background:var(--bg-body); border:1px solid var(--border);">
+                    <button class="cf-btn" id="d-odd" onclick="Dice.type('odd')" style="background:var(--bg-body); border:1px solid var(--border); font-size:14px; padding:12px;">
                         НЕЧЕТ <br> <b style="color:#a371f7">x1.90</b>
                     </button>
                 </div>
-                <button class="btn-main" style="background: var(--g-dice)" onclick="Dice.roll()">БРОСОК</button>
+                <button class="btn-main" style="background: var(--g-dice)" onclick="Dice.roll()">Бросок</button>
             </div>
         </section>
 
-        <!-- PROFILE SECTION -->
+        <!-- PROFILE -->
         <section id="p-profile" class="page">
             <h2 style="margin-top:0">Профиль</h2>
+            
             <div class="control-panel" style="text-align:center;">
-                <div style="width:70px; height:70px; background:#21262d; border-radius:50%; margin:0 auto 10px; display:flex; align-items:center; justify-content:center; font-size:24px;">👤</div>
-                <h3>Игрок #1</h3>
-                <div style="font-size:24px; color:#2ea043; font-weight:bold; margin-top:10px;" id="prof-bal">0.00 ₽</div>
+                <div style="width:70px; height:70px; background:#21262d; border-radius:50%; margin:0 auto 10px; display:flex; align-items:center; justify-content:center; font-size:24px;">😎</div>
+                <h3>Игрок <span id="prof-id">#Loading</span></h3>
             </div>
-            <h4 style="margin-bottom:10px">История ставок</h4>
+
+            <!-- REFERRAL SYSTEM UI -->
+            <div class="ref-card">
+                <h3>🤝 Партнерская программа</h3>
+                <p style="font-size:12px; color:var(--text-muted); margin-bottom:15px;">Приглашай друзей и получай <b>50₽</b> за каждого!</p>
+                
+                <div class="ref-stat">
+                    <div class="rs-box">Приглашено<b><span id="ref-count">0</span></b></div>
+                    <div class="rs-box">Заработано<b><span id="ref-earn">0</span> ₽</b></div>
+                </div>
+
+                <button class="btn-main" style="font-size:14px; padding:10px;" onclick="App.shareRef()">
+                    <i class="fas fa-share-alt"></i> Пригласить друга
+                </button>
+            </div>
+
+            <h4 style="margin-bottom:10px; margin-top:20px;">История ставок</h4>
             <div id="history-list" style="font-size:12px;"></div>
         </section>
-        
-        <!-- PLACEHOLDERS -->
-        <section id="p-empty1" class="page"><div class="empty-state">Чат (Скоро)</div></section>
-        <section id="p-empty2" class="page"><div class="empty-state">Поддержка (Скоро)</div></section>
     </main>
 
     <nav>
         <div class="nav-item active" onclick="App.nav('menu')"><i class="fas fa-home"></i>Меню</div>
         <div class="nav-item" onclick="App.nav('sport')"><i class="fas fa-futbol"></i>Спорт</div>
         <div class="nav-item" onclick="App.nav('profile')"><i class="fas fa-user"></i>Профиль</div>
-        <div class="nav-item" onclick="App.nav('empty1')"><i class="fas fa-comments"></i></div>
-        <div class="nav-item" onclick="App.nav('empty2')"><i class="fas fa-headset"></i></div>
     </nav>
 
     <script>
+        const tg = window.Telegram.WebApp;
+
+        // --- CORE APP ---
         const App = {
-            bal: 50.00, // STARTING BALANCE
-            hist: [],
+            userId: 0,
+            bal: 50.00,
+            refCount: 0,
+            refEarn: 0,
+            history: [],
 
             init: function() {
-                // Load from storage (if exists)
-                const s = localStorage.getItem('bet_app_v2');
-                if(s) {
-                    const data = JSON.parse(s);
-                    this.bal = data.bal;
-                    this.hist = data.hist || [];
-                }
+                tg.ready();
+                tg.expand();
                 
-                this.upd();
+                // Get user from TG or Demo
+                const user = tg.initDataUnsafe?.user;
+                this.userId = user ? user.id : Math.floor(Math.random() * 999999);
+                document.getElementById('prof-id').innerText = "#" + this.userId;
+
+                // Load Data (Local Sim for now)
+                this.load();
+                
+                // Init Modules
                 Mines.init();
-                Sport.startTick();
+                Sport.init();
+
+                // Check Referrals (Stub logic)
+                const urlParams = new URLSearchParams(window.location.search);
+                const refId = urlParams.get('start'); // Telegram passes ?start=123
+                if(refId && refId != this.userId) {
+                    // Logic to send to backend: "User X invited by User Y"
+                    console.log("Invited by:", refId);
+                }
+            },
+
+            load: function() {
+                // Mock Load
+                const saved = localStorage.getItem('casino_v3');
+                if(saved) {
+                    const d = JSON.parse(saved);
+                    this.bal = d.bal;
+                    this.history = d.history || [];
+                    this.refCount = d.refCount || 0;
+                    this.refEarn = d.refEarn || 0;
+                }
+                this.updateUI();
             },
 
             save: function() {
-                localStorage.setItem('bet_app_v2', JSON.stringify({
+                localStorage.setItem('casino_v3', JSON.stringify({
                     bal: this.bal,
-                    hist: this.hist
+                    history: this.history,
+                    refCount: this.refCount,
+                    refEarn: this.refEarn
                 }));
-                this.upd();
+                this.updateUI();
             },
 
-            upd: function() {
+            updateUI: function() {
                 const s = this.bal.toFixed(2) + ' ₽';
                 document.getElementById('ui-balance').innerText = s;
-                document.getElementById('prof-bal').innerText = s;
-                
-                const hList = document.getElementById('history-list');
-                hList.innerHTML = this.hist.map(x => `
-                    <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.05);">
-                        <span>${x.g}</span>
-                        <span style="color:${x.w > 0 ? '#2ea043' : '#da3633'}">${x.w > 0 ? '+' + x.w : x.w}</span>
-                    </div>
-                `).join('');
+                document.getElementById('ref-count').innerText = this.refCount;
+                document.getElementById('ref-earn').innerText = this.refEarn;
+
+                // History Render
+                const hl = document.getElementById('history-list');
+                if(this.history.length === 0) hl.innerHTML = '<div style="text-align:center; color:#555">Пусто</div>';
+                else {
+                    hl.innerHTML = this.history.slice(0, 10).map(h => `
+                        <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.05);">
+                            <span>${h.game}</span>
+                            <span style="color:${h.win > 0 ? '#2ea043' : '#da3633'}">${h.win > 0 ? '+' + h.win : h.win}</span>
+                        </div>
+                    `).join('');
+                }
             },
 
-            addHist: function(game, winAmount) {
-                this.hist.unshift({g: game, w: winAmount});
-                if(this.hist.length > 15) this.hist.pop();
+            addHist: function(game, win) {
+                this.history.unshift({ game, win });
                 this.save();
             },
 
@@ -372,83 +417,120 @@
                 document.querySelectorAll('.page').forEach(e => e.classList.remove('active'));
                 document.getElementById('p-' + p).classList.add('active');
                 
-                // Update bottom nav
                 document.querySelectorAll('.nav-item').forEach(e => e.classList.remove('active'));
-                // Simple mapping for demo
-                if(p === 'menu' || p === 'mines' || p === 'dice') document.querySelectorAll('.nav-item')[0].classList.add('active');
+                if(p === 'menu' || p.startsWith('mines') || p.startsWith('dice')) document.querySelectorAll('.nav-item')[0].classList.add('active');
                 if(p === 'sport') document.querySelectorAll('.nav-item')[1].classList.add('active');
                 if(p === 'profile') document.querySelectorAll('.nav-item')[2].classList.add('active');
             },
 
+            shareRef: function() {
+                const link = `https://t.me/share/url?url=https://t.me/YOUR_BOT_NAME?start=${this.userId}&text=Забирай+50₽+бонуса+в+казино!`;
+                tg.openTelegramLink(link);
+            },
+
             deposit: function() {
-                alert('Для пополнения используйте бота. ID транзакции: ' + Math.floor(Math.random()*999999));
+                tg.showPopup({ title: 'Касса', message: 'Пополнение через бота (В разработке)' });
             }
         };
 
-        /* --- SPORT REAL-TIME SIMULATION --- */
+        // --- SPORT ENGINE (SMART SCHEDULE) ---
         const Sport = {
-            curCat: 'football',
             matches: [],
-
+            curCat: 'football',
+            
+            // Expanded Team List
             teams: {
-                football: ['Real Madrid', 'Barcelona', 'Man City', 'Liverpool', 'PSG', 'Bayern'],
-                hockey: ['СКА', 'ЦСКА', 'Ак Барс', 'Авангард', 'Динамо', 'Спартак'],
-                tennis: ['Djokovic', 'Alcaraz', 'Medvedev', 'Sinner', 'Rublev', 'Nadal'],
-                basketball: ['Lakers', 'Bulls', 'Celtics', 'Heat', 'Warriors', 'Nets']
+                football: ['Real Madrid', 'Barcelona', 'Man City', 'Liverpool', 'PSG', 'Bayern', 'Juventus', 'Milan', 'Arsenal', 'Chelsea'],
+                hockey: ['СКА', 'ЦСКА', 'Ак Барс', 'Авангард', 'Динамо М', 'Спартак', 'Металлург', 'Салават Юлаев', 'Трактор', 'Локомотив'],
+                basketball: ['Lakers', 'Bulls', 'Celtics', 'Heat', 'Warriors', 'Nets', 'CSKA Basket', 'Real Madrid Basket', 'Anadolu Efes', 'Barcelona Basket'],
+                tennis: ['Djokovic', 'Alcaraz', 'Medvedev', 'Sinner', 'Rublev', 'Nadal', 'Tsitsipas', 'Zverev', 'Rune', 'Hurkacz']
             },
 
-            startTick: function() {
-                this.genSchedule();
-                setInterval(() => {
-                    this.updateTimes();
-                    // Every 5 minutes refresh schedule totally
-                    if(new Date().getMinutes() % 5 === 0 && new Date().getSeconds() === 0) this.genSchedule();
-                }, 1000); 
+            init: function() {
+                this.generateSchedule();
+                this.render();
+                // Ticker for LIVE matches only
+                setInterval(() => this.tick(), 2000); 
             },
 
-            genSchedule: function() {
-                // Generate based on current Hour to keep consistency
-                const now = new Date();
-                const h = now.getHours();
-                const m = now.getMinutes();
-
+            generateSchedule: function() {
                 this.matches = [];
+                const categories = ['football', 'hockey', 'basketball', 'tennis'];
                 
-                // Logic: Randomly decide how many matches per category now
-                // Seed random with Hour + Category index to match requests
-                const cats = ['football', 'hockey', 'tennis', 'basketball'];
-                
-                cats.forEach(cat => {
-                    // Unique "random" for this hour/cat
-                    let count = (h + cat.length) % 3; // 0, 1, or 2 matches
-                    if(cat === 'football') count = 1; // Always 1 football
-                    
-                    for(let i=0; i<count; i++) {
-                        // Generate Time
-                        let startMin = (i * 20) + (h % 10);
-                        let elapsed = m - startMin;
-                        if(elapsed < 0) elapsed = 0; // Not started
-                        if(elapsed > 90) continue; // Ended
+                categories.forEach(cat => {
+                    const catTeams = [...this.teams[cat]];
+                    // Shuffle teams
+                    catTeams.sort(() => Math.random() - 0.5);
 
-                        // Pick teams
-                        let t1 = this.teams[cat][(h+i)%this.teams[cat].length];
-                        let t2 = this.teams[cat][(h+i+1)%this.teams[cat].length];
-                        
-                        // Fake score based on elapsed time
-                        let s1 = Math.floor(elapsed / 30); 
-                        let s2 = Math.floor(elapsed / 45);
-
+                    // 1. Create 1-2 LIVE matches
+                    const liveCount = Math.floor(Math.random() * 2) + 1; 
+                    for(let i=0; i<liveCount; i++) {
+                        if(catTeams.length < 2) break;
                         this.matches.push({
-                            cat: cat, t1, t2, time: elapsed, s1, s2
+                            id: Math.random(),
+                            cat: cat,
+                            t1: catTeams.pop(),
+                            t2: catTeams.pop(),
+                            isLive: true,
+                            time: Math.floor(Math.random() * 60) + 10, // 10-70 mins
+                            s1: Math.floor(Math.random() * (cat === 'basketball' ? 80 : 3)),
+                            s2: Math.floor(Math.random() * (cat === 'basketball' ? 80 : 3)),
+                            k: [this.randK(), this.randK(), this.randK()]
+                        });
+                    }
+
+                    // 2. Create 3-4 SCHEDULED matches (Today/Tomorrow)
+                    const futureCount = 3;
+                    for(let i=0; i<futureCount; i++) {
+                        if(catTeams.length < 2) break;
+                        const hour = Math.floor(Math.random() * 10) + 12; // 12:00 - 22:00
+                        const min = Math.random() > 0.5 ? '00' : '30';
+                        const isTomorrow = Math.random() > 0.7;
+                        
+                        this.matches.push({
+                            id: Math.random(),
+                            cat: cat,
+                            t1: catTeams.pop(),
+                            t2: catTeams.pop(),
+                            isLive: false,
+                            dateStr: (isTomorrow ? 'Завтра' : 'Сегодня') + ` ${hour}:${min}`,
+                            s1: 0, s2: 0,
+                            k: [this.randK(), this.randK(), this.randK()]
                         });
                     }
                 });
-                this.render();
             },
 
-            updateTimes: function() {
-                this.matches.forEach(m => m.time++);
-                this.render(); // Re-render times
+            randK: function() { return (Math.random() * 3 + 1.1).toFixed(2); },
+
+            tick: function() {
+                let updated = false;
+                this.matches.forEach(m => {
+                    if(m.isLive) {
+                        updated = true;
+                        m.time++; // Increase minute
+                        
+                        // Scoring Logic per Sport
+                        if(Math.random() < 0.15) { // Chance to score
+                            const team = Math.random() > 0.5 ? 1 : 2;
+                            if(m.cat === 'basketball') {
+                                // Basketball: +2 or +3 points
+                                const points = Math.random() > 0.65 ? 3 : 2;
+                                team === 1 ? m.s1 += points : m.s2 += points;
+                            } else if (m.cat === 'tennis') {
+                                // Simplified tennis (Game score)
+                                // Not implemented fully to avoid complex set logic in one file
+                                team === 1 ? m.s1++ : m.s2++;
+                            } else {
+                                // Football/Hockey: +1
+                                team === 1 ? m.s1++ : m.s2++;
+                            }
+                        }
+                    }
+                });
+                if(updated && document.getElementById('p-sport').classList.contains('active')) {
+                    this.render();
+                }
             },
 
             filter: function(cat, btn) {
@@ -459,192 +541,142 @@
             },
 
             render: function() {
-                const cont = document.getElementById('sport-feed');
-                const filtered = this.matches.filter(m => m.cat === this.curCat);
-                
-                if(filtered.length === 0) {
-                    cont.innerHTML = '<div class="empty-state">Матчей нет. Расписание обновляется...</div>';
-                    return;
-                }
+                const container = document.getElementById('sport-feed');
+                // Filter by category
+                const list = this.matches.filter(m => m.cat === this.curCat);
+                // Sort: Live first
+                list.sort((a, b) => (a.isLive === b.isLive) ? 0 : a.isLive ? -1 : 1);
 
-                cont.innerHTML = filtered.map(m => `
+                container.innerHTML = list.map(m => `
                     <div class="match-card">
-                        <div style="font-size:10px; color:var(--text-muted); display:flex; justify-content:space-between;">
-                            <span><span class="live-dot"></span>LIVE</span>
-                            <span>${m.time}' мин</span>
+                        <div class="match-header">
+                            ${m.isLive 
+                                ? `<span class="live-badge"><span class="live-dot"></span>LIVE</span> <span>${m.time}' мин</span>` 
+                                : `<span class="upcoming-badge"><i class="far fa-clock"></i> ${m.dateStr}</span> <span>Не начался</span>`
+                            }
                         </div>
                         <div class="teams-row">
                             <span class="team-name">${m.t1}</span>
-                            <span class="match-score">${m.s1}:${m.s2}</span>
+                            <span class="match-score">${m.s1} : ${m.s2}</span>
                             <span class="team-name" style="text-align:right">${m.t2}</span>
                         </div>
                         <div class="cf-grid">
-                            <div class="cf-btn" onclick="Sport.bet()">П1 <b>1.85</b></div>
-                            <div class="cf-btn" onclick="Sport.bet()">X <b>3.40</b></div>
-                            <div class="cf-btn" onclick="Sport.bet()">П2 <b>2.10</b></div>
+                            <div class="cf-btn" onclick="Sport.bet(${m.id}, 'p1', ${m.k[0]})">П1 <b>${m.k[0]}</b></div>
+                            <div class="cf-btn" onclick="Sport.bet(${m.id}, 'x', ${m.k[1]})">X <b>${m.k[1]}</b></div>
+                            <div class="cf-btn" onclick="Sport.bet(${m.id}, 'p2', ${m.k[2]})">П2 <b>${m.k[2]}</b></div>
                         </div>
                     </div>
                 `).join('');
             },
 
-            bet: function() {
-                if(App.bal < 100) return alert('Мин. ставка 100 на спорт');
-                App.bal -= 100;
-                App.save();
-                alert('Ставка принята! (Симуляция)');
+            bet: function(id, type, coef) {
+                if(App.bal < 50) return tg.showAlert('Мин. ставка 50₽');
+                App.bal -= 50;
+                App.addHist('Sport Bet', -50);
+                tg.showAlert(`Ставка 50₽ принята! (Кэф x${coef})`);
             }
         };
 
-        /* --- MINES --- */
+        // --- MINES LOGIC ---
         const Mines = {
-            active: false,
-            grid: [],
-            
+            active: false, grid: [], bet: 0,
             init: function() {
-                const g = document.getElementById('m-grid');
-                g.innerHTML = '';
+                const g = document.getElementById('m-grid'); g.innerHTML = '';
                 for(let i=0; i<25; i++) {
-                    let d = document.createElement('div');
-                    d.className = 'cell';
-                    d.onclick = () => this.click(i, d);
+                    let d = document.createElement('div'); d.className = 'cell'; d.onclick = () => this.click(i, d);
                     g.appendChild(d);
                 }
             },
-            
-            updInput: function() {
-                document.getElementById('m-cnt-val').innerText = document.getElementById('m-cnt').value;
-            },
-
+            updInput: function() { document.getElementById('m-cnt-val').innerText = document.getElementById('m-cnt').value; },
             start: function() {
                 const bet = parseFloat(document.getElementById('m-bet').value);
-                const mines = parseInt(document.getElementById('m-cnt').value);
+                if(bet > App.bal) return tg.showAlert('Не хватает денег');
+                if(isNaN(bet) || bet < 1) return;
                 
-                if(bet > App.bal) return alert('Не хватает денег');
-                if(bet < 1) return alert('Мин ставка 1');
-
-                App.bal -= bet;
-                App.save();
-
+                App.bal -= bet; App.save();
+                this.bet = bet;
+                this.mines = parseInt(document.getElementById('m-cnt').value);
                 this.active = true;
                 this.grid = Array(25).fill(0);
                 
-                // Place mines
                 let c = 0;
-                while(c < mines) {
-                    let r = Math.floor(Math.random()*25);
-                    if(this.grid[r]===0) { this.grid[r]=1; c++; }
-                }
-
-                // UI
+                while(c < this.mines) { let r = Math.floor(Math.random()*25); if(this.grid[r]===0) { this.grid[r]=1; c++; } }
+                
                 document.getElementById('m-btn').style.display='none';
                 document.getElementById('m-cash').style.display='block';
-                document.querySelectorAll('.cell').forEach(c => {
-                    c.className='cell'; c.innerHTML='';
-                });
-                this.bet = bet;
-                this.mines = mines;
+                document.querySelectorAll('.cell').forEach(c => { c.className='cell'; c.innerHTML=''; });
                 this.step = 0;
             },
-
             click: function(idx, el) {
                 if(!this.active || el.classList.contains('active')) return;
-                
                 el.classList.add('active');
                 if(this.grid[idx] === 1) {
-                    // BOOM
-                    el.classList.add('bomb');
-                    el.innerHTML = '<i class="fas fa-bomb"></i>';
+                    el.classList.add('bomb'); el.innerHTML = '<i class="fas fa-bomb"></i>';
                     this.end(false);
                 } else {
-                    el.classList.add('gem');
-                    el.innerHTML = '<i class="fas fa-gem"></i>';
+                    el.classList.add('gem'); el.innerHTML = '<i class="fas fa-gem"></i>';
                     this.step++;
-                    // Calc coef
                     let safe = 25 - this.mines;
-                    let left = safe - (this.step - 1);
-                    let mult = (25 - (this.step-1)) / left;
-                    // Simplified accumulation
-                    let cur = (this.bet * Math.pow(mult * 0.98, this.step)); 
-                    document.getElementById('m-cash').innerHTML = `ЗАБРАТЬ ${cur.toFixed(2)}`;
+                    let mult = (25 - (this.step-1)) / (safe - (this.step - 1));
+                    this.currWin = (this.bet * Math.pow(mult * 0.98, this.step));
+                    document.getElementById('m-cash').innerText = `Забрать ${this.currWin.toFixed(0)} ₽`;
                 }
             },
-
             cashout: function() {
                 if(!this.active) return;
-                const win = parseFloat(document.getElementById('m-cash').innerText.split(' ')[1]);
-                App.bal += win;
-                App.addHist('Mines', win);
+                App.bal += this.currWin;
+                App.addHist('Mines', this.currWin.toFixed(2));
                 this.end(true);
             },
-
             end: function(win) {
                 this.active = false;
                 document.getElementById('m-btn').style.display='block';
                 document.getElementById('m-cash').style.display='none';
                 if(!win) App.addHist('Mines', -this.bet);
-                
-                // Show all
-                const cells = document.querySelectorAll('.cell');
-                cells.forEach((c, i) => {
-                    if(this.grid[i]===1) {
-                        c.innerHTML = '<i class="fas fa-bomb"></i>';
-                        if(!c.classList.contains('bomb')) c.style.opacity = 0.5;
-                    }
+                document.querySelectorAll('.cell').forEach((c, i) => {
+                    if(this.grid[i]===1) { c.innerHTML = '<i class="fas fa-bomb"></i>'; if(!c.classList.contains('bomb')) c.style.opacity = 0.5; }
                 });
             }
         };
 
-        /* --- DICE --- */
+        // --- DICE LOGIC ---
         const Dice = {
             sel: null,
-            
-            type: function(t) {
-                this.sel = t;
-                document.getElementById('d-even').style.borderColor = t==='even'?'#a371f7':'var(--border)';
-                document.getElementById('d-odd').style.borderColor = t==='odd'?'#a371f7':'var(--border)';
+            type: function(t) { 
+                this.sel = t; 
+                document.getElementById('d-even').style.borderColor = t==='even'?'#a371f7':'var(--border)'; 
+                document.getElementById('d-odd').style.borderColor = t==='odd'?'#a371f7':'var(--border)'; 
             },
-
             roll: function() {
                 const bet = parseFloat(document.getElementById('d-bet').value);
-                if(!this.sel) return alert('Выберите ЧЕТ или НЕЧЕТ');
-                if(bet > App.bal) return alert('Не хватает денег');
-
-                App.bal -= bet;
-                App.save();
-
+                if(!this.sel) return tg.showAlert('Чет или Нечет?');
+                if(bet > App.bal) return tg.showAlert('Мало денег');
+                
+                App.bal -= bet; App.save();
+                
                 const cube = document.getElementById('d-cube');
-                // Random rotations: ensure it lands flat (multiple of 90deg) + extra spins
                 const res = Math.floor(Math.random() * 6) + 1;
-                
-                // Mapping result to angles [X, Y]
-                const map = {
-                    1: [0, 0], 6: [0, 180], 
-                    2: [0, -90], 5: [0, 90],
-                    3: [-90, 0], 4: [90, 0]
-                };
-                
-                // Add lots of spins (e.g. 5 full rotations)
+                const map = { 1:[0,0], 6:[0,180], 2:[0,-90], 5:[0,90], 3:[-90,0], 4:[90,0] };
                 const ang = map[res];
-                const rX = ang[0] + (360 * 5);
-                const rY = ang[1] + (360 * 5);
                 
-                cube.style.transform = `rotateX(${rX}deg) rotateY(${rY}deg)`;
+                // Add lots of rotation
+                const x = ang[0] + (360 * 5);
+                const y = ang[1] + (360 * 5);
+                cube.style.transform = `rotateX(${x}deg) rotateY(${y}deg)`;
 
                 setTimeout(() => {
                     const isEven = res % 2 === 0;
-                    let win = 0;
-                    if((this.sel === 'even' && isEven) || (this.sel === 'odd' && !isEven)) {
-                        win = bet * 1.9;
-                        App.bal += win;
-                        alert('Победа! Выпало ' + res);
-                    } else {
-                        alert('Проигрыш. Выпало ' + res);
-                    }
-                    if(win > 0) App.addHist('Dice', win);
-                    else App.addHist('Dice', -bet);
+                    const win = ((this.sel === 'even' && isEven) || (this.sel === 'odd' && !isEven));
                     
-                    // Reset rotation slightly to keep it clean for next spin? 
-                    // No, CSS transition handles it well if we just keep increasing degrees or reset logic 
+                    if(win) {
+                        const amount = bet * 1.9;
+                        App.bal += amount;
+                        App.addHist('Dice', amount.toFixed(2));
+                        tg.showAlert(`Выпало ${res}. Победа! +${amount.toFixed(0)}`);
+                    } else {
+                        App.addHist('Dice', -bet);
+                        tg.showAlert(`Выпало ${res}. Луз.`);
+                    }
                 }, 1600);
             }
         };
