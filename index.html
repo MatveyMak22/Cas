@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Winline Pro</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* ====================
+           WINLINE THEME CORE
+           ==================== */
+        :root {
+            --bg-main: #131313;
+            --bg-card: #222222;
+            --bg-nav: #1b1b1b;
+            --primary: #ff7f00; /* Winline Orange */
+            --primary-dark: #cc6600;
+            --green: #34c759;
+            --red: #ff3b30;
+            --text-main: #ffffff;
+            --text-sub: #999999;
+            --border: #333333;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; user-select: none; }
+        body { margin: 0; padding: 0; background: var(--bg-main); color: var(--text-main); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding-bottom: 90px; overflow-x: hidden; }
+
+        /* HEADER */
+        .header {
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(19, 19, 19, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 12px 16px;
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid var(--border);
+        }
+        .logo { font-weight: 900; font-size: 22px; color: var(--primary); letter-spacing: -1px; text-transform: uppercase; }
+        .balance-chip {
+            background: #2a2a2a; border: 1px solid #333;
+            padding: 6px 14px; border-radius: 8px;
+            font-weight: 700; font-size: 15px; display: flex; align-items: center; gap: 5px;
+        }
+
+        /* NAVIGATION */
+        .nav {
+            position: fixed; bottom: 0; width: 100%;
+            background: var(--bg-nav); border-top: 1px solid var(--border);
+            display: flex; justify-content: space-around; padding: 10px 0 25px; z-index: 100;
+        }
+        .nav-item { color: var(--text-sub); font-size: 10px; display: flex; flex-direction: column; align-items: center; gap: 4px; transition: 0.2s; }
+        .nav-item i { font-size: 20px; }
+        .nav-item.active { color: var(--primary); }
+
+        /* PAGES */
+        .page { display: none; padding: 16px; animation: fade 0.3s; }
+        .page.active { display: block; }
+        @keyframes fade { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* UI ELEMENTS */
+        .card { background: var(--bg-card); border-radius: 12px; padding: 15px; margin-bottom: 12px; position: relative; }
+        .btn {
+            width: 100%; padding: 14px; border: none; border-radius: 8px;
+            background: var(--primary); color: #fff; font-weight: 800; font-size: 16px;
+            text-transform: uppercase; cursor: pointer; transition: 0.1s;
+        }
+        .btn:active { transform: scale(0.98); opacity: 0.9; }
+        .btn-green { background: var(--green); }
+        .btn-gray { background: #333; color: #fff; }
+        input {
+            width: 100%; background: #111; border: 1px solid var(--border);
+            padding: 14px; border-radius: 8px; color: #fff; font-size: 16px; margin-bottom: 10px;
+        }
+
+        /* --- SPORT FEED --- */
+        .cats-scroll { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 5px; margin-bottom: 10px; scrollbar-width: none; }
+        .cat-chip {
+            padding: 8px 16px; background: #2a2a2a; border-radius: 20px;
+            font-size: 13px; color: var(--text-sub); white-space: nowrap; border: 1px solid transparent;
+        }
+        .cat-chip.active { background: var(--text-main); color: var(--bg-main); font-weight: 700; }
+
+        .match-card { display: flex; flex-direction: column; gap: 10px; }
+        .match-top { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-sub); font-weight: 600; text-transform: uppercase; }
+        .live-tag { color: var(--red); display: flex; align-items: center; gap: 5px; }
+        .live-dot { width: 6px; height: 6px; background: var(--red); border-radius: 50%; animation: blink 1.5s infinite; }
+        @keyframes blink { 50% { opacity: 0.4; } }
+
+        .teams-box { display: flex; justify-content: space-between; align-items: center; font-weight: 700; font-size: 14px; }
+        .score-box { background: #111; padding: 4px 10px; border-radius: 6px; font-size: 18px; color: var(--primary); letter-spacing: 1px; }
+        
+        .coef-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+        .cf { 
+            background: #333; padding: 10px; border-radius: 6px; text-align: center; 
+            font-size: 12px; color: var(--text-sub); transition: 0.1s;
+        }
+        .cf:active { background: #444; }
+        .cf b { display: block; color: var(--text-main); font-size: 14px; margin-top: 3px; }
+
+        /* --- MATCH DETAIL OVERLAY --- */
+        #detail-view {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg-main); z-index: 200; display: none; flex-direction: column;
+            overflow-y: auto; padding-bottom: 50px;
+        }
+        .dv-header { padding: 15px; background: var(--bg-card); display: flex; align-items: center; border-bottom: 1px solid var(--border); }
+        .dv-hero {
+            padding: 30px 15px; background: radial-gradient(circle at top, #2a2a2a 0%, #131313 100%);
+            text-align: center; border-bottom: 1px solid var(--border);
+        }
+        .dv-score { font-size: 42px; font-weight: 900; margin: 10px 0; }
+        .dv-time { color: var(--primary); font-weight: bold; }
+        
+        .market-tabs { display: flex; border-bottom: 1px solid var(--border); background: var(--bg-card); }
+        .mt { flex: 1; text-align: center; padding: 12px; color: var(--text-sub); font-size: 14px; border-bottom: 2px solid transparent; }
+        .mt.active { color: var(--primary); border-color: var(--primary); font-weight: 700; }
+        .market-sec { padding: 15px; }
+        .ms-title { font-size: 12px; color: var(--text-sub); margin-bottom: 10px; text-transform: uppercase; }
+
+        /* --- MY BETS --- */
+        .bet-card { 
+            border-left: 4px solid #444; padding: 12px; border-radius: 8px; 
+            background: var(--bg-card); margin-bottom: 8px;
+        }
+        .bet-card.win { border-color: var(--green); }
+        .bet-card.lose { border-color: var(--red); }
+        .bet-card.wait { border-color: var(--primary); }
+        .bc-top { display: flex; justify-content: space-between; font-size: 13px; font-weight: 700; margin-bottom: 5px; }
+        .bc-info { font-size: 11px; color: var(--text-sub); }
+        .bc-res { display: flex; justify-content: space-between; margin-top: 8px; font-size: 12px; }
+        .win-sum { color: var(--green); font-weight: 800; }
+        .lose-sum { color: var(--red); font-weight: 800; }
+
+        /* --- GAMES: CRASH --- */
+        .crash-area {
+            height: 220px; background: #111; border-radius: 12px; position: relative;
+            overflow: hidden; border: 1px solid var(--border); margin-bottom: 15px;
+        }
+        .crash-num {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            font-size: 48px; font-weight: 900; color: #fff; z-index: 2;
+        }
+        .plane {
+            position: absolute; bottom: 10px; left: 10px; font-size: 30px;
+            transition: bottom 0.1s linear, left 0.1s linear; z-index: 1;
+        }
+        .graph-line {
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(45deg, rgba(255,127,0,0.1), transparent);
+        }
+
+        /* --- GAMES: MINES --- */
+        .mines-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; max-width: 320px; margin: 0 auto; }
+        .m-cell {
+            aspect-ratio: 1; background: #333; border-radius: 6px; 
+            display: flex; justify-content: center; align-items: center; font-size: 22px; cursor: pointer;
+            box-shadow: inset 0 -3px 0 rgba(0,0,0,0.3); transition: 0.1s;
+        }
+        .m-cell:active { transform: translateY(2px); box-shadow: none; }
+        .m-cell.gem { background: #1a4023; border: 1px solid var(--green); }
+        .m-cell.boom { background: #401a1a; border: 1px solid var(--red); }
+        .m-cell.open { background: #222; box-shadow: none; }
+
+        /* --- GAMES: DICE --- */
+        .dice-scene { height: 180px; display: flex; justify-content: center; align-items: center; perspective: 800px; }
+        .cube { width: 70px; height: 70px; position: relative; transform-style: preserve-3d; transition: transform 1s cubic-bezier(0.17, 0.67, 0.83, 0.67); }
+        .side {
+            position: absolute; width: 70px; height: 70px; 
+            background: #fff; border-radius: 8px; border: 2px solid #ccc;
+            display: flex; justify-content: center; align-items: center; 
+            font-size: 24px; color: #000; font-weight: bold;
+        }
+        .s1 { transform: translateZ(35px); }
+        .s6 { transform: rotateY(180deg) translateZ(35px); }
+        .s2 { transform: rotateY(90deg) translateZ(35px); }
+        .s5 { transform: rotateY(-90deg) translateZ(35px); }
+        .s3 { transform: rotateX(90deg) translateZ(35px); }
+        .s4 { transform: rotateX(-90deg) translateZ(35px); }
+
+        /* PROFILE STATS */
+        .stat-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #333; font-size: 14px; }
+        .stat-row span:last-child { font-weight: 700; color: #fff; }
+    </style>
+</head>
+<body>
+
+    <!-- HEADER -->
+    <div class="header">
+        <div class="logo">WINLINE</div>
+        <div class="balance-chip">
+            <span style="color:var(--primary)">₽</span>
+            <span id="ui-bal">...</span>
+        </div>
+    </div>
+
+    <!-- 1. СПОРТ (ГЛАВНАЯ) -->
+    <div id="p-sport" class="page active">
+        <div class="cats-scroll">
+            <div class="cat-chip active" onclick="Sport.filter('football', this)">Футбол</div>
+            <div class="cat-chip" onclick="Sport.filter('hockey', this)">Хоккей</div>
+            <div class="cat-chip" onclick="Sport.filter('tennis', this)">Теннис</div>
+            <div class="cat-chip" onclick="Sport.filter('basketball', this)">Баскет</div>
+            <div class="cat-chip" onclick="Sport.filter('table_tennis', this)">Настольный</div>
+        </div>
+        <div id="sport-feed"></div>
+    </div>
+
+    <!-- 2. МОИ СТАВКИ -->
+    <div id="p-bets" class="page">
+        <div class="market-tabs" style="border-radius:8px; margin-bottom:15px; border:1px solid var(--border)">
+            <div class="mt active" onclick="Bets.render('active', this)">В игре</div>
+            <div class="mt" onclick="Bets.render('history', this)">Рассчитанные</div>
+        </div>
+        <div id="bets-container"></div>
+    </div>
+
+    <!-- 3. МИНИ ИГРЫ -->
+    <div id="p-games" class="page">
+        <h2 style="margin-top:0">Мини-игры</h2>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+            <div class="card" onclick="App.nav('crash')" style="text-align:center; height:120px; display:flex; flex-direction:column; justify-content:center;">
+                <i class="fas fa-plane" style="font-size:30px; color:var(--primary); margin-bottom:10px;"></i>
+                <b>CRASH</b>
+            </div>
+            <div class="card" onclick="App.nav('mines')" style="text-align:center; height:120px; display:flex; flex-direction:column; justify-content:center;">
+                <i class="fas fa-bomb" style="font-size:30px; color:var(--primary); margin-bottom:10px;"></i>
+                <b>MINES</b>
+            </div>
+            <div class="card" onclick="App.nav('dice')" style="text-align:center; height:120px; display:flex; flex-direction:column; justify-content:center;">
+                <i class="fas fa-dice" style="font-size:30px; color:var(--primary); margin-bottom:10px;"></i>
+                <b>DICE</b>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. ПРОФИЛЬ -->
+    <div id="p-profile" class="page">
+        <div class="card" style="text-align:center; padding:30px;">
+            <div style="font-size:40px; margin-bottom:10px;">😎</div>
+            <div style="color:var(--text-sub); font-size:12px;">ID пользователя</div>
+            <div style="font-size:24px; font-weight:900;" id="u-id">...</div>
+        </div>
+        
+        <div class="card">
+            <div class="stat-row">
+                <span>Баланс счета</span>
+                <span id="st-bal">0 ₽</span>
+            </div>
+            <div class="stat-row">
+                <span>Всего выиграно</span>
+                <span style="color:var(--green)" id="st-won">0 ₽</span>
+            </div>
+            <div class="stat-row" style="border:none">
+                <span>Всего проиграно</span>
+                <span style="color:var(--red)" id="st-lost">0 ₽</span>
+            </div>
+        </div>
+
+        <button class="btn btn-green" onclick="alert('В данный момент пополнение недоступно.\nВедутся технические работы.')">ПОПОЛНИТЬ СЧЕТ</button>
+        
+        <!-- Админка (скрытая) -->
+        <div style="margin-top:40px; text-align:center; opacity:0.3" onclick="App.adminTap()">
+            <small>v3.5.0 Release</small>
+        </div>
+        <div id="admin-panel" style="display:none; margin-top:20px; border:1px solid var(--red); padding:15px; border-radius:8px;">
+            <h4 style="margin:0 0 10px 0; color:var(--red)">Admin Panel</h4>
+            <input type="number" id="adm-sum" placeholder="Новая сумма">
+            <button class="btn btn-gray" onclick="App.setBalance()">Установить</button>
+        </div>
+    </div>
+
+    <!-- === GAME SCREENS === -->
+
+    <!-- CRASH -->
+    <div id="p-crash" class="page">
+        <div style="display:flex; align-items:center; margin-bottom:15px;" onclick="App.nav('games')">
+            <i class="fas fa-arrow-left"></i> <b style="margin-left:10px">CRASH</b>
+        </div>
+        <div class="crash-area">
+            <div class="crash-num" id="cr-val">1.00x</div>
+            <div class="plane" id="cr-plane">✈️</div>
+            <div class="graph-line"></div>
+        </div>
+        <div class="card">
+            <input type="number" id="cr-bet" value="100" placeholder="Ставка">
+            <button class="btn" id="cr-btn" onclick="Crash.start()">СТАРТ</button>
+        </div>
+    </div>
+
+    <!-- MINES -->
+    <div id="p-mines" class="page">
+        <div style="display:flex; align-items:center; margin-bottom:15px;" onclick="App.nav('games')">
+            <i class="fas fa-arrow-left"></i> <b style="margin-left:10px">MINES</b>
+        </div>
+        <div class="card" style="text-align:center;">
+            <div class="mines-grid" id="mn-grid"></div>
+            <div style="margin-top:20px; display:flex; gap:10px;">
+                <input type="number" id="mn-bet" value="100" style="flex:2">
+                <input type="number" id="mn-cnt" value="3" style="flex:1" placeholder="Мины">
+            </div>
+            <button class="btn btn-green" id="mn-btn" onclick="Mines.start()">ИГРАТЬ</button>
+            <button class="btn" id="mn-cash" style="display:none; background:var(--primary)" onclick="Mines.cash()">ЗАБРАТЬ</button>
+        </div>
+    </div>
+
+    <!-- DICE -->
+    <div id="p-dice" class="page">
+        <div style="display:flex; align-items:center; margin-bottom:15px;" onclick="App.nav('games')">
+            <i class="fas fa-arrow-left"></i> <b style="margin-left:10px">DICE</b>
+        </div>
+        <div class="dice-scene">
+            <div class="cube" id="cube">
+                <div class="side s1">1</div><div class="side s2">2</div>
+                <div class="side s3">3</div><div class="side s4">4</div>
+                <div class="side s5">5</div><div class="side s6">6</div>
+            </div>
+        </div>
+        <div class="card">
+            <input type="number" id="di-bet" value="100" placeholder="Ставка">
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;">
+                <button class="btn btn-gray" onclick="Dice.roll('odd')">НЕЧЕТ (x1.9)</button>
+                <button class="btn btn-gray" onclick="Dice.roll('even')">ЧЕТ (x1.9)</button>
+                <button class="btn btn-gray" onclick="Dice.roll('under')">< 3 (x2.1)</button>
+                <button class="btn btn-gray" onclick="Dice.roll('over')">> 3 (x2.1)</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MATCH DETAIL OVERLAY -->
+    <div id="detail-view">
+        <div class="dv-header">
+            <i class="fas fa-arrow-left" style="font-size:20px;" onclick="Sport.close()"></i>
+            <span style="margin-left:15px; font-weight:700;">Матч</span>
+        </div>
+        <div class="dv-hero">
+            <div class="dv-time" id="dv-status">LIVE</div>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px;">
+                <div style="width:40%; font-weight:700;" id="dv-t1">Team A</div>
+                <div class="dv-score" id="dv-score">0:0</div>
+                <div style="width:40%; font-weight:700;" id="dv-t2">Team B</div>
+            </div>
+        </div>
+        <div class="market-tabs">
+            <div class="mt active">Основные</div>
+            <div class="mt">Тоталы</div>
+            <div class="mt">Форы</div>
+        </div>
+        <div class="market-sec">
+            <div class="ms-title">Исход матча (Основное время)</div>
+            <div class="coef-row" id="dv-1x2"></div>
+        </div>
+        <div class="market-sec">
+            <div class="ms-title">Тотал голов</div>
+            <div class="coef-row" id="dv-total"></div>
+        </div>
+    </div>
+
+    <!-- NAV BAR -->
+    <div class="nav">
+        <div class="nav-item active" onclick="App.nav('sport', this)"><i class="fas fa-futbol"></i>Спорт</div>
+        <div class="nav-item" onclick="App.nav('bets', this)"><i class="fas fa-ticket-alt"></i>Мои пари</div>
+        <div class="nav-item" onclick="App.nav('games', this)"><i class="fas fa-gamepad"></i>Игры</div>
+        <div class="nav-item" onclick="App.nav('profile', this)"><i class="fas fa-user"></i>Профиль</div>
+    </div>
+
+    <script>
+        // ===================================
+        // ⚙️ CONFIG & CORE
+        // ===================================
+        const tg = window.Telegram.WebApp;
+        
+        // !!! ССЫЛКУ С RENDER ВСТАВИТЬ СЮДА (БЕЗ / В КОНЦЕ) !!!
+        const API_URL = "https://backend-4jag.onrender.com"; 
+
+        let state = { user: {}, matches: [], history: [], active: [] };
+        let activeCat = 'football';
+
+        const App = {
+            uid: tg.initDataUnsafe?.user?.id || 12345,
+            adminCount: 0,
+
+            init: async function() {
+                tg.expand();
+                document.getElementById('u-id').innerText = this.uid;
+                this.poll();
+                setInterval(() => this.poll(), 3000); // Синхронизация каждые 3 сек
+            },
+
+            poll: async function() {
+                try {
+                    let r = await fetch(`${API_URL}/api/init/${this.uid}`);
+                    let d = await r.json();
+                    
+                    state.user = d.user;
+                    state.matches = d.matches;
+                    state.history = d.history;
+                    state.active = d.active_bets;
+
+                    this.renderHeader();
+                    if(document.getElementById('p-profile').style.display === 'block') this.renderProfile();
+                    if(document.getElementById('p-sport').style.display === 'block') Sport.render();
+                    if(document.getElementById('p-bets').style.display === 'block') Bets.render(Bets.curTab);
+                    if(Sport.activeMatch) Sport.updateDetail(Sport.activeMatch);
+
+                } catch(e) { console.log('Sync err'); }
+            },
+
+            renderHeader: function() {
+                document.getElementById('ui-bal').innerText = Math.floor(state.user.balance).toLocaleString();
+            },
+
+            renderProfile: function() {
+                document.getElementById('st-bal').innerText = Math.floor(state.user.balance).toLocaleString() + ' ₽';
+                document.getElementById('st-won').innerText = Math.floor(state.user.total_won).toLocaleString() + ' ₽';
+                document.getElementById('st-lost').innerText = Math.floor(state.user.total_lost).toLocaleString() + ' ₽';
+            },
+
+            nav: function(p, el) {
+                document.querySelectorAll('.page').forEach(x => x.classList.remove('active'));
+                document.getElementById('p-'+p).classList.add('active');
+                if(el) {
+                    document.querySelectorAll('.nav-item').forEach(x => x.classList.remove('active'));
+                    el.classList.add('active');
+                }
+                if(p === 'bets') Bets.render('active');
+            },
+
+            bet: async function(url, body) {
+                // Визуальное списание
+                state.user.balance -= body.bet || body.amount;
+                this.renderHeader();
+
+                let res = await fetch(`${API_URL}/api/${url}`, {
+                    method:'POST', headers:{'Content-Type':'application/json'},
+                    body: JSON.stringify({user_id: this.uid, ...body})
+                });
+                let d = await res.json();
+                if(d.status === 'ok') state.user.balance = d.new_balance;
+            },
+
+            adminTap: function() {
+                if(++this.adminCount === 5) document.getElementById('admin-panel').style.display = 'block';
+            },
+            setBalance: async function() {
+                let v = document.getElementById('adm-sum').value;
+                await fetch(`${API_URL}/api/admin/set`, {
+                    method:'POST', headers:{'Content-Type':'application/json'},
+                    body:JSON.stringify({user_id:this.uid, amount:v})
+                });
+                alert("Баланс изменен");
+            }
+        };
+
+        // ===================================
+        // ⚽ SPORT LOGIC
+        // ===================================
+        const Sport = {
+            activeMatch: null,
+            filter: function(c, el) {
+                activeCat = c;
+                document.querySelectorAll('.cat-chip').forEach(x=>x.classList.remove('active'));
+                el.classList.add('active');
+                this.render();
+            },
+            render: function() {
+                let list = state.matches.filter(m => m.sport === activeCat).sort((a,b) => {
+                    if(a.isLive !== b.isLive) return a.isLive ? -1 : 1;
+                    return a.timestamp - b.timestamp;
+                });
+
+                document.getElementById('sport-feed').innerHTML = list.map(m => {
+                    let timeStr = "";
+                    if(m.isLive) {
+                        if(m.sport === 'tennis' || m.sport === 'table_tennis') timeStr = `Сет ${m.sets.length}`;
+                        else timeStr = `${Math.floor(m.time)}' мин`;
+                    } else {
+                        let d = new Date(m.startTime);
+                        timeStr = `${d.getHours()}:${(d.getMinutes()<10?'0':'')+d.getMinutes()}`;
+                    }
+
+                    let badge = m.isLive ? 
+                        `<div class="live-tag"><div class="live-dot"></div> LIVE • ${timeStr}</div>` : 
+                        `<div style="color:var(--text-sub)">${timeStr}</div>`;
+
+                    return `
+                    <div class="card match-card" onclick="Sport.open(${m.id})">
+                        <div class="match-top">${badge} <span>${m.sport}</span></div>
+                        <div class="teams-box">
+                            <div style="width:40%">${m.t1}</div>
+                            <div class="score-box">${m.s1} : ${m.s2}</div>
+                            <div style="width:40%;text-align:right">${m.t2}</div>
+                        </div>
+                        <div class="coef-row" onclick="event.stopPropagation()">
+                            <div class="cf" onclick="Sport.bet(${m.id}, 'p1', ${m.k.p1}, '${m.t1}')">П1 <b>${m.k.p1}</b></div>
+                            <div class="cf" onclick="Sport.bet(${m.id}, 'x', ${m.k.x}, 'X')">X <b>${m.k.x}</b></div>
+                            <div class="cf" onclick="Sport.bet(${m.id}, 'p2', ${m.k.p2}, '${m.t2}')">П2 <b>${m.k.p2}</b></div>
+                        </div>
+                    </div>`;
+                }).join('');
+            },
+            bet: function(mid, ch, k, name) {
+                let s = prompt(`Ставка на ${name} (x${k})`);
+                if(s && !isNaN(s) && s > 0) {
+                    App.bet('bet/sport', {match_id: mid, choice: ch, amount: s, coeff: k, match_name: name});
+                    alert("✅ Ставка принята!");
+                }
+            },
+            open: function(id) {
+                this.activeMatch = id;
+                document.getElementById('detail-view').style.display = 'flex';
+                this.updateDetail(id);
+            },
+            close: function() {
+                document.getElementById('detail-view').style.display = 'none';
+                this.activeMatch = null;
+            },
+            updateDetail: function(id) {
+                let m = state.matches.find(x => x.id === id);
+                if(!m) return;
+                
+                document.getElementById('dv-t1').innerText = m.t1;
+                document.getElementById('dv-t2').innerText = m.t2;
+                document.getElementById('dv-score').innerText = `${m.s1}:${m.s2}`;
+                document.getElementById('dv-status').innerText = m.isLive ? `LIVE • ${m.time}'` : 'Скоро';
+                if(m.sport.includes('tennis') && m.isLive) document.getElementById('dv-status').innerText = `LIVE • Сет ${m.sets.length}`;
+
+                // Рынки
+                document.getElementById('dv-1x2').innerHTML = `
+                    <div class="cf" onclick="Sport.bet(${m.id}, 'p1', ${m.k.p1}, '${m.t1}')">П1 <b>${m.k.p1}</b></div>
+                    <div class="cf" onclick="Sport.bet(${m.id}, 'x', ${m.k.x}, 'Ничья')">X <b>${m.k.x}</b></div>
+                    <div class="cf" onclick="Sport.bet(${m.id}, 'p2', ${m.k.p2}, '${m.t2}')">П2 <b>${m.k.p2}</b></div>
+                `;
+                // Тоталы (заглушка значений, но кнопки рабочие)
+                let tm = m.total_val || 2.5;
+                document.getElementById('dv-total').innerHTML = `
+                    <div class="cf" onclick="Sport.bet(${m.id}, 'tm', 1.85, 'ТМ ${tm}')">ТМ ${tm} <b>1.85</b></div>
+                    <div class="cf" onclick="Sport.bet(${m.id}, 'tb', 1.85, 'ТБ ${tm}')">ТБ ${tm} <b>1.85</b></div>
+                `;
+            }
+        };
+
+        // ===================================
+        // 🧾 BETS HISTORY
+        // ===================================
+        const Bets = {
+            curTab: 'active',
+            render: function(tab, el) {
+                if(tab) {
+                    this.curTab = tab;
+                    document.querySelectorAll('.mt').forEach(x => x.classList.remove('active'));
+                    if(el) el.classList.add('active');
+                    // Для табов внутри секции "Мои пари" есть дубликат классов .mt, но это не страшно
+                }
+                
+                const c = document.getElementById('bets-container');
+                c.innerHTML = '';
+                
+                let data = (this.curTab === 'active') ? state.active : state.history;
+                
+                if(!data || data.length === 0) {
+                    c.innerHTML = '<div style="text-align:center; color:#555; margin-top:20px;">Ставок нет</div>';
+                    return;
+                }
+
+                data.forEach(b => {
+                    // Logic for Active vs History
+                    if(this.curTab === 'active') {
+                        c.innerHTML += `
+                        <div class="bet-card bet-wait">
+                            <div class="bc-top"><span>${b.game}</span> <span>${b.bet} ₽</span></div>
+                            <div class="bc-info">Исход: ${b.choice} • Кэф: x${b.coeff}</div>
+                            <div class="bc-res"><span>Статус</span> <span style="color:var(--primary)">В игре...</span></div>
+                        </div>`;
+                    } else {
+                        // History
+                        let isWin = b.win > 0;
+                        let winSum = b.win;
+                        let lostSum = b.bet;
+                        c.innerHTML += `
+                        <div class="bet-card ${isWin?'bet-win':'bet-lose'}">
+                            <div class="bc-top"><span>${b.game}</span> <span>${b.bet} ₽</span></div>
+                            <div class="bc-info">${b.details || 'Игра'} • Кэф x${b.coeff}</div>
+                            <div class="bc-res">
+                                <span>Результат</span> 
+                                <span class="${isWin?'win-sum':'lose-sum'}">
+                                    ${isWin ? '+'+(winSum-lostSum).toFixed(0) : '-'+lostSum} ₽
+                                </span>
+                            </div>
+                        </div>`;
+                    }
+                });
+            }
+        };
+
+        // ===================================
+        // 🎮 GAMES
+        // ===================================
+        const Crash = {
+            on: false, m: 1,
+            start: function() {
+                if(this.on) return this.cash();
+                let b = +document.getElementById('cr-bet').value;
+                if(b > state.user.balance) return alert("Мало денег");
+                
+                this.on = true; this.bet = b; this.m = 1;
+                document.getElementById('cr-btn').innerText = "ЗАБРАТЬ";
+                document.getElementById('cr-btn').classList.replace('btn','btn-green');
+                
+                // Demo logic (Visual)
+                let crashPoint = 1 + Math.random()*4; 
+                let tm = setInterval(() => {
+                    this.m += 0.01 + (this.m*0.005);
+                    document.getElementById('cr-val').innerText = this.m.toFixed(2)+'x';
+                    let pos = Math.min(this.m*10, 180);
+                    document.getElementById('cr-plane').style.bottom = pos+'px';
+                    document.getElementById('cr-plane').style.left = pos+'px';
+                    
+                    if(this.m >= crashPoint) {
+                        clearInterval(tm); this.end(0);
+                    }
+                }, 50);
+                this.tm = tm;
+            },
+            cash: function() {
+                clearInterval(this.tm);
+                this.end(Math.floor(this.bet * this.m));
+            },
+            end: function(win) {
+                this.on = false;
+                document.getElementById('cr-btn').innerText = "СТАРТ";
+                document.getElementById('cr-btn').className = "btn"; // reset color
+                document.getElementById('cr-plane').style.bottom = '10px';
+                document.getElementById('cr-plane').style.left = '10px';
+                
+                if(win===0) {
+                    document.getElementById('cr-val').style.color = 'red';
+                    setTimeout(()=>document.getElementById('cr-val').style.color='white', 1000);
+                } else {
+                    document.getElementById('cr-val').style.color = '#34c759';
+                    setTimeout(()=>document.getElementById('cr-val').style.color='white', 1000);
+                }
+                
+                App.bet('bet/game', {game:'Crash', bet:this.bet, win:win, coeff:this.m.toFixed(2)});
+            }
+        };
+
+        const Mines = {
+            act: false, grid: [],
+            start: function() {
+                let b = +document.getElementById('mn-bet').value;
+                if(b > state.user.balance) return alert("Мало денег");
+                
+                this.bet = b; this.act = true; this.mult = 1;
+                this.grid = Array(25).fill(0);
+                let cnt = +document.getElementById('mn-cnt').value;
+                let c=0; while(c<cnt){let r=Math.floor(Math.random()*25); if(!this.grid[r]){this.grid[r]=1;c++}}
+                
+                App.bet('bet/game', {game:'Mines Start', bet:b, win:0, coeff:0}); // Списание старта
+                
+                document.getElementById('mn-btn').style.display='none';
+                document.getElementById('mn-cash').style.display='block';
+                let f = document.getElementById('mn-grid'); f.innerHTML='';
+                for(let i=0; i<25; i++) {
+                    let d=document.createElement('div'); d.className='m-cell'; 
+                    d.onclick=()=>this.click(i,d); f.appendChild(d);
+                }
+            },
+            click: function(i, el) {
+                if(!this.act || el.classList.contains('gem')) return;
+                if(this.grid[i]) {
+                    el.classList.add('boom'); el.innerText='💣';
+                    this.end(0);
+                } else {
+                    el.classList.add('gem'); el.innerText='💎';
+                    this.mult *= 1.18;
+                }
+            },
+            cash: function(){ this.end(Math.floor(this.bet * this.mult)); },
+            end: function(win) {
+                this.act = false;
+                document.getElementById('mn-btn').style.display='block';
+                document.getElementById('mn-cash').style.display='none';
+                if(win > 0) App.bet('bet/game', {game:'Mines', bet:0, win:win, coeff:this.mult.toFixed(2)}); // До начисление
+                else {
+                    this.grid.forEach((v,k)=>{ if(v) document.getElementById('mn-grid').children[k].innerText='💣'; });
+                }
+            }
+        };
+
+        const Dice = {
+            roll: function(type) {
+                let b = +document.getElementById('di-bet').value;
+                if(b > state.user.balance) return alert('Мало денег');
+                
+                let r = Math.floor(Math.random()*6)+1;
+                let k = (type=='under'||type=='over') ? 2.1 : 1.9;
+                
+                let c = document.getElementById('cube');
+                // Простая анимация CSS
+                c.style.transform = `rotateX(${r*360}deg) rotateY(${r*360}deg)`;
+                
+                setTimeout(()=>{
+                    let win = false;
+                    if(type=='odd' && r%2!=0) win=true;
+                    if(type=='even' && r%2==0) win=true;
+                    if(type=='under' && r<3) win=true;
+                    if(type=='over' && r>3) win=true;
+                    
+                    let w = win ? Math.floor(b*k) : 0;
+                    App.bet('bet/game', {game:'Dice', bet:b, win:w, coeff:k});
+                    
+                    if(win) alert(`Победа! +${w}`);
+                    else alert(`Выпало ${r}. Проигрыш.`);
+                }, 1000);
+            }
+        };
+
+        window.onload = () => App.init();
+    </script>
+</body>
+</html>
