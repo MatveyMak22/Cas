@@ -3,23 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Betting Mini App</title>
+    <title>Casino Pro</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
+        /* --- PREMIUM DARK THEME --- */
         :root {
-            --bg-body: #090c10;
+            --bg-body: #0d1117;
             --bg-card: #161b22;
-            --bg-nav: #0d1117;
+            --bg-nav: #010409;
             --accent: #238636;
-            --accent-gradient: linear-gradient(135deg, #2ea043, #238636);
-            --danger: #da3633;
+            --accent-glow: rgba(46, 160, 67, 0.4);
             --text-main: #f0f6fc;
             --text-muted: #8b949e;
+            --danger: #da3633;
             --border: #30363d;
-            
-            --g-mines: linear-gradient(135deg, #f85149, #da3633);
-            --g-dice: linear-gradient(135deg, #a371f7, #8957e5);
+            --gradient-sport: linear-gradient(135deg, #1f6feb, #238636);
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; user-select: none; }
@@ -37,35 +36,34 @@
 
         /* --- HEADER --- */
         header {
-            padding: 10px 15px;
-            background: rgba(13, 17, 23, 0.95);
+            padding: 12px 16px;
+            background: rgba(22, 27, 34, 0.95);
             backdrop-filter: blur(10px);
             border-bottom: 1px solid var(--border);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            height: 60px;
             z-index: 100;
         }
-        .bal-wrap { display: flex; flex-direction: column; }
-        .bal-label { font-size: 10px; color: var(--text-muted); font-weight: 700; letter-spacing: 0.5px; }
-        .bal-val { font-size: 18px; font-weight: 800; color: #fff; text-shadow: 0 0 15px rgba(46, 160, 67, 0.3); }
-        .btn-add { 
+        .balance-box { display: flex; flex-direction: column; }
+        .balance-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+        .balance-val { font-size: 18px; font-weight: 800; color: #fff; text-shadow: 0 0 15px rgba(46, 160, 67, 0.4); }
+        .btn-topup { 
             background: #1f6feb; color: white; border: none; 
-            padding: 8px 14px; border-radius: 10px; font-size: 12px; font-weight: bold;
-            box-shadow: 0 0 10px rgba(31, 111, 235, 0.3);
+            padding: 8px 16px; border-radius: 12px; font-size: 13px; font-weight: 600;
+            box-shadow: 0 4px 12px rgba(31, 111, 235, 0.2);
         }
 
-        /* --- MAIN SCROLL --- */
-        main { flex: 1; overflow-y: auto; padding: 15px; padding-bottom: 90px; }
-        .page { display: none; animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+        /* --- MAIN CONTENT --- */
+        main { flex: 1; overflow-y: auto; padding: 16px; padding-bottom: 90px; }
+        .page { display: none; animation: fadeIn 0.3s ease-out; }
         .page.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* --- GAMES MENU --- */
-        .games-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        /* --- MENU GRID --- */
+        .games-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         .g-card {
-            height: 120px;
+            height: 130px;
             border-radius: 16px;
             position: relative;
             overflow: hidden;
@@ -76,243 +74,222 @@
             display: flex;
             flex-direction: column;
             justify-content: flex-end;
+            transition: transform 0.1s;
         }
-        .g-card:active { transform: scale(0.98); opacity: 0.8; }
-        .g-card.wide { grid-column: span 2; height: 100px; background: linear-gradient(135deg, #1f6feb, #0d4a9e); }
-        .g-card.mines { background: var(--g-mines); }
-        .g-card.dice { background: var(--g-dice); }
-        
-        .g-icon { position: absolute; top: 10px; right: 10px; font-size: 50px; opacity: 0.2; transform: rotate(-10deg); color: #fff; }
-        .g-title { font-size: 16px; font-weight: 800; color: #fff; z-index: 2; margin: 0; }
-        .g-sub { font-size: 11px; color: rgba(255,255,255,0.8); z-index: 2; }
+        .g-card:active { transform: scale(0.97); }
+        .g-card.wide { grid-column: span 2; height: 110px; background: var(--gradient-sport); }
+        .g-icon { position: absolute; top: 10px; right: 10px; font-size: 55px; opacity: 0.15; transform: rotate(-10deg); color: #fff; }
+        .g-title { font-size: 17px; font-weight: 800; color: #fff; z-index: 2; margin: 0; }
+        .g-sub { font-size: 11px; color: rgba(255,255,255,0.8); z-index: 2; margin-top: 2px; }
 
-        /* --- SPORT SECTION --- */
-        .sport-cats {
+        /* --- SPORT FEED --- */
+        .sport-tabs {
             display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 5px;
             scrollbar-width: none;
         }
-        .cat-btn {
+        .tab-btn {
             background: var(--bg-card); border: 1px solid var(--border); color: var(--text-muted);
-            padding: 8px 14px; border-radius: 20px; font-size: 12px; white-space: nowrap; transition: 0.2s;
+            padding: 8px 16px; border-radius: 20px; font-size: 13px; white-space: nowrap; transition: 0.2s;
         }
-        .cat-btn.active { background: #fff; color: #000; border-color: #fff; font-weight: 700; }
-        .cat-btn i { margin-right: 5px; }
+        .tab-btn.active { background: #fff; color: #000; border-color: #fff; font-weight: 700; }
+        .tab-btn i { margin-right: 6px; }
 
         .match-card {
-            background: var(--bg-card); border-radius: 14px; padding: 12px; margin-bottom: 10px;
-            border: 1px solid var(--border); cursor: pointer; transition: 0.2s;
+            background: var(--bg-card); border-radius: 16px; padding: 14px; margin-bottom: 12px;
+            border: 1px solid var(--border); cursor: pointer; position: relative; overflow: hidden;
         }
         .match-card:active { background: #1c2128; }
-        .match-header { display: flex; justify-content: space-between; font-size: 10px; color: var(--text-muted); margin-bottom: 8px; }
+        .match-header { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted); margin-bottom: 10px; }
         
-        .live-badge { color: #f85149; font-weight: bold; display: flex; align-items: center; gap: 4px; }
+        .live-badge { color: #f85149; font-weight: bold; display: flex; align-items: center; gap: 5px; }
         .live-dot { width: 6px; height: 6px; background: #f85149; border-radius: 50%; animation: blink 1s infinite; }
         @keyframes blink { 50% { opacity: 0.3; } }
-        
-        .upcoming-badge { color: var(--text-muted); display: flex; align-items: center; gap: 4px; }
 
-        .teams-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-        .team-name { font-size: 13px; font-weight: 600; width: 40%; line-height: 1.2; }
-        .match-score { font-size: 18px; font-weight: 800; color: #fff; letter-spacing: 1px; width: 20%; text-align: center;}
+        .teams-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+        .team-name { font-size: 14px; font-weight: 600; width: 40%; line-height: 1.2; }
+        .match-score { font-size: 20px; font-weight: 800; color: #fff; letter-spacing: 2px; width: 20%; text-align: center;}
         
-        .cf-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+        .cf-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
         .cf-btn { 
-            background: #21262d; border-radius: 8px; padding: 8px 4px; 
-            text-align: center; font-size: 11px; color: var(--text-muted); cursor: pointer;
-            border: 1px solid transparent; z-index: 2;
+            background: #21262d; border-radius: 8px; padding: 10px 4px; 
+            text-align: center; font-size: 11px; color: var(--text-muted); 
+            border: 1px solid rgba(255,255,255,0.05); z-index: 2;
         }
-        .cf-btn:active { background: rgba(255,255,255,0.05); }
-        .cf-btn b { display: block; color: var(--accent); font-size: 13px; margin-top: 2px; }
+        .cf-btn:active { background: rgba(255,255,255,0.1); }
+        .cf-btn b { display: block; color: var(--accent); font-size: 14px; margin-top: 2px; }
 
-        /* --- MATCH DETAIL OVERLAY --- */
-        #p-match-detail { padding: 0; height: 100%; display: none; }
-        #p-match-detail.active { display: flex; flex-direction: column; }
+        /* --- MATCH DETAIL --- */
+        #p-match-detail { padding: 0; height: 100%; display: none; flex-direction: column; }
+        #p-match-detail.active { display: flex; }
         
-        .match-hero {
-            background: linear-gradient(to bottom, #1f6feb, #090c10);
-            padding: 20px; text-align: center;
-            border-bottom: 1px solid var(--border);
+        .hero-section {
+            background: radial-gradient(circle at center, #1f2530 0%, #0d1117 100%);
+            padding: 20px; text-align: center; border-bottom: 1px solid var(--border);
         }
-        .hero-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .back-btn { background: rgba(0,0,0,0.3); border: none; color: white; padding: 8px 12px; border-radius: 8px; font-size: 14px; cursor: pointer; }
+        .nav-back { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .back-icon { font-size: 18px; padding: 10px; cursor: pointer; }
         
-        .scoreboard { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .sb-team { width: 35%; display: flex; flex-direction: column; align-items: center; gap: 10px; }
-        .team-logo { 
-            width: 60px; height: 60px; border-radius: 12px; 
-            display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold; color: white;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        .scoreboard { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .sb-team { width: 35%; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+        .team-avatar { 
+            width: 64px; height: 64px; border-radius: 14px; 
+            display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: 800; color: white;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         }
-        .sb-score { font-size: 36px; font-weight: 900; color: white; text-shadow: 0 0 20px rgba(255,255,255,0.3); }
-        .sb-meta { color: rgba(255,255,255,0.7); font-size: 12px; margin-top: 5px; }
+        .sb-main-score { font-size: 40px; font-weight: 900; color: white; text-shadow: 0 0 30px rgba(255,255,255,0.1); }
+        
+        .tennis-table { width: 100%; border-collapse: separate; border-spacing: 2px; margin-top: 20px; font-size: 12px; }
+        .tennis-table th { color: var(--text-muted); padding: 4px; font-weight: 400; }
+        .tennis-table td { background: rgba(255,255,255,0.03); padding: 8px; text-align: center; color: white; border-radius: 4px; }
+        .tennis-table .set-active { background: rgba(35, 134, 54, 0.2); border: 1px solid var(--accent); }
 
-        /* Tennis Specific Table */
-        .tennis-sets {
-            width: 100%; border-collapse: separate; border-spacing: 2px; margin-top: 15px;
+        /* --- INPUTS & CONTROLS --- */
+        .control-box { background: var(--bg-card); padding: 16px; border-radius: 16px; border: 1px solid var(--border); }
+        input { 
+            width: 100%; background: #010409; border: 1px solid var(--border);
+            padding: 14px; border-radius: 12px; color: white; font-size: 16px; margin-bottom: 12px;
         }
-        .tennis-sets th { font-size: 10px; color: rgba(255,255,255,0.6); padding: 5px; text-align: center; }
-        .tennis-sets td { background: rgba(255,255,255,0.05); padding: 10px; text-align: center; color: white; font-weight: bold; border-radius: 4px; }
-        .tennis-sets .team-label { text-align: left; padding-left: 10px; display: flex; align-items: center; gap: 8px; width: 40%; font-size: 12px; }
-        .tennis-sets .current-set { background: rgba(31, 111, 235, 0.2); border: 1px solid #1f6feb; }
-        .tennis-logo-mini { width: 20px; height: 20px; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; font-size: 10px; margin-right: 5px; }
-
-        .bet-sheet { padding: 20px; background: var(--bg-body); flex: 1; }
-
-        /* --- UI CONTROLS --- */
-        .control-panel { background: var(--bg-card); padding: 15px; border-radius: 16px; border: 1px solid var(--border); }
-        input[type="number"], input[type="text"], input[type="range"] {
-            width: 100%; background: #090c10; border: 1px solid var(--border);
-            padding: 12px; border-radius: 10px; color: white; font-size: 16px; margin-bottom: 10px;
-        }
-        .btn-main {
-            width: 100%; padding: 14px; border-radius: 12px; font-size: 16px; font-weight: 700; border: none;
-            background: var(--accent-gradient); color: white; box-shadow: 0 5px 15px rgba(35, 134, 54, 0.4);
+        .btn-action {
+            width: 100%; padding: 16px; border-radius: 12px; font-size: 16px; font-weight: 700; border: none;
+            background: var(--accent); color: white; box-shadow: 0 4px 15px var(--accent-glow);
             cursor: pointer;
         }
-        .btn-main:active { transform: scale(0.98); }
+        .btn-action:active { transform: scale(0.98); }
 
-        /* --- DICE 3D --- */
-        .dice-stage { height: 200px; display: flex; align-items: center; justify-content: center; perspective: 800px; }
-        .cube { width: 80px; height: 80px; position: relative; transform-style: preserve-3d; transition: transform 1.5s cubic-bezier(0.19, 1, 0.22, 1); }
-        .face { 
-            position: absolute; width: 80px; height: 80px; border: 2px solid #a371f7;
-            background: radial-gradient(circle, rgba(163,113,247,0.2) 0%, #161b22 100%);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 30px; font-weight: bold; color: #fff; border-radius: 8px;
-        }
-        .f1 { transform: rotateY(0deg) translateZ(40px); } .f6 { transform: rotateY(180deg) translateZ(40px); }
-        .f2 { transform: rotateY(90deg) translateZ(40px); } .f5 { transform: rotateY(-90deg) translateZ(40px); }
-        .f4 { transform: rotateX(90deg) translateZ(40px); } .f3 { transform: rotateX(-90deg) translateZ(40px); }
-
-        /* --- MINES --- */
-        .mines-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-bottom: 15px; }
-        .cell {
-            aspect-ratio: 1; background: #21262d; border-radius: 6px; cursor: pointer;
-            display: flex; align-items: center; justify-content: center; font-size: 16px;
-            border: 1px solid rgba(255,255,255,0.05); transition: 0.1s;
-        }
-        .cell.active { background: #30363d; }
-        .cell.gem { background: rgba(46,160,67,0.2); border-color: #2ea043; color: #2ea043; }
-        .cell.bomb { background: rgba(218,54,51,0.2); border-color: var(--danger); color: var(--danger); }
-
-        /* --- REFERRAL CARD --- */
-        .ref-card {
-            background: linear-gradient(135deg, #1c2128, #161b22);
-            border: 1px solid var(--border);
-            border-radius: 16px; padding: 20px; text-align: center;
-            margin-top: 15px;
-        }
-        .ref-stat { display: flex; justify-content: space-around; margin: 15px 0; }
-        .rs-box { font-size: 12px; color: var(--text-muted); }
-        .rs-box b { display: block; font-size: 16px; color: #fff; margin-top: 4px; }
-
-        /* --- NAV --- */
+        /* --- BOTTOM NAV --- */
         nav {
-            position: fixed; bottom: 0; width: 100%; height: 75px;
-            background: var(--bg-nav); border-top: 1px solid var(--border);
+            position: fixed; bottom: 0; width: 100%; height: 80px;
+            background: #0d1117; border-top: 1px solid var(--border);
             display: flex; justify-content: space-around; align-items: center;
-            padding-bottom: 10px; z-index: 99;
+            padding-bottom: 15px; z-index: 99;
         }
         .nav-item {
-            display: flex; flex-direction: column; align-items: center; gap: 4px;
-            color: var(--text-muted); font-size: 10px; width: 20%;
+            display: flex; flex-direction: column; align-items: center; gap: 5px;
+            color: var(--text-muted); font-size: 10px; width: 20%; cursor: pointer;
         }
-        .nav-item i { font-size: 20px; transition: 0.2s; }
-        .nav-item.active { color: var(--text-main); }
-        .nav-item.active i { color: #2ea043; transform: translateY(-3px); }
+        .nav-item i { font-size: 22px; transition: 0.2s; }
+        .nav-item.active { color: #f0f6fc; }
+        .nav-item.active i { color: var(--accent); transform: translateY(-4px); }
+
+        /* --- OTHER GAMES --- */
+        .mines-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 15px; }
+        .cell { 
+            aspect-ratio: 1; background: #21262d; border-radius: 8px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; font-size: 18px;
+            border: 1px solid rgba(255,255,255,0.05); transition: 0.1s;
+        }
+        .cell.gem { background: rgba(35, 134, 54, 0.2); border-color: var(--accent); color: var(--accent); }
+        .cell.bomb { background: rgba(218, 54, 51, 0.2); border-color: var(--danger); color: var(--danger); }
+
+        .dice-area { height: 220px; display: flex; align-items: center; justify-content: center; perspective: 1000px; }
+        .cube { width: 90px; height: 90px; position: relative; transform-style: preserve-3d; transition: transform 1.5s cubic-bezier(0.18, 0.89, 0.32, 1.28); }
+        .face { 
+            position: absolute; width: 90px; height: 90px; border: 2px solid var(--accent);
+            background: radial-gradient(circle, rgba(35,134,54,0.2) 0%, #0d1117 100%);
+            display: flex; align-items: center; justify-content: center; font-size: 36px; font-weight: bold; color: #fff; border-radius: 12px;
+        }
+        .f1 { transform: rotateY(0deg) translateZ(45px); } .f6 { transform: rotateY(180deg) translateZ(45px); }
+        .f2 { transform: rotateY(90deg) translateZ(45px); } .f5 { transform: rotateY(-90deg) translateZ(45px); }
+        .f4 { transform: rotateX(90deg) translateZ(45px); } .f3 { transform: rotateX(-90deg) translateZ(45px); }
+
+        .ref-card { background: linear-gradient(135deg, #1c2128, #161b22); border: 1px solid var(--border); border-radius: 16px; padding: 20px; text-align: center; margin-top: 15px; }
     </style>
 </head>
 <body>
 
     <header id="main-header">
-        <div class="bal-wrap">
-            <span class="bal-label">БАЛАНС</span>
-            <span class="bal-val" id="ui-balance">Загрузка...</span>
+        <div class="balance-box">
+            <span class="balance-label">Ваш баланс</span>
+            <span class="balance-val" id="ui-balance">Загрузка...</span>
         </div>
-        <button class="btn-add" onclick="App.deposit()">Пополнить</button>
+        <button class="btn-topup" onclick="App.deposit()"><i class="fas fa-wallet"></i></button>
     </header>
 
     <main>
-        <!-- MATCH DETAIL VIEW (OVERLAY) -->
+        <!-- MATCH DETAIL VIEW -->
         <section id="p-match-detail">
-            <div class="match-hero">
-                <div class="hero-top">
-                    <button class="back-btn" onclick="App.nav('sport')"><i class="fas fa-chevron-left"></i> Назад</button>
-                    <span id="md-league" style="font-size: 12px; color: rgba(255,255,255,0.7); text-transform: uppercase;">LEAGUE</span>
-                    <div style="width: 60px;"></div>
+            <div class="hero-section">
+                <div class="nav-back">
+                    <i class="fas fa-arrow-left back-icon" onclick="App.nav('sport')"></i>
+                    <span id="md-league" style="font-size:12px; letter-spacing:1px; color:#8b949e;">LEAGUE</span>
+                    <div style="width:20px;"></div>
                 </div>
                 
-                <!-- Scoreboard -->
                 <div class="scoreboard">
                     <div class="sb-team">
-                        <div class="team-logo" id="md-logo1" style="background:#ff9800;">H</div>
-                        <span id="md-name1" style="font-weight:bold; font-size:14px; margin-top:5px;">Home</span>
+                        <div class="team-avatar" id="md-logo1" style="background:#238636;">H</div>
+                        <span id="md-name1" style="font-size:13px; font-weight:600; line-height:1.2;">Home</span>
                     </div>
                     <div>
-                        <div class="sb-score" id="md-score">0 : 0</div>
-                        <div class="sb-meta" id="md-time">LIVE</div>
+                        <div class="sb-main-score" id="md-score">0:0</div>
+                        <div id="md-time" style="font-size:12px; color:#f85149; font-weight:bold; margin-top:5px;">LIVE</div>
                     </div>
                     <div class="sb-team">
-                        <div class="team-logo" id="md-logo2" style="background:#2196f3;">A</div>
-                        <span id="md-name2" style="font-weight:bold; font-size:14px; margin-top:5px;">Away</span>
+                        <div class="team-avatar" id="md-logo2" style="background:#1f6feb;">A</div>
+                        <span id="md-name2" style="font-size:13px; font-weight:600; line-height:1.2;">Away</span>
                     </div>
                 </div>
 
-                <!-- Tennis Table Container -->
                 <div id="md-tennis-stats" style="display:none;"></div>
             </div>
 
-            <div class="bet-sheet">
-                <h3 style="margin-top:0;">Основные исходы</h3>
-                <div class="cf-grid" id="md-coeffs">
-                    <!-- Buttons injected via JS -->
-                </div>
+            <div class="control-box" style="margin-top:20px; flex:1;">
+                <h3 style="margin-top:0; font-size:16px;">Сделать ставку</h3>
+                <div class="cf-grid" id="md-coeffs"></div>
+                <p style="text-align:center; color:#555; font-size:12px; margin-top:20px;">
+                    <i class="fas fa-lock"></i> Безопасная ставка
+                </p>
             </div>
         </section>
 
-        <!-- MENU -->
+        <!-- LOBBY -->
         <section id="p-menu" class="page active">
-            <h2 style="margin-top:0">Лобби</h2>
+            <h2 style="margin-top:0">Игровой зал</h2>
             <div class="games-grid">
                 <div class="g-card wide" onclick="App.nav('sport')">
-                    <i class="fas fa-trophy g-icon"></i><h3 class="g-title">Спорт</h3><span class="g-sub">Live & Line</span>
+                    <i class="fas fa-trophy g-icon"></i>
+                    <h3 class="g-title">Спорт Live</h3>
+                    <span class="g-sub">Футбол, Хоккей, Теннис</span>
                 </div>
                 <div class="g-card mines" onclick="App.nav('mines')">
-                    <i class="fas fa-bomb g-icon"></i><h3 class="g-title">Mines</h3><span class="g-sub">Сапер</span>
+                    <i class="fas fa-bomb g-icon"></i>
+                    <h3 class="g-title">Mines</h3>
+                    <span class="g-sub">Сапер на деньги</span>
                 </div>
                 <div class="g-card dice" onclick="App.nav('dice')">
-                    <i class="fas fa-dice-d20 g-icon"></i><h3 class="g-title">Dice</h3><span class="g-sub">Кубик</span>
+                    <i class="fas fa-dice-d20 g-icon"></i>
+                    <h3 class="g-title">Dice 3D</h3>
+                    <span class="g-sub">Удвоение x1.90</span>
                 </div>
             </div>
         </section>
 
         <!-- SPORT FEED -->
         <section id="p-sport" class="page">
-            <h2 style="margin-top:0">Спорт</h2>
-            <div class="sport-cats">
-                <button class="cat-btn active" onclick="Sport.filter('football', this)">⚽ Футбол</button>
-                <button class="cat-btn" onclick="Sport.filter('hockey', this)">🏒 Хоккей</button>
-                <button class="cat-btn" onclick="Sport.filter('tennis', this)">🏓 Настольный</button>
-                <button class="cat-btn" onclick="Sport.filter('basketball', this)">🏀 Баскет</button>
+            <h2 style="margin-top:0">Линия</h2>
+            <div class="sport-tabs">
+                <button class="tab-btn active" onclick="Sport.filter('football', this)"><i class="fas fa-futbol"></i> Футбол</button>
+                <button class="tab-btn" onclick="Sport.filter('hockey', this)"><i class="fas fa-hockey-puck"></i> Хоккей</button>
+                <button class="tab-btn" onclick="Sport.filter('tennis', this)"><i class="fas fa-table-tennis"></i> Теннис</button>
+                <button class="tab-btn" onclick="Sport.filter('basketball', this)"><i class="fas fa-basketball-ball"></i> Баскет</button>
+                <button class="tab-btn" onclick="Sport.filter('table_tennis', this)"><i class="fas fa-table-tennis"></i> Пинг-Понг</button>
             </div>
             <div id="sport-feed"></div>
         </section>
 
         <!-- MINES -->
         <section id="p-mines" class="page">
-            <div style="display:flex; align-items:center; gap:10px; margin-bottom:15px;">
-                <i class="fas fa-chevron-left" onclick="App.nav('menu')" style="padding:10px;"></i>
-                <h2>Mines</h2>
-            </div>
-            <div class="control-panel">
-                <input type="number" id="m-bet" value="50" placeholder="Ставка">
-                <div style="display:flex; justify-content:space-between; margin-bottom:10px; font-size:13px;">
-                    <span>Мины: <b id="m-cnt-val">3</b></span>
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:15px;"><i class="fas fa-chevron-left" onclick="App.nav('menu')" style="padding:10px;"></i><h2>Mines</h2></div>
+            <div class="control-box">
+                <input type="number" id="m-bet" value="100" placeholder="Сумма ставки">
+                <div style="display:flex;justify-content:space-between;margin-bottom:10px;font-size:13px;color:#8b949e;">
+                    <span>Мины: <b id="m-cnt-val" style="color:white;">3</b></span>
                     <span>Кэф: <b id="m-coef" style="color:var(--accent)">x1.00</b></span>
                 </div>
                 <input type="range" id="m-cnt" min="3" max="24" value="3" oninput="Mines.updInput()">
-                <button id="m-btn" class="btn-main" onclick="Mines.start()">Играть</button>
-                <button id="m-cash" class="btn-main" style="background:#d29922; display:none;" onclick="Mines.cashout()">Забрать</button>
+                
+                <button id="m-btn" class="btn-action" onclick="Mines.start()">ИГРАТЬ</button>
+                <button id="m-cash" class="btn-action" style="background:#d29922;display:none;" onclick="Mines.cashout()">ЗАБРАТЬ</button>
             </div>
             <br>
             <div class="mines-grid" id="m-grid"></div>
@@ -320,444 +297,215 @@
 
         <!-- DICE -->
         <section id="p-dice" class="page">
-            <div style="display:flex; align-items:center; gap:10px; margin-bottom:15px;">
-                <i class="fas fa-chevron-left" onclick="App.nav('menu')" style="padding:10px;"></i>
-                <h2>Dice</h2>
-            </div>
-            <div class="dice-stage">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:15px;"><i class="fas fa-chevron-left" onclick="App.nav('menu')" style="padding:10px;"></i><h2>Dice</h2></div>
+            <div class="dice-area">
                 <div class="cube" id="d-cube">
                     <div class="face f1">1</div><div class="face f2">2</div><div class="face f3">3</div>
                     <div class="face f4">4</div><div class="face f5">5</div><div class="face f6">6</div>
                 </div>
             </div>
-            <div class="control-panel">
-                <input type="number" id="d-bet" value="50" placeholder="Ставка">
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:15px;">
-                    <button class="cf-btn" id="d-even" onclick="Dice.type('even')" style="padding:15px; background:var(--bg-body); border:1px solid var(--border);">
-                        ЧЕТ <b>x1.90</b>
-                    </button>
-                    <button class="cf-btn" id="d-odd" onclick="Dice.type('odd')" style="padding:15px; background:var(--bg-body); border:1px solid var(--border);">
-                        НЕЧЕТ <b>x1.90</b>
-                    </button>
+            <div class="control-box">
+                <input type="number" id="d-bet" value="100" placeholder="Сумма ставки">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:15px;">
+                    <button class="cf-btn" id="d-even" onclick="Dice.type('even')" style="padding:15px;background:#0d1117;border:1px solid var(--border);">ЧЕТ <b>x1.90</b></button>
+                    <button class="cf-btn" id="d-odd" onclick="Dice.type('odd')" style="padding:15px;background:#0d1117;border:1px solid var(--border);">НЕЧЕТ <b>x1.90</b></button>
                 </div>
-                <button class="btn-main" onclick="Dice.roll()">Бросок</button>
+                <button class="btn-action" onclick="Dice.roll()">БРОСОК</button>
             </div>
         </section>
 
         <!-- PROFILE -->
         <section id="p-profile" class="page">
             <h2 style="margin-top:0">Профиль</h2>
-            <div class="control-panel" style="text-align:center;">
-                <div style="width:70px; height:70px; background:#21262d; border-radius:50%; margin:0 auto 10px; display:flex; align-items:center; justify-content:center; font-size:24px;">👤</div>
+            <div class="control-box" style="text-align:center;">
+                <div style="width:70px;height:70px;background:#21262d;border-radius:50%;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;font-size:24px;border:2px solid var(--accent);">😎</div>
                 <h3>ID: <span id="prof-id">...</span></h3>
             </div>
 
-            <!-- Referral Card -->
             <div class="ref-card">
-                <h3>🤝 Партнерская программа</h3>
-                <p style="font-size:12px; color:var(--text-muted); margin-bottom:15px;">
-                    Приглашай друзей и получай <b>50₽</b> за каждого!
-                </p>
-                <div class="ref-stat">
-                    <div class="rs-box">Людей <b id="ui-ref-count">0</b></div>
-                    <div class="rs-box">Доход <b id="ui-ref-earn">0 ₽</b></div>
+                <h3 style="margin-top:0;">🤝 Партнерка</h3>
+                <p style="font-size:12px;color:#8b949e;">Пригласи друга и получай % от его игр!</p>
+                <div class="ref-stat" style="display:flex;justify-content:space-around;margin:15px 0;">
+                    <div><div style="font-size:12px;color:#8b949e;">Приглашено</div><b style="font-size:18px;" id="ui-ref-count">0</b></div>
+                    <div><div style="font-size:12px;color:#8b949e;">Доход</div><b style="font-size:18px;color:#2ea043;" id="ui-ref-earn">0 ₽</b></div>
                 </div>
-                <button class="btn-main" style="font-size:14px; padding:10px;" onclick="App.shareRef()">Пригласить друга</button>
+                <button class="btn-action" style="font-size:14px;padding:12px;" onclick="App.shareRef()">Пригласить друга</button>
             </div>
 
-            <h4 style="margin-bottom:10px; margin-top:20px;">История ставок</h4>
-            <div id="history-list" style="font-size:12px;"></div>
+            <h4 style="margin-bottom:10px;margin-top:20px;">История игр</h4>
+            <div id="history-list" style="font-size:13px;"></div>
         </section>
     </main>
 
     <nav id="main-nav">
-        <div class="nav-item active" onclick="App.nav('menu')"><i class="fas fa-home"></i>Меню</div>
-        <div class="nav-item" onclick="App.nav('sport')"><i class="fas fa-futbol"></i>Спорт</div>
-        <div class="nav-item" onclick="App.nav('profile')"><i class="fas fa-user"></i>Профиль</div>
+        <div class="nav-item active" onclick="App.nav('menu')"><i class="fas fa-home"></i><span>Главная</span></div>
+        <div class="nav-item" onclick="App.nav('sport')"><i class="fas fa-futbol"></i><span>Спорт</span></div>
+        <div class="nav-item" onclick="App.nav('profile')"><i class="fas fa-user"></i><span>Профиль</span></div>
     </nav>
 
     <script>
         const tg = window.Telegram.WebApp;
 
-        // --- BACKEND CONNECTION & APP LOGIC ---
-        const App = {
-            userId: 0,
-            bal: 0,
-            
-            init: async function() {
-                tg.ready(); 
-                tg.expand();
-                
-                // 1. Get User ID
-                const u = tg.initDataUnsafe?.user;
-                this.userId = u ? u.id : 12345; // 12345 for browser testing
-                document.getElementById('prof-id').innerText = this.userId;
-                
-                // 2. Check for referral
-                const startParam = tg.initDataUnsafe?.start_param;
-                
-                // 3. Connect to Server
-                await this.fetchData(startParam);
-                
-                // 4. Init Game Modules
-                Mines.init();
-                Sport.init();
-            },
+        // !!! ВАЖНО: ВСТАВЬТЕ СЮДА ССЫЛКУ С RENDER/AMVERA (без / в конце) !!!
+        const API_URL = "https://backend-4jag.onrender.com"; 
 
-            // GET DATA FROM SERVER
+        const App = {
+            userId: 0, bal: 0,
+            init: async function() {
+                tg.ready(); tg.expand();
+                const u = tg.initDataUnsafe?.user;
+                this.userId = u ? u.id : 123456; // Fallback
+                document.getElementById('prof-id').innerText = this.userId;
+                const startParam = tg.initDataUnsafe?.start_param;
+                await this.fetchData(startParam);
+                Sport.init(); Mines.init();
+            },
             fetchData: async function(refId) {
                 try {
-                    let url = `/api/user/${this.userId}`;
+                    let url = `${API_URL}/api/user/${this.userId}`;
                     if(refId) url += `?ref_id=${refId}`;
-                    
                     let res = await fetch(url);
-                    if (!res.ok) throw new Error('Server offline');
-                    
                     let data = await res.json();
-                    
                     this.bal = data.balance;
                     document.getElementById('ui-ref-count').innerText = data.ref_count;
                     document.getElementById('ui-ref-earn').innerText = data.ref_earn.toFixed(1) + ' ₽';
                     this.updateUI(data.history);
-                    
-                } catch(e) {
-                    console.warn("Backend недоступен, режим демо.");
-                    this.bal = 50; // Fallback balance
-                    this.updateUI();
-                }
+                } catch(e) { console.error(e); }
             },
-
-            // SEND BET TO SERVER
             sendBet: async function(game, bet, win, coeff) {
                 try {
-                    // Optimistic UI update (Instant reaction)
-                    this.bal = this.bal - bet + win;
+                    this.bal = this.bal - bet + win; // Instant update
                     document.getElementById('ui-balance').innerText = this.bal.toFixed(2) + ' ₽';
-
-                    let res = await fetch('/api/bet', {
-                        method: 'POST',
-                        headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify({
-                            user_id: this.userId,
-                            game: game,
-                            bet: bet,
-                            win: win,
-                            coeff: coeff
-                        })
+                    let res = await fetch(`${API_URL}/api/bet`, {
+                        method: 'POST', headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({ user_id: this.userId, game, bet, win, coeff })
                     });
-                    
                     let data = await res.json();
-                    if(data.status === 'ok') {
-                        this.bal = data.new_balance;
-                        this.fetchData(); // Sync history
-                    }
-                } catch(e) {
-                    tg.showAlert("Ошибка связи с сервером (Ставка не сохранена в БД)");
-                }
+                    if(data.status==='ok') { this.bal = data.new_balance; this.fetchData(); }
+                } catch(e) { tg.showAlert("Ошибка соединения"); }
             },
-
             updateUI: function(hist) {
                 document.getElementById('ui-balance').innerText = this.bal.toFixed(2) + ' ₽';
-                
-                if(hist && hist.length > 0) {
-                    document.getElementById('history-list').innerHTML = hist.slice(0, 15).map(h => `
-                        <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.05);">
-                            <span>${h.game} (x${h.coeff})</span>
-                            <span style="color:${(h.w - h.bet) > 0 ? '#2ea043' : '#da3633'}">
-                                ${(h.w - h.bet) > 0 ? '+' : ''}${(h.w - h.bet).toFixed(1)}
-                            </span>
-                        </div>
-                    `).join('');
-                } else {
-                    document.getElementById('history-list').innerHTML = '<div style="text-align:center;color:#555;padding:10px;">Ставок пока нет</div>';
+                if(hist) {
+                    document.getElementById('history-list').innerHTML = hist.slice(0,10).map(h => `
+                        <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #30363d;">
+                            <div><div style="font-weight:600;">${h.game}</div><div style="font-size:11px;color:#8b949e;">Коэф: x${h.coeff}</div></div>
+                            <div style="text-align:right;font-weight:bold;color:${(h.w-h.bet)>0?'#2ea043':'#da3633'}">${(h.w-h.bet)>0?'+':''}${(h.w-h.bet).toFixed(1)}</div>
+                        </div>`).join('');
                 }
             },
-
             nav: function(p) {
-                // Hide Detail Overlay
                 document.getElementById('p-match-detail').classList.remove('active');
-                document.getElementById('main-header').style.display = 'flex';
-                document.getElementById('main-nav').style.display = 'flex';
-
-                // Tabs Logic
-                document.querySelectorAll('.page').forEach(e => e.classList.remove('active'));
-                document.getElementById('p-' + p).classList.add('active');
-                
-                document.querySelectorAll('.nav-item').forEach(e => e.classList.remove('active'));
-                if(p==='menu'||p.startsWith('mines')||p.startsWith('dice')) document.querySelectorAll('.nav-item')[0].classList.add('active');
-                if(p==='sport') document.querySelectorAll('.nav-item')[1].classList.add('active');
-                if(p==='profile') document.querySelectorAll('.nav-item')[2].classList.add('active');
+                document.getElementById('main-header').style.display='flex';
+                document.getElementById('main-nav').style.display='flex';
+                document.querySelectorAll('.page').forEach(e=>e.classList.remove('active'));
+                document.getElementById('p-'+p).classList.add('active');
+                document.querySelectorAll('.nav-item').forEach(e=>e.classList.remove('active'));
+                if(p==='menu'||p.startsWith('mines')||p.startsWith('dice'))document.querySelectorAll('.nav-item')[0].classList.add('active');
+                if(p==='sport')document.querySelectorAll('.nav-item')[1].classList.add('active');
+                if(p==='profile')document.querySelectorAll('.nav-item')[2].classList.add('active');
             },
-
-            shareRef: function() {
-                // Change YOUR_BOT_USERNAME to your real bot username
-                const link = `https://t.me/share/url?url=https://t.me/YOUR_BOT_USERNAME?start=${this.userId}&text=Забирай+50₽+бонуса!`;
-                tg.openTelegramLink(link);
-            },
-
-            deposit: function() {
-                tg.showPopup({title: 'Пополнение', message: 'Функция пополнения доступна через бота.'});
-            }
+            shareRef: function() { tg.openTelegramLink(`https://t.me/share/url?url=https://t.me/YOUR_BOT_NAME?start=${this.userId}&text=Играй+со+мной!`); },
+            deposit: function() { tg.showAlert('Пополнение доступно через бота.'); }
         };
 
-        // --- SPORT ENGINE ---
         const Sport = {
-            matches: [],
-            curCat: 'football',
-            detailId: null,
-
-            teams: {
-                football: ['Real Madrid', 'Barcelona', 'Man City', 'Liverpool', 'PSG', 'Bayern'],
-                hockey: ['Ак Барс', 'Авангард', 'ЦСКА', 'СКА', 'Динамо', 'Металлург'],
-                basketball: ['Lakers', 'Bulls', 'Celtics', 'Heat', 'Warriors', 'Nets'],
-                tennis: ['Лиска Т.', 'Краме...', 'Иванов А.', 'Петров Б.', 'Сидоров В.', 'Кузнецов']
+            matches: [], curCat: 'football', detailId: null,
+            init: function() { this.loadRemote(); setInterval(() => this.loadRemote(), 3000); },
+            loadRemote: async function() {
+                try {
+                    let res = await fetch(`${API_URL}/api/matches`);
+                    this.matches = await res.json();
+                    if(document.getElementById('p-sport').classList.contains('active')) this.render();
+                    if(this.detailId) { const m = this.matches.find(x=>x.id===this.detailId); if(m) this.renderDetail(m); }
+                } catch(e) {}
             },
-
-            init: function() {
-                this.genSchedule();
-                setInterval(() => this.tick(), 1000);
-                this.render();
-            },
-
-            genSchedule: function() {
-                const now = Date.now();
-                const categories = ['football', 'hockey', 'basketball', 'tennis'];
-                
-                categories.forEach(cat => {
-                    const tms = [...this.teams[cat]].sort(() => Math.random() - 0.5);
-                    
-                    // 1. Live Match
-                    this.matches.push({
-                        id: Math.random(), cat: cat, isLive: true,
-                        t1: tms.pop(), t2: tms.pop(),
-                        time: 0, s1: 0, s2: 0,
-                        sets: cat === 'tennis' ? [[0,0]] : null, setScore: [0,0],
-                        timestamp: now - 3600000 
-                    });
-
-                    // 2. Upcoming Sorted
-                    for(let i=0; i<3; i++) {
-                        const mins = (i+1) * 45 + Math.floor(Math.random()*30);
-                        this.matches.push({
-                            id: Math.random(), cat: cat, isLive: false,
-                            t1: tms.length ? tms.pop() : 'Team A', 
-                            t2: tms.length ? tms.pop() : 'Team B',
-                            time: 0, s1: 0, s2: 0,
-                            sets: null,
-                            timestamp: now + (mins * 60000)
-                        });
-                    }
-                });
-            },
-
-            tick: function() {
-                this.matches.forEach(m => {
-                    if(m.isLive) {
-                        m.time++;
-                        // Scoring chance
-                        if(Math.random() < 0.1) {
-                            const who = Math.random() > 0.5 ? 0 : 1;
-                            
-                            if(m.cat === 'tennis') {
-                                let curSetIdx = m.sets.length - 1;
-                                m.sets[curSetIdx][who]++;
-                                // Win set logic (simple)
-                                if(m.sets[curSetIdx][who] >= 11 && (m.sets[curSetIdx][who] - m.sets[curSetIdx][1-who] >= 2)) {
-                                    m.setScore[who]++; m.sets.push([0,0]);
-                                }
-                                m.s1 = m.setScore[0]; m.s2 = m.setScore[1];
-                            } else if (m.cat === 'basketball') {
-                                m[who===0?'s1':'s2'] += (Math.random()>0.7 ? 3 : 2);
-                            } else {
-                                m[who===0?'s1':'s2']++;
-                            }
-                        }
-                    }
-                });
-                // Update views
-                if(document.getElementById('p-sport').classList.contains('active')) this.render();
-                if(this.detailId) {
-                     const m = this.matches.find(x => x.id === this.detailId);
-                     if(m) this.renderDetail(m);
-                }
-            },
-
-            filter: function(cat, btn) {
-                this.curCat = cat;
-                document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                this.render();
-            },
-
+            filter: function(c,b) { this.curCat=c; document.querySelectorAll('.tab-btn').forEach(x=>x.classList.remove('active')); b.classList.add('active'); this.render(); },
             render: function() {
-                const list = this.matches.filter(m => m.cat === this.curCat);
-                // Sort: Live first, then by time
-                list.sort((a, b) => {
-                    if(a.isLive && !b.isLive) return -1;
-                    if(!a.isLive && b.isLive) return 1;
-                    return a.timestamp - b.timestamp;
+                const d = document.getElementById('sport-feed');
+                const list = this.matches.filter(m=>m.cat===this.curCat).sort((a,b)=>{
+                   if (a.isLive !== b.isLive) return a.isLive ? -1 : 1;
+                   return a.timestamp - b.timestamp;
                 });
-
-                const cont = document.getElementById('sport-feed');
-                cont.innerHTML = list.map(m => {
-                    const d = new Date(m.timestamp);
-                    const timeStr = m.isLive 
-                        ? `<span class="live-badge"><span class="live-dot"></span>LIVE</span> ${m.cat==='tennis'? '' : Math.floor(m.time/60)+"' мин"}`
-                        : `<i class="far fa-clock"></i> ${d.getDate() === new Date().getDate() ? 'Сегодня' : 'Завтра'} ${d.getHours()}:${(d.getMinutes()<10?'0':'')+d.getMinutes()}`;
-                    
+                d.innerHTML = list.map(m=> {
+                    const date = new Date(m.timestamp);
+                    const timeStr = m.isLive ? 
+                        `<span class="live-badge"><span class="live-dot"></span>LIVE</span> ${m.cat==='tennis'||m.cat==='table_tennis' ? 'Сет '+m.sets.length : Math.floor(m.time)+"' мин"}` : 
+                        `${date.getHours()}:${(date.getMinutes()<10?'0':'')+date.getMinutes()}`;
                     return `
-                    <div class="match-card" onclick="Sport.openDetail(${m.id})">
+                    <div class="match-card" onclick="Sport.openD(${m.id})">
                         <div class="match-header"><span>${timeStr}</span></div>
-                        <div class="teams-row">
-                            <span class="team-name">${m.t1}</span>
-                            <span class="match-score">${m.s1} : ${m.s2}</span>
-                            <span class="team-name" style="text-align:right">${m.t2}</span>
-                        </div>
-                        <div class="cf-grid">
-                            <button class="cf-btn" onclick="event.stopPropagation(); Sport.bet(50)">П1 <b>1.85</b></button>
-                            <button class="cf-btn" onclick="event.stopPropagation(); Sport.bet(50)">X <b>3.40</b></button>
-                            <button class="cf-btn" onclick="event.stopPropagation(); Sport.bet(50)">П2 <b>2.10</b></button>
-                        </div>
+                        <div class="teams-row"><span class="team-name">${m.t1}</span><span class="match-score">${m.s1}:${m.s2}</span><span class="team-name" style="text-align:right">${m.t2}</span></div>
+                        <div class="cf-grid"><button class="cf-btn" onclick="event.stopPropagation();Sport.bet(50)">П1 <b>1.85</b></button><button class="cf-btn">X <b>3.40</b></button><button class="cf-btn" onclick="event.stopPropagation();Sport.bet(50)">П2 <b>2.10</b></button></div>
                     </div>`;
                 }).join('');
             },
-
-            openDetail: function(id) {
-                this.detailId = id;
-                const m = this.matches.find(x => x.id === id);
-                if(!m) return;
-
-                document.getElementById('main-header').style.display = 'none';
-                document.getElementById('main-nav').style.display = 'none';
-                
-                document.querySelectorAll('.page').forEach(e => e.classList.remove('active'));
+            openD: function(id) {
+                this.detailId=id; const m=this.matches.find(x=>x.id===id);
+                document.getElementById('main-header').style.display='none'; document.getElementById('main-nav').style.display='none';
+                document.getElementById('p-menu').classList.remove('active'); document.getElementById('p-sport').classList.remove('active');
                 document.getElementById('p-match-detail').classList.add('active');
-                
                 this.renderDetail(m);
             },
-
             renderDetail: function(m) {
+                if(!m) return;
                 document.getElementById('md-league').innerText = m.cat.toUpperCase();
-                document.getElementById('md-name1').innerText = m.t1;
-                document.getElementById('md-name2').innerText = m.t2;
-                document.getElementById('md-logo1').innerText = m.t1[0];
-                document.getElementById('md-logo2').innerText = m.t2[0];
-                document.getElementById('md-score').innerText = `${m.s1} : ${m.s2}`;
+                document.getElementById('md-name1').innerText=m.t1; document.getElementById('md-name2').innerText=m.t2;
+                document.getElementById('md-logo1').innerText=m.t1[0]; document.getElementById('md-logo2').innerText=m.t2[0];
+                document.getElementById('md-score').innerText=`${m.s1}:${m.s2}`;
+                document.getElementById('md-time').innerText = m.isLive ? "LIVE" : "Скоро";
                 
-                document.getElementById('md-time').innerText = m.isLive 
-                    ? `LIVE ${m.cat==='tennis' ? 'Сет ' + m.sets.length : Math.floor(m.time/60)+"'"}` 
-                    : 'Ожидание';
+                const t = document.getElementById('md-tennis-stats');
+                if((m.cat==='tennis' || m.cat==='table_tennis') && m.sets) {
+                    t.style.display='block';
+                    let h='<th></th>', r1='', r2='';
+                    m.sets.forEach((s,i)=>{ h+=`<th>${i+1}</th>`; r1+=`<td>${s[0]}</td>`; r2+=`<td>${s[1]}</td>`; });
+                    t.innerHTML = `<table class="tennis-table"><thead><tr>${h}</tr></thead><tbody><tr><td>${m.t1.slice(0,3)}</td>${r1}</tr><tr><td>${m.t2.slice(0,3)}</td>${r2}</tr></tbody></table>`;
+                } else t.style.display='none';
 
-                // TENNIS TABLE
-                const tennisDiv = document.getElementById('md-tennis-stats');
-                if(m.cat === 'tennis' && m.sets) {
-                    tennisDiv.style.display = 'block';
-                    let ths = '<th></th>'; for(let i=1; i<=5; i++) ths += `<th>${i}</th>`;
-                    
-                    const buildRow = (teamIdx, color) => {
-                        let tds = `<td><div class="tennis-logo-mini" style="background:${color};color:white">${m[teamIdx===0?'t1':'t2'][0]}</div></td>`;
-                        for(let i=0; i<5; i++) {
-                            const val = m.sets[i] ? m.sets[i][teamIdx] : '';
-                            const isCurrent = (i === m.sets.length - 1);
-                            tds += `<td class="${isCurrent && m.isLive ? 'current-set' : ''}">${val}</td>`;
-                        }
-                        return `<tr>${tds}</tr>`;
-                    };
-
-                    tennisDiv.innerHTML = `<table class="tennis-sets"><thead><tr>${ths}</tr></thead><tbody>${buildRow(0, '#ff9800')}${buildRow(1, '#2196f3')}</tbody></table>`;
-                } else {
-                    tennisDiv.style.display = 'none';
-                }
-
-                // BET BUTTONS
-                document.getElementById('md-coeffs').innerHTML = `
-                    <button class="cf-btn" onclick="Sport.bet(50)">П1 <b>1.85</b></button>
-                    <button class="cf-btn" onclick="Sport.bet(50)">X <b>3.40</b></button>
-                    <button class="cf-btn" onclick="Sport.bet(50)">П2 <b>2.10</b></button>
-                `;
+                document.getElementById('md-coeffs').innerHTML = `<button class="cf-btn" onclick="Sport.bet(50)">П1 <b>1.85</b></button><button class="cf-btn">X <b>3.40</b></button><button class="cf-btn" onclick="Sport.bet(50)">П2 <b>2.10</b></button>`;
             },
-
-            bet: function(amt) {
-                if(App.bal < amt) return tg.showAlert('Недостаточно средств');
-                // Send sport bet to server
-                App.sendBet('Sport Bet', amt, 0, 0); 
-                tg.showAlert('Ставка принята!');
-            }
+            bet: function(a) { App.sendBet('Sport', a, 0, 0); tg.showAlert('Ставка принята'); }
         };
 
-        // --- MINES LOGIC ---
         const Mines = {
-            init: function() {
-                const g = document.getElementById('m-grid'); g.innerHTML = '';
-                for(let i=0; i<25; i++) {
-                    let d = document.createElement('div'); d.className = 'cell'; d.onclick = () => this.click(i, d);
-                    g.appendChild(d);
-                }
-            },
-            updInput: function() { document.getElementById('m-cnt-val').innerText = document.getElementById('m-cnt').value; },
+            init: function() { const g=document.getElementById('m-grid'); for(let i=0;i<25;i++){let d=document.createElement('div');d.className='cell';d.onclick=()=>this.clk(i,d);g.appendChild(d);} },
+            updInput: function() { document.getElementById('m-cnt-val').innerText=document.getElementById('m-cnt').value; },
             start: function() {
-                const bet = parseFloat(document.getElementById('m-bet').value);
-                if(bet > App.bal) return tg.showAlert('Мало денег');
-                
-                // Visual deduction
-                document.getElementById('ui-balance').innerText = (App.bal - bet).toFixed(2) + ' ₽';
-                
-                this.active = true; this.bet = bet; this.mines = parseInt(document.getElementById('m-cnt').value);
-                this.grid = Array(25).fill(0);
-                let c=0; while(c<this.mines) { let r=Math.floor(Math.random()*25); if(this.grid[r]===0){this.grid[r]=1; c++;} }
+                const b=parseFloat(document.getElementById('m-bet').value); if(b>App.bal)return tg.showAlert('Мало денег');
+                this.bet=b; this.act=true; this.mines=parseInt(document.getElementById('m-cnt').value); this.grid=Array(25).fill(0);
+                let c=0;while(c<this.mines){let r=Math.floor(Math.random()*25);if(this.grid[r]==0){this.grid[r]=1;c++}}
                 document.getElementById('m-btn').style.display='none'; document.getElementById('m-cash').style.display='block';
-                document.querySelectorAll('.cell').forEach(c => { c.className='cell'; c.innerHTML=''; });
-                this.step=0;
+                document.querySelectorAll('.cell').forEach(c=>{c.className='cell';c.innerHTML=''}); this.step=0;
+                document.getElementById('ui-balance').innerText=(App.bal-b).toFixed(2)+' ₽';
             },
-            click: function(idx, el) {
-                if(!this.active || el.classList.contains('active')) return;
-                el.classList.add('active');
-                if(this.grid[idx]===1) { 
-                    el.classList.add('bomb'); el.innerHTML='💣'; 
-                    this.end(false); 
-                } else { 
-                    el.classList.add('gem'); el.innerHTML='💎'; this.step++;
-                    const m = (25-(this.step-1))/(25-this.mines-(this.step-1));
-                    this.win = this.bet * Math.pow(m*0.98, this.step);
-                    document.getElementById('m-cash').innerText = `Забрать ${this.win.toFixed(0)} ₽`;
-                }
+            clk: function(i,e) {
+                if(!this.act||e.classList.contains('active'))return; e.classList.add('active');
+                if(this.grid[i]==1){e.classList.add('bomb');e.innerHTML='💣';this.end(0);}
+                else{e.classList.add('gem');e.innerHTML='💎';this.step++;this.win=this.bet*Math.pow((25-(this.step-1))/(25-this.mines-(this.step-1))*0.98,this.step);document.getElementById('m-cash').innerText=`ЗАБРАТЬ ${this.win.toFixed(0)}`;}
             },
-            cashout: function() { this.end(true); },
-            end: function(w) { 
-                this.active=false; document.getElementById('m-btn').style.display='block'; document.getElementById('m-cash').style.display='none';
-                
-                const winAmt = w ? this.win : 0;
-                const coeff = w ? (this.win / this.bet) : 0;
-                App.sendBet('Mines', this.bet, winAmt, coeff.toFixed(2));
-
-                if(!w) {
-                    document.querySelectorAll('.cell').forEach((c, i) => {
-                        if(this.grid[i]===1) { c.innerHTML = '💣'; if(!c.classList.contains('bomb')) c.style.opacity = 0.5; }
-                    });
-                }
+            cashout: function(){this.end(this.win);},
+            end: function(w) {
+                this.act=false; document.getElementById('m-btn').style.display='block'; document.getElementById('m-cash').style.display='none';
+                App.sendBet('Mines', this.bet, w||0, w?(w/this.bet).toFixed(2):0);
+                document.querySelectorAll('.cell').forEach((c,i)=>{if(this.grid[i]==1)c.innerHTML='💣'});
             }
         };
 
-        // --- DICE LOGIC ---
         const Dice = {
             roll: function() {
-                const bet = parseFloat(document.getElementById('d-bet').value);
-                if(bet > App.bal) return tg.showAlert('Мало денег');
-                
-                document.getElementById('ui-balance').innerText = (App.bal - bet).toFixed(2) + ' ₽';
-                
-                const res = Math.floor(Math.random()*6)+1;
-                const m = {1:[0,0], 6:[0,180], 2:[0,-90], 5:[0,90], 3:[-90,0], 4:[90,0]};
-                document.getElementById('d-cube').style.transform = `rotateX(${m[res][0]+720}deg) rotateY(${m[res][1]+720}deg)`;
-                
-                setTimeout(() => {
-                    const win = (res%2===0 && this.type==='even') || (res%2!==0 && this.type==='odd');
-                    const winAmt = win ? bet * 1.9 : 0;
-                    App.sendBet('Dice', bet, winAmt, 1.9);
-                    tg.showAlert(win ? `Победа! ${res}` : `Луз. ${res}`);
-                }, 1600);
+                const b=parseFloat(document.getElementById('d-bet').value); if(b>App.bal)return tg.showAlert('Мало денег');
+                const r=Math.floor(Math.random()*6)+1;
+                document.getElementById('ui-balance').innerText=(App.bal-b).toFixed(2)+' ₽';
+                const m={1:[0,0],6:[0,180],2:[0,-90],5:[0,90],3:[-90,0],4:[90,0]};
+                document.getElementById('d-cube').style.transform=`rotateX(${m[r][0]+720}deg) rotateY(${m[r][1]+720}deg)`;
+                setTimeout(()=>{
+                    const w=((r%2==0&&this.t=='even')||(r%2!=0&&this.t=='odd'));
+                    App.sendBet('Dice', b, w?b*1.9:0, 1.9);
+                    tg.showAlert(w?'Победа':'Луз');
+                },1600);
             },
-            type: function(t) { this.type = t; }
+            type: function(t){this.t=t; document.querySelectorAll('#d-even, #d-odd').forEach(b=>b.style.borderColor='var(--border)'); event.target.closest('button').style.borderColor='var(--accent)';}
         };
 
         window.onload = () => App.init();
