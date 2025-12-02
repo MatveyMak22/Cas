@@ -199,4 +199,304 @@
         let state = { matches: [], balance: 0 };
         let currentSport = 'football';
 
-        c
+        const App = {
+            init: async () => {
+                tg.expand();
+                App.poll();
+                setInterval(App.poll, 5000);
+            },
+            poll: async () => {
+                // User Info
+                try {
+                    let res = await fetch(`${API_URL}/api/init?tg_id=${user.id}`);
+                    let d = await res.json();
+                    state.balance = d.balance;
+                    document.getElementById('header-bal').innerText = Math.floor(d.balance).toLocaleString();
+                } catch(e){}
+
+                // Matches
+                try {
+                    let mRes = await fetch(`${API_URL}/api/matches`);
+                    state.matches = await mRes.json();
+                    if(document.getElementById('p-sport').classList.contains('active')) renderMatches();
+                } catch(e){}
+            },
+            api: async (endpoint, data) => {
+                let res = await fetch(`${API_URL}/api/${endpoint}`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json', 'X-Telegram-ID': user.id},
+                    body: JSON.stringify(data)
+                });
+                return await res.json();
+            }
+        };
+
+        // --- NAVIGATION ---
+        function nav(page, el) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            
+            // Если переходим в hub, скрываем конкретные игры
+            if(page === 'games-hub') {
+                document.getElementById('p-games-hub').classList.add('active');
+            } else {
+                document.getElementById('p-' + page).classList.add('active');
+            }
+            
+            if(el) el.classList.add('active');
+            if(page === 'bets') loadBets('active');
+        }
+
+        function openGame(g) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            if(g === 'hub') document.getElementById('p-games-hub').classList.add('active');
+            else {
+                document.getElementById('p-game-' + g).classList.add('active');
+                if(g === 'crash') Crash.initCanvas();
+            }
+        }
+
+        // --- SPORT ---
+        function filterSport(s, el) {
+            currentSport = s;
+            document.querySelectorAll('.sport-tabs .s-tab').forEach(t => t.classList.remove('active'));
+            el.classList.add('active');
+            renderMatches();
+        }
+
+        function renderMatches() {
+            let list = state.matches.filter(m => m.sport === currentSport);
+            let html = '';
+            
+            if(list.length === 0) html = '<div style="text-align:center;color:#666;padding:20px">Нет матчей</div>';
+
+            list.forEach(m => {
+                let isLive = m.status === 'live';
+                let time = isLive ? `<span style="color:var(--danger)">LIVE</span>` : new Date(m.start_time).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+                
+                // RENDER TABLE FOR TENNIS
+                if(currentSport === 'tennis' || currentSport === 'table_tennis') {
+                    let sets = m.score_details || []; // [[6,4], [2,1], [0,0]]
+                    let maxSets = currentSport === 'tennis' ? 3 : 5;
+                    let cols = '';
+                    for(let i=0; i<maxSets; i++) cols += `<th>${i+1} сет</th>`;
+                    
+                    let row1 = '', row2 = '';
+                    for(let i=0; i<maxSets; i++) {
+                        let s = sets[i] || [0,0];
+                        let val1 = (s[0]===0 && s[1]===0 && i>0 && !isLive) ? '-' : s[0];
+                        let val2 = (s[0]===0 && s[1]===0 && i>0 && !isLive) ? '-' : s[1];
+                        row1 += `<td>${val1}</td>`;
+                        row2 += `<td>${val2}</td>`;
+                    }
+
+                    html += `
+                    <div class="card">
+                        <div style="font-size:12px;color:#666;margin-bottom:5px">${m.sport.toUpperCase()} • ${time}</div>
+                        <table class="score-table">
+                            <tr><th></th> <th style="width:10%">M</th> ${cols}</tr>
+                            <tr>
+                                <td class="team-name">${m.team_home}</td>
+                                <td class="curr-score">${m.score_home}</td>
+                                ${row1}
+                            </tr>
+                            <tr>
+                                <td class="team-name">${m.team_away}</td>
+                                <td class="curr-score">${m.score_away}</td>
+                                ${row2}
+                            </tr>
+                        </table>
+                        <div class="cf-row">
+                            <div class="cf-btn" onclick="bet(${m.id},'home',${m.odds_home})">П1 <b>${m.odds_home}</b></div>
+                            ${m.odds_draw > 0 ? `<div class="cf-btn" onclick="bet(${m.id},'draw',${m.odds_draw})">X <b>${m.odds_draw}</b></div>` : ''}
+                            <div class="cf-btn" onclick="bet(${m.id},'away',${m.odds_away})">П2 <b>${m.odds_away}</b></div>
+                        </div>
+                    </div>`;
+                } else {
+                    // STANDARD (Football/Hockey)
+                    html += `
+                    <div class="card">
+                        <div class="match-row">
+                            <span style="font-size:12px;color:#666">${time}</span>
+                            <span style="color:var(--primary);font-weight:700">${isLive ? m.score_home+':'+m.score_away : 'VS'}</span>
+                        </div>
+                        <div class="match-row" style="margin-bottom:12px; font-weight:600">
+                            <span>${m.team_home}</span>
+                            <span>${m.team_away}</span>
+                        </div>
+                        <div class="cf-row">
+                            <div class="cf-btn" onclick="bet(${m.id},'home',${m.odds_home})">П1 <b>${m.odds_home}</b></div>
+                            <div class="cf-btn" onclick="bet(${m.id},'draw',${m.odds_draw})">X <b>${m.odds_draw}</b></div>
+                            <div class="cf-btn" onclick="bet(${m.id},'away',${m.odds_away})">П2 <b>${m.odds_away}</b></div>
+                        </div>
+                    </div>`;
+                }
+            });
+            document.getElementById('matches-feed').innerHTML = html;
+        }
+
+        async function bet(mid, sel, k) {
+            let amt = prompt(`Ставка на k=${k}. Сумма:`, 100);
+            if(amt) {
+                let res = await App.api('bet', {match_id: mid, selection: sel, amount: parseFloat(amt), coefficient: k});
+                if(res.status === 'ok') tg.showAlert("Ставка принята!");
+                else tg.showAlert("Ошибка: " + res.detail);
+            }
+        }
+
+        // --- CRASH LOGIC ---
+        const Crash = {
+            active: false, ctx: null, x: 0, val: 1.00, animReq: null,
+            initCanvas: () => {
+                let c = document.getElementById('crashCanvas');
+                c.width = c.offsetWidth; c.height = c.offsetHeight;
+                Crash.ctx = c.getContext('2d');
+            },
+            play: async () => {
+                let b = document.getElementById('crash-bet').value;
+                if(b > state.balance) return;
+                
+                let res = await App.api('crash/start', {bet: parseFloat(b)});
+                if(res.status !== 'started') return tg.showAlert("Ошибка");
+
+                document.getElementById('crash-btn').style.display = 'none';
+                document.getElementById('crash-cash-btn').style.display = 'block';
+                Crash.active = true;
+                Crash.x = 0; Crash.val = 1.00;
+                Crash.loop();
+            },
+            loop: () => {
+                if(!Crash.active) return;
+                let c = document.getElementById('crashCanvas');
+                let ctx = Crash.ctx;
+                
+                // Physics sim
+                Crash.val += 0.005 * Crash.val; // Exp growth
+                Crash.x += 1;
+                
+                // Draw
+                ctx.clearRect(0,0,c.width,c.height);
+                ctx.beginPath();
+                ctx.moveTo(0, c.height);
+                // Simple curve calc
+                ctx.quadraticCurveTo(c.width/2, c.height, Crash.x % c.width, c.height - (Crash.val*20)); 
+                ctx.strokeStyle = '#00ff88'; ctx.lineWidth = 3; ctx.stroke();
+
+                document.getElementById('crash-val').innerText = Crash.val.toFixed(2) + 'x';
+
+                // Auto fail local sim (server handles real logic)
+                // Just keep running until cashout or server response logic (in real app we use socket)
+                // For this demo, we rely on user clicking Cashout. 
+                // If user doesn't click, we don't know when to stop visual without server info.
+                // Hack: We don't stop visually until cashout.
+                Crash.animReq = requestAnimationFrame(Crash.loop);
+            },
+            cashout: async () => {
+                Crash.active = false;
+                cancelAnimationFrame(Crash.animReq);
+                let mult = parseFloat(document.getElementById('crash-val').innerText);
+                
+                let res = await App.api('crash/cashout', {multiplier: mult});
+                
+                if(res.status === 'won') {
+                    document.getElementById('crash-val').style.color = '#00ff88';
+                    tg.showAlert(`Выигрыш: ${res.win}`);
+                } else {
+                    document.getElementById('crash-val').innerText = "CRASH @ " + res.crash_point + "x";
+                    document.getElementById('crash-val').style.color = 'red';
+                    tg.showAlert("Самолет улетел раньше!");
+                }
+                
+                setTimeout(() => {
+                    document.getElementById('crash-val').style.color = '#fff';
+                    document.getElementById('crash-val').innerText = "1.00x";
+                    Crash.ctx.clearRect(0,0,1000,1000);
+                    document.getElementById('crash-btn').style.display = 'block';
+                    document.getElementById('crash-cash-btn').style.display = 'none';
+                }, 2000);
+            }
+        };
+
+        // --- MINES & DICE (Simplified for brevity, same logic as before) ---
+        const Mines = {
+            active: false, grid: [], bet:0, mult:1,
+            start: async () => {
+                let b = document.getElementById('mines-bet').value;
+                await App.api('game', {game: 'Mines Start', amount: -parseFloat(b)});
+                Mines.bet = parseFloat(b); Mines.mult = 1; Mines.active = true;
+                Mines.grid = Array(25).fill(0);
+                for(let i=0;i<3;i++) Mines.grid[Math.floor(Math.random()*25)] = 1;
+                
+                document.getElementById('mines-grid').innerHTML = Mines.grid.map((v,i)=>
+                    `<div class="mine-cell" onclick="Mines.click(${i}, ${v}, this)"></div>`
+                ).join('');
+                document.getElementById('mines-start').style.display='none';
+                document.getElementById('mines-cash').style.display='block';
+            },
+            click: (i, isBomb, el) => {
+                if(!Mines.active || el.classList.contains('gem')) return;
+                if(isBomb) {
+                    el.classList.add('boom'); el.innerHTML='💣';
+                    Mines.active = false; tg.showAlert("Взрыв!");
+                    Mines.reset();
+                } else {
+                    el.classList.add('gem'); el.innerHTML='💎';
+                    Mines.mult *= 1.2;
+                    document.getElementById('mines-mult').innerText = "x"+Mines.mult.toFixed(2);
+                }
+            },
+            cashout: async () => {
+                if(!Mines.active) return;
+                let win = Math.floor(Mines.bet * Mines.mult);
+                await App.api('game', {game: 'Mines Win', amount: win});
+                Mines.active = false; tg.showAlert("Победа: "+win); Mines.reset();
+            },
+            reset: () => {
+                document.getElementById('mines-start').style.display='block';
+                document.getElementById('mines-cash').style.display='none';
+                document.getElementById('mines-mult').innerText = "x1.00";
+            }
+        };
+
+        const Dice = {
+            sel: null,
+            roll: async () => {
+                let b = document.getElementById('dice-bet').value;
+                if(!Dice.sel) return tg.showAlert("Выберите исход");
+                let r = Math.floor(Math.random()*6)+1;
+                document.getElementById('dice-cube').style.transform = `rotateX(${r*90}deg) rotateY(${r*90}deg)`;
+                
+                setTimeout(async () => {
+                    let isOdd = r%2!==0;
+                    let win = (Dice.sel==='odd' && isOdd) || (Dice.sel==='even' && !isOdd);
+                    let amt = win ? Math.floor(b*0.9) : -b;
+                    await App.api('game', {game: 'Dice', amount: parseFloat(amt)});
+                    tg.showAlert(win ? "Победа!" : "Проигрыш");
+                }, 1000);
+            }
+        };
+
+        async function loadBets(type, el) {
+            if(el) {
+                document.querySelectorAll('#p-bets .s-tab').forEach(t=>t.classList.remove('active'));
+                el.classList.add('active');
+            }
+            let res = await fetch(`${API_URL}/api/history`, {headers: {'X-Telegram-ID': user.id}});
+            let data = await res.json();
+            let list = type === 'active' ? data.active : data.history;
+            document.getElementById('bets-list').innerHTML = list.map(b => `
+                <div class="card" style="border-left:3px solid ${b.status==='won'?'#00ff88':(b.status==='lost'?'red':'orange')}">
+                    <div style="font-size:12px;display:flex;justify-content:space-between">
+                        <span>${b.team_home ? b.team_home+' vs '+b.team_away : b.game_type}</span>
+                        <span>${b.status.toUpperCase()}</span>
+                    </div>
+                    <div style="font-weight:700;margin-top:5px">${b.bet_selection || '-'} (x${b.coefficient})</div>
+                    <div style="font-size:12px;color:#888;margin-top:2px">Ставка: ${b.amount} • Выигрыш: ${b.status==='won'?b.potential_win:0}</div>
+                </div>
+            `).join('');
+        }
+
+        window.onload = App.init;
+    </script>
+</body>
+</html>
