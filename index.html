@@ -3,541 +3,365 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Casino & Sports</title>
+    <title>Royal Bet</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"> 
     <style>
-        :root {
-            --bg: #0f111a;
-            --card-bg: #1c1f2e;
-            --primary: #00ff88;
-            --primary-dim: rgba(0, 255, 136, 0.2);
-            --danger: #ff4757;
-            --text: #ffffff;
-            --text-sec: #8b9bb4;
-        }
-
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            padding-bottom: 80px;
-            user-select: none;
-        }
-
-        /* --- UI COMPONENTS --- */
-        .container { padding: 16px; }
-
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: var(--card-bg);
-            padding: 12px 16px;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        .balance-box {
-            font-size: 18px;
-            font-weight: 700;
-            color: var(--primary);
-            text-shadow: 0 0 10px var(--primary-dim);
-        }
-
-        .card {
-            background: var(--card-bg);
-            border-radius: 12px;
-            padding: 12px;
-            margin-bottom: 12px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-
-        .btn {
-            background: var(--primary);
-            color: #000;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-weight: 700;
-            width: 100%;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .btn:active { transform: scale(0.98); opacity: 0.9; }
-
-        /* --- TABS --- */
-        .tabs {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            background: var(--card-bg);
-            display: flex;
-            justify-content: space-around;
-            padding: 12px 0;
-            border-top: 1px solid rgba(255,255,255,0.05);
-            z-index: 100;
-        }
-        .tab-item {
-            color: var(--text-sec);
-            font-size: 12px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-        }
-        .tab-item.active { color: var(--primary); }
-        .page { display: none; }
-        .page.active { display: block; }
-
-        /* --- SPORT --- */
-        .live-badge {
-            background: var(--danger);
-            color: white;
-            font-size: 10px;
-            padding: 2px 6px;
-            border-radius: 4px;
-            animation: pulse 1.5s infinite;
-        }
-        @keyframes pulse { 0% {opacity: 1;} 50% {opacity: 0.6;} 100% {opacity: 1;} }
-
-        .match-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 10px;
-            font-size: 12px;
-            color: var(--text-sec);
-        }
-        .match-teams {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 14px;
-            font-weight: 600;
-            margin-bottom: 12px;
-        }
-        .odds-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
-        .odd-btn {
-            background: rgba(255,255,255,0.05);
-            padding: 8px;
-            border-radius: 6px;
-            text-align: center;
-            font-size: 13px;
-        }
-        .odd-btn span { display: block; color: var(--primary); font-weight: 700; }
-
-        /* --- MINES --- */
-        .mines-grid {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 8px;
-            margin: 20px 0;
-        }
-        .mine-cell {
-            aspect-ratio: 1;
-            background: rgba(255,255,255,0.1);
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            transition: 0.2s;
-        }
-        .mine-cell.revealed.gem { background: var(--primary); }
-        .mine-cell.revealed.bomb { background: var(--danger); }
-
-        /* --- DICE --- */
-        .dice-container {
-            perspective: 1000px;
-            height: 150px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin: 40px 0;
-        }
-        .cube {
-            width: 80px;
-            height: 80px;
-            position: relative;
-            transform-style: preserve-3d;
-            transform: rotateX(-20deg) rotateY(-20deg);
-            transition: transform 1s ease-out;
-        }
-        .face {
-            position: absolute;
-            width: 80px;
-            height: 80px;
-            background: var(--primary);
-            border: 2px solid #000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 30px;
-            color: #000;
-            font-weight: bold;
-        }
-        .front  { transform: translateZ(40px); }
-        .back   { transform: rotateY(180deg) translateZ(40px); }
-        .right  { transform: rotateY(90deg) translateZ(40px); }
-        .left   { transform: rotateY(-90deg) translateZ(40px); }
-        .top    { transform: rotateX(90deg) translateZ(40px); }
-        .bottom { transform: rotateX(-90deg) translateZ(40px); }
-
-        /* --- INPUTS --- */
-        .bet-input {
-            width: 100%;
-            background: rgba(0,0,0,0.3);
-            border: 1px solid rgba(255,255,255,0.1);
-            color: white;
-            padding: 10px;
-            border-radius: 8px;
-            margin-bottom: 10px;
-            box-sizing: border-box;
-        }
-
-        .bet-history-item {
-            font-size: 12px;
-            border-left: 3px solid #555;
-        }
-        .bet-history-item.won { border-color: var(--primary); }
-        .bet-history-item.lost { border-color: var(--danger); }
-        .status-win { color: var(--primary); }
-        .status-loss { color: var(--danger); }
+        :root{--bg:#0b0e11;--card:#151a21;--acc:#00b359;--red:#ff4d4d;--text:#fff;--sub:#8b95a5;--border:#2a303c;--gold:#ffc107;--blue:#2d8cf0}
+        body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,sans-serif;padding-bottom:100px;user-select:none;-webkit-tap-highlight-color:transparent}
+        
+        header{padding:15px;background:rgba(11,14,17,0.95);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100}
+        .bal{font-weight:700;font-size:16px;background:#21262d;padding:6px 14px;border-radius:20px;border:1px solid var(--border)}
+        
+        main{padding:15px}
+        .page{display:none;animation:fade .3s}@keyframes fade{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}.page.active{display:block}
+        
+        .nav{position:fixed;bottom:0;width:100%;background:var(--card);border-top:1px solid var(--border);display:flex;justify-content:space-around;padding:12px 0 25px;z-index:99}
+        .nav-item{color:var(--sub);font-size:10px;text-align:center;transition:.2s}.nav-item i{font-size:22px;margin-bottom:4px;display:block}
+        .nav-item.active{color:var(--text)}.nav-item.active i{color:var(--acc);transform:translateY(-3px)}
+        
+        /* CARDS */
+        .g-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.g-card{height:120px;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:15px;position:relative;overflow:hidden}.g-card.wide{grid-column:span 2;background:linear-gradient(135deg,#1f2530,#151a21)}
+        
+        /* SPORT */
+        .tabs{display:flex;gap:8px;overflow-x:auto;padding-bottom:10px;scrollbar-width:none}.tab{background:var(--card);border:1px solid var(--border);padding:8px 16px;border-radius:20px;font-size:13px;white-space:nowrap;color:var(--sub)}.tab.active{background:var(--text);color:var(--bg);font-weight:700}
+        
+        .match{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:15px;margin-bottom:10px}
+        .live-badge{color:var(--red);font-weight:800;font-size:11px;display:flex;align-items:center;gap:5px}.dot{width:6px;height:6px;border-radius:50%;background:var(--red);animation:blink 1.5s infinite}@keyframes blink{50%{opacity:.4}}
+        .teams{display:flex;justify-content:space-between;align-items:center;margin:15px 0;font-weight:700}
+        .score{background:rgba(255,255,255,.05);padding:5px 12px;border-radius:8px;font-size:18px}
+        .coefs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+        .cf{background:rgba(255,255,255,.03);border:1px solid var(--border);padding:10px;border-radius:10px;text-align:center;font-size:13px}
+        .cf b{display:block;color:var(--acc);margin-top:2px} .cf:active{background:rgba(255,255,255,.1)}
+        
+        /* HISTORY BETS */
+        .h-tab-bar{display:flex;border-bottom:1px solid var(--border);margin-bottom:15px}.ht{flex:1;text-align:center;padding:12px;color:var(--sub);font-size:14px;border-bottom:2px solid transparent}.ht.active{color:var(--text);border-color:var(--acc)}
+        
+        .bet-row{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:10px;position:relative;overflow:hidden}
+        .bet-row.win{border-left:4px solid var(--acc)}.bet-row.lose{border-left:4px solid var(--red)}.bet-row.wait{border-left:4px solid var(--gold)}
+        .bet-head{display:flex;justify-content:space-between;font-size:13px;font-weight:700;margin-bottom:5px}
+        .bet-det{font-size:11px;color:var(--sub);margin-bottom:8px}
+        .bet-res{display:flex;justify-content:space-between;font-size:12px}
+        .win-val{color:var(--acc);font-weight:800}.lose-val{color:var(--red);font-weight:800}
+        
+        /* COMMON */
+        .btn{width:100%;padding:16px;border:none;border-radius:12px;background:var(--acc);color:#fff;font-weight:800;font-size:16px;margin-top:15px;box-shadow:0 4px 15px rgba(0,179,89,.2)}
+        input{width:100%;background:#090b0e;border:1px solid var(--border);padding:14px;border-radius:10px;color:#fff;font-size:16px;outline:none}
+        
+        .dice-area{height:200px;display:flex;align-items:center;justify-content:center;perspective:1000px}.cube{width:80px;height:80px;position:relative;transform-style:preserve-3d;transition:1.5s}.face{position:absolute;width:80px;height:80px;border:2px solid var(--blue);background:#111;display:flex;align-items:center;justify-content:center;font-size:30px;color:#fff;border-radius:12px}.f1{transform:translateZ(40px)}.f6{transform:rotateY(180deg) translateZ(40px)}.f2{transform:rotateY(90deg) translateZ(40px)}.f5{transform:rotateY(-90deg) translateZ(40px)}.f3{transform:rotateX(90deg) translateZ(40px)}.f4{transform:rotateX(-90deg) translateZ(40px)}
+        .mines-g{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}.mc{aspect-ratio:1;background:var(--card);border:1px solid var(--border);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:20px}.mc.gem{background:rgba(0,179,89,.2);border-color:var(--acc)}.mc.boom{background:rgba(255,77,77,.2);border-color:var(--red)}
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <div>Casino & Sports</div>
-        <div class="balance-box" id="userBalance">0.00 ₽</div>
-    </div>
+    <header>
+        <div style="font-weight:900;font-size:19px;letter-spacing:-1px">ROYAL<span style="color:var(--acc)">BET</span></div>
+        <div class="bal"><span style="color:var(--acc)">₽</span> <span id="ui-bal">...</span></div>
+    </header>
 
-    <!-- SPORT TAB -->
-    <div id="sport" class="page active container">
-        <h3>🔥 LIVE</h3>
-        <div id="liveMatches"></div>
-        
-        <h3>📅 Предстоящие</h3>
-        <div id="upcomingMatches"></div>
-    </div>
-
-    <!-- GAMES TAB -->
-    <div id="games" class="page container">
-        <h3>🎰 Мини-игры</h3>
-        
-        <!-- DICE -->
-        <div class="card">
-            <h4>Dice 3D</h4>
-            <div class="dice-container">
-                <div class="cube" id="diceCube">
-                    <div class="face front">1</div>
-                    <div class="face back">6</div>
-                    <div class="face right">3</div>
-                    <div class="face left">4</div>
-                    <div class="face top">2</div>
-                    <div class="face bottom">5</div>
-                </div>
+    <main>
+        <!-- SPORT -->
+        <section id="p-sport" class="page active">
+            <h2 style="margin-top:0">Спорт</h2>
+            <div class="tabs">
+                <div class="tab active" onclick="filter('football',this)">⚽ Футбол</div>
+                <div class="tab" onclick="filter('hockey',this)">🏒 Хоккей</div>
+                <div class="tab" onclick="filter('basketball',this)">🏀 Баскет</div>
             </div>
-            <input type="number" id="diceBet" class="bet-input" placeholder="Ставка" value="10">
-            <button class="btn" onclick="playDice()">Бросить (x2)</button>
-        </div>
+            <div id="feed" style="margin-top:15px"></div>
+        </section>
 
-        <!-- MINES -->
-        <div class="card">
-            <h4>Mines</h4>
-            <input type="number" id="minesBet" class="bet-input" placeholder="Ставка" value="10">
-            <div id="minesGrid" class="mines-grid"></div>
-            <button class="btn" id="startMinesBtn" onclick="startMines()">Начать игру</button>
-            <button class="btn" id="cashoutMinesBtn" onclick="cashoutMines()" style="display:none; background: #e6b333;">Забрать</button>
-        </div>
-    </div>
+        <!-- MY BETS -->
+        <section id="p-bets" class="page">
+            <div class="h-tab-bar">
+                <div class="ht active" onclick="renderBets('active',this)">Активные</div>
+                <div class="ht" onclick="renderBets('history',this)">История</div>
+            </div>
+            <div id="bets-list"></div>
+        </section>
 
-    <!-- BETS TAB -->
-    <div id="bets" class="page container">
-        <h3>Мои ставки</h3>
-        <div id="activeBets"></div>
-        <h4>История</h4>
-        <div id="historyBets"></div>
-    </div>
+        <!-- GAMES -->
+        <section id="p-mines" class="page">
+            <h2>Mines</h2>
+            <div style="background:var(--card);padding:15px;border-radius:16px;border:1px solid var(--border)">
+                <input type="number" id="m-bet" value="100" placeholder="Сумма">
+                <div style="margin:10px 0;display:flex;justify-content:space-between;font-size:13px;color:var(--sub)"><span>Мины: 3</span><span id="m-kef" style="color:var(--acc)">x1.00</span></div>
+                <button id="m-btn" class="btn" onclick="Mines.start()">ИГРАТЬ</button>
+                <button id="m-cash" class="btn" style="display:none;background:var(--gold);color:#000" onclick="Mines.cash()">ЗАБРАТЬ</button>
+            </div>
+            <div class="mines-g" id="m-grid" style="margin-top:20px"></div>
+        </section>
 
-    <!-- NAVIGATION -->
-    <div class="tabs">
-        <div class="tab-item active" onclick="switchTab('sport', this)">
-            <span>⚽</span><span>Спорт</span>
-        </div>
-        <div class="tab-item" onclick="switchTab('games', this)">
-            <span>🎮</span><span>Игры</span>
-        </div>
-        <div class="tab-item" onclick="switchTab('bets', this)">
-            <span>📋</span><span>Ставки</span>
-        </div>
-    </div>
+        <section id="p-dice" class="page">
+            <h2>Dice 3D</h2>
+            <div class="dice-area"><div class="cube" id="cube"><div class="face f1">1</div><div class="face f2">6</div><div class="face f3">2</div><div class="face f4">5</div><div class="face f5">3</div><div class="face f6">4</div></div></div>
+            <div style="background:var(--card);padding:15px;border-radius:16px;border:1px solid var(--border)">
+                <input type="number" id="d-bet" value="100">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px">
+                    <button class="cf" onclick="Dice.type='odd'">НЕЧЕТ <b>x1.9</b></button>
+                    <button class="cf" onclick="Dice.type='even'">ЧЕТ <b>x1.9</b></button>
+                </div>
+                <button class="btn" style="background:var(--blue)" onclick="Dice.roll()">БРОСОК</button>
+            </div>
+        </section>
+
+        <!-- PROFILE -->
+        <section id="p-profile" class="page">
+            <h2>Профиль</h2>
+            <div style="text-align:center;padding:20px;background:var(--card);border-radius:16px;border:1px solid var(--border)">
+                <div style="font-size:40px">😎</div>
+                <h3>ID: <span id="uid">...</span></h3>
+                <div style="font-size:12px;color:var(--sub)">Админка: Доступна через Telegram бот команды</div>
+            </div>
+        </section>
+    </main>
+
+    <nav>
+        <div class="nav-item active" onclick="nav('sport',this)"><i class="fas fa-trophy"></i>Спорт</div>
+        <div class="nav-item" onclick="nav('bets',this)"><i class="fas fa-ticket-alt"></i>Ставки</div>
+        <div class="nav-item" onclick="nav('mines',this)"><i class="fas fa-bomb"></i>Mines</div>
+        <div class="nav-item" onclick="nav('dice',this)"><i class="fas fa-dice"></i>Dice</div>
+        <div class="nav-item" onclick="nav('profile',this)"><i class="fas fa-user"></i>Профиль</div>
+    </nav>
 
     <script>
-        // CONFIG
-        const API_URL = "https://backend-4jag.onrender.com"; // ЗАМЕНИТЬ ПЕРЕД ДЕПЛОЕМ!
         const tg = window.Telegram.WebApp;
-        
-        let currentUser = { id: 0, balance: 0 };
-        
-        // Получаем ID пользователя (в проде нужно валидировать initData)
-        // Для теста берем ID из user.id или генерируем случайный
-        const userId = tg.initDataUnsafe?.user?.id || 12345;
-        const userName = tg.initDataUnsafe?.user?.username || "User";
+        // ТВОЙ URL
+        const API_URL = "https://backend-4jag.onrender.com"; 
 
-        // Headers helper
-        const getHeaders = () => ({
-            "Content-Type": "application/json",
-            "X-Telegram-ID": userId.toString()
-        });
+        let state = { matches: [], history: [], active: [], bal: 0 };
+        let curCat = 'football';
 
-        async function init() {
-            tg.expand();
-            // Auth & Get Balance
-            const res = await fetch(`${API_URL}/api/init?tg_id=${userId}&username=${userName}`);
-            const data = await res.json();
-            updateBalanceUI(data.balance);
+        const App = {
+            uid: tg.initDataUnsafe?.user?.id || 12345,
+            username: tg.initDataUnsafe?.user?.username || "Guest",
             
-            // Start Polling
-            loadMatches();
-            loadHistory();
-            setInterval(loadMatches, 10000); // Раз в 10 сек обновляем матчи
-            setInterval(refreshBalance, 10000);
-        }
-
-        function updateBalanceUI(amount) {
-            currentUser.balance = amount;
-            document.getElementById('userBalance').innerText = parseFloat(amount).toFixed(2) + ' ₽';
-        }
-
-        async function refreshBalance() {
-            const res = await fetch(`${API_URL}/api/init?tg_id=${userId}`);
-            const data = await res.json();
-            updateBalanceUI(data.balance);
-        }
-
-        // --- TABS LOGIC ---
-        function switchTab(tabId, el) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.getElementById(tabId).classList.add('active');
-            
-            document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
-            el.classList.add('active');
-
-            if(tabId === 'bets') loadHistory();
-        }
-
-        // --- SPORTS LOGIC ---
-        async function loadMatches() {
-            try {
-                const res = await fetch(`${API_URL}/api/matches`);
-                const data = await res.json();
+            init: async function() {
+                tg.expand();
+                document.getElementById('uid').innerText = this.uid;
                 
-                renderMatchesList(data.live, 'liveMatches', true);
-                renderMatchesList(data.upcoming, 'upcomingMatches', false);
-            } catch (e) { console.error(e); }
+                // Загружаем начальные данные
+                await this.refreshUser();
+                await this.pollMatches();
+                await this.loadBets();
+
+                // Поллинг
+                setInterval(() => this.pollMatches(), 10000);
+                setInterval(() => this.refreshUser(), 10000);
+            },
+
+            refreshUser: async function() {
+                try {
+                    let res = await fetch(`${API_URL}/api/init?tg_id=${this.uid}&username=${this.username}`);
+                    let data = await res.json();
+                    state.bal = data.balance;
+                    document.getElementById('ui-bal').innerText = Math.floor(state.bal).toLocaleString();
+                } catch(e) { console.error(e); }
+            },
+
+            pollMatches: async function() {
+                try {
+                    let res = await fetch(`${API_URL}/api/matches`);
+                    let data = await res.json();
+                    // Объединяем Live и Upcoming в один массив для фронта
+                    state.matches = [...data.live, ...data.upcoming];
+                    if(document.getElementById('p-sport').classList.contains('active')) renderMatches();
+                } catch(e) {}
+            },
+
+            loadBets: async function() {
+                try {
+                    let res = await fetch(`${API_URL}/api/history`, {headers: {'X-Telegram-ID': this.uid.toString()}});
+                    let data = await res.json();
+                    state.active = data.active;
+                    state.history = data.history;
+                    if(document.getElementById('p-bets').classList.contains('active')) renderBets();
+                } catch(e) {}
+            },
+
+            placeBet: async function(matchId, selection, amount, k) {
+                // Оптимистичное списание
+                state.bal -= amount;
+                document.getElementById('ui-bal').innerText = Math.floor(state.bal);
+
+                let res = await fetch(`${API_URL}/api/bet`, {
+                    method:'POST', 
+                    headers:{'Content-Type':'application/json', 'X-Telegram-ID': this.uid.toString()},
+                    body:JSON.stringify({match_id: matchId, selection: selection, amount: parseFloat(amount), coefficient: k})
+                });
+                let d = await res.json();
+                if(d.status==='ok') {
+                    state.bal = d.new_balance;
+                    this.loadBets();
+                    tg.showAlert("Ставка принята!");
+                } else {
+                    tg.showAlert("Ошибка: " + d.detail);
+                }
+            },
+
+            playGame: async function(gameName, amount) {
+                let res = await fetch(`${API_URL}/api/game`, {
+                    method:'POST', 
+                    headers:{'Content-Type':'application/json', 'X-Telegram-ID': this.uid.toString()},
+                    body:JSON.stringify({game: gameName, amount: amount})
+                });
+                let d = await res.json();
+                state.bal = d.new_balance;
+                document.getElementById('ui-bal').innerText = Math.floor(state.bal).toLocaleString();
+            }
+        };
+
+        // --- RENDER FUNCTIONS ---
+        function nav(p, el) {
+            document.querySelectorAll('.page').forEach(e=>e.classList.remove('active'));
+            document.getElementById('p-'+p).classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(e=>e.classList.remove('active'));
+            el.classList.add('active');
+            if(p==='bets') App.loadBets();
         }
 
-        function renderMatchesList(matches, elementId, isLive) {
-            const container = document.getElementById(elementId);
-            container.innerHTML = '';
+        function filter(cat, el) {
+            curCat = cat;
+            document.querySelectorAll('.tab').forEach(e=>e.classList.remove('active'));
+            el.classList.add('active');
+            renderMatches();
+        }
+
+        function renderMatches() {
+            let list = state.matches.filter(m => m.sport === curCat);
             
-            if (matches.length === 0) {
-                container.innerHTML = '<div style="text-align:center; color:#555; padding:20px;">Нет матчей</div>';
+            document.getElementById('feed').innerHTML = list.map(m => {
+                let isLive = m.status === 'live';
+                let time = isLive ? 
+                    `<span class="live-badge"><div class="dot"></div> ${m.current_minute}'</span>` : 
+                    `<span style="color:var(--sub);font-size:12px">${new Date(m.start_time).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</span>`;
+                
+                let score = isLive ? `${m.score_home}:${m.score_away}` : "VS";
+
+                return `
+                <div class="match">
+                    <div style="display:flex;justify-content:space-between;margin-bottom:10px">${time} <span style="font-size:10px;color:var(--sub)">${m.sport.toUpperCase()}</span></div>
+                    <div class="teams">
+                        <div style="width:40%">${m.team_home}</div>
+                        <div class="score">${score}</div>
+                        <div style="width:40%;text-align:right">${m.team_away}</div>
+                    </div>
+                    <div class="coefs">
+                        <div class="cf" onclick="doBet(${m.id},'home',${m.odds_home})">П1 <b>${m.odds_home}</b></div>
+                        <div class="cf" onclick="doBet(${m.id},'draw',${m.odds_draw})">X <b>${m.odds_draw}</b></div>
+                        <div class="cf" onclick="doBet(${m.id},'away',${m.odds_away})">П2 <b>${m.odds_away}</b></div>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        let curBetTab = 'active';
+        function renderBets(tab, el) {
+            if(tab) { curBetTab = tab; document.querySelectorAll('.ht').forEach(e=>e.classList.remove('active')); el.classList.add('active'); }
+            
+            const cont = document.getElementById('bets-list');
+            cont.innerHTML = '';
+            
+            let source = curBetTab === 'active' ? state.active : state.history;
+
+            if(source.length === 0) {
+                cont.innerHTML = '<div style="text-align:center;color:#555;margin-top:20px">Пусто</div>';
                 return;
             }
 
-            matches.forEach(m => {
-                const div = document.createElement('div');
-                div.className = 'card';
-                const timeStr = isLive ? `<span style="color:var(--primary)">${m.current_minute}'</span>` : new Date(m.start_time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                const scoreStr = isLive ? `${m.score_home} : ${m.score_away}` : "vs";
-
-                div.innerHTML = `
-                    <div class="match-header">
-                        <span>${isLive ? '<span class="live-badge">LIVE</span>' : ''} ${m.sport.toUpperCase()}</span>
-                        <span>${timeStr}</span>
-                    </div>
-                    <div class="match-teams">
-                        <span>${m.team_home}</span>
-                        <span style="font-size:18px; color:var(--primary)">${scoreStr}</span>
-                        <span>${m.team_away}</span>
-                    </div>
-                    <div class="odds-row">
-                        <div class="odd-btn" onclick="placeBet(${m.id}, 'home', ${m.odds_home})">П1<br><span>${m.odds_home}</span></div>
-                        <div class="odd-btn" onclick="placeBet(${m.id}, 'draw', ${m.odds_draw})">X<br><span>${m.odds_draw}</span></div>
-                        <div class="odd-btn" onclick="placeBet(${m.id}, 'away', ${m.odds_away})">П2<br><span>${m.odds_away}</span></div>
-                    </div>
-                `;
-                container.appendChild(div);
-            });
-        }
-
-        async function placeBet(matchId, selection, coef) {
-            const amount = parseFloat(prompt(`Сделать ставку на ${selection} (k=${coef})?\nВаш баланс: ${currentUser.balance}\nВведите сумму:`));
-            if (!amount || isNaN(amount) || amount <= 0) return;
-
-            try {
-                const res = await fetch(`${API_URL}/api/bet`, {
-                    method: 'POST',
-                    headers: getHeaders(),
-                    body: JSON.stringify({ match_id: matchId, selection, amount, coefficient: coef })
-                });
-                const data = await res.json();
+            source.forEach(b => {
+                let isWin = b.status === 'won';
+                let isLose = b.status === 'lost';
+                let statusClass = isWin ? 'win' : (isLose ? 'lose' : 'wait');
+                let statusText = isWin ? 'ПОБЕДА' : (isLose ? 'ПРОИГРЫШ' : 'В ИГРЕ');
+                let color = isWin ? 'var(--acc)' : (isLose ? 'var(--red)' : 'var(--gold)');
                 
-                if (res.ok) {
-                    tg.showAlert("Ставка принята!");
-                    updateBalanceUI(data.new_balance);
-                } else {
-                    tg.showAlert("Ошибка: " + data.detail);
-                }
-            } catch (e) { tg.showAlert("Ошибка сети"); }
-        }
+                let diff = isWin ? `+${b.potential_win}` : (isLose ? `-${b.amount}` : `~${b.potential_win}`);
 
-        // --- HISTORY ---
-        async function loadHistory() {
-            const res = await fetch(`${API_URL}/api/history`, { headers: getHeaders() });
-            const data = await res.json();
-            
-            const render = (list, id) => {
-                const el = document.getElementById(id);
-                el.innerHTML = '';
-                list.forEach(b => {
-                    const statusClass = b.status === 'won' ? 'status-win' : (b.status === 'lost' ? 'status-loss' : '');
-                    el.innerHTML += `
-                        <div class="card bet-history-item ${b.status}">
-                            <div style="display:flex; justify-content:space-between">
-                                <span>${b.team_home} vs ${b.team_away}</span>
-                                <span class="${statusClass}">${b.status.toUpperCase()}</span>
-                            </div>
-                            <div style="font-size:11px; color:#aaa; margin-top:4px">
-                                Ставка: ${b.amount}₽ на ${b.bet_selection} (x${b.coefficient}) 
-                                <br> Выигрыш: ${b.status === 'won' ? b.potential_win : 0}₽
-                            </div>
-                        </div>
-                    `;
-                });
-            };
-            
-            render(data.active, 'activeBets');
-            render(data.history, 'historyBets');
-        }
-
-        // --- DICE GAME ---
-        async function playDice() {
-            const amount = parseFloat(document.getElementById('diceBet').value);
-            if(amount > currentUser.balance) return tg.showAlert("Недостаточно средств");
-
-            const cube = document.getElementById('diceCube');
-            // Random rotate
-            const xRand = Math.floor(Math.random() * 4 + 5) * 90;
-            const yRand = Math.floor(Math.random() * 4 + 5) * 90;
-            
-            cube.style.transform = `rotateX(${xRand}deg) rotateY(${yRand}deg)`;
-
-            // Logic Simulation (Client side visual, server side validation in real app would be complex, here simplified)
-            // Определяем грань (упрощенно: считаем это просто 50/50 выигрыш для демо)
-            const win = Math.random() > 0.6; // 40% win rate
-            const change = win ? amount : -amount;
-
-            setTimeout(async () => {
-                const res = await fetch(`${API_URL}/api/game`, {
-                    method: 'POST',
-                    headers: getHeaders(),
-                    body: JSON.stringify({ game: 'dice', amount: change })
-                });
-                const data = await res.json();
-                updateBalanceUI(data.new_balance);
-                tg.showAlert(win ? `Победа! +${amount}` : "Проигрыш");
-            }, 1000);
-        }
-
-        // --- MINES GAME ---
-        let minesActive = false;
-        let minesBetAmount = 0;
-        let minesMultiplier = 1.0;
-        
-        function startMines() {
-            minesBetAmount = parseFloat(document.getElementById('minesBet').value);
-            if(minesBetAmount > currentUser.balance) return tg.showAlert("Недостаточно средств");
-            if(minesBetAmount <= 0) return;
-
-            // Списываем ставку сразу (оптимистично) или замораживаем
-            // В этом демо спишем при проигрыше или вернем при выигрыше, но для простоты:
-            // Спишем ставку на сервере
-            
-            changeBalanceServer(-minesBetAmount);
-
-            minesActive = true;
-            minesMultiplier = 1.0;
-            document.getElementById('startMinesBtn').style.display = 'none';
-            document.getElementById('cashoutMinesBtn').style.display = 'block';
-            document.getElementById('cashoutMinesBtn').innerText = `Забрать ${minesBetAmount}`;
-            
-            const grid = document.getElementById('minesGrid');
-            grid.innerHTML = '';
-            for(let i=0; i<25; i++) {
-                const cell = document.createElement('div');
-                cell.className = 'mine-cell';
-                cell.onclick = () => openMine(cell);
-                grid.appendChild(cell);
-            }
-        }
-
-        async function changeBalanceServer(amount) {
-            const res = await fetch(`${API_URL}/api/game`, {
-                method: 'POST', headers: getHeaders(),
-                body: JSON.stringify({ game: 'mines_entry', amount: amount })
+                cont.innerHTML += `
+                <div class="bet-row ${statusClass}">
+                    <div class="bet-head"><span>${b.team_home} vs ${b.team_away}</span> <span style="color:${color}">${statusText}</span></div>
+                    <div class="bet-det">Выбор: ${b.bet_selection.toUpperCase()} • Кэф: x${b.coefficient}</div>
+                    <div class="bet-res">
+                        <span>Ставка: ${b.amount}₽</span>
+                        <span style="font-weight:800;color:${color}">${diff} ₽</span>
+                    </div>
+                </div>`;
             });
-            const data = await res.json();
-            updateBalanceUI(data.new_balance);
         }
 
-        function openMine(cell) {
-            if(!minesActive || cell.classList.contains('revealed')) return;
-            
-            const isBomb = Math.random() < 0.2; // 20% бомб
-            cell.classList.add('revealed');
+        function doBet(mid, ch, k) {
+            let sum = prompt("Сумма ставки:", 100);
+            if(sum && !isNaN(sum)) App.placeBet(mid, ch, sum, k);
+        }
 
-            if(isBomb) {
-                cell.classList.add('bomb');
-                cell.innerText = '💣';
-                minesActive = false;
-                tg.showAlert("Взрыв! Вы проиграли.");
-                resetMinesUI();
-            } else {
-                cell.classList.add('gem');
-                cell.innerText = '💎';
-                minesMultiplier *= 1.2;
-                const currentWin = (minesBetAmount * minesMultiplier).toFixed(2);
-                document.getElementById('cashoutMinesBtn').innerText = `Забрать ${currentWin}`;
+        // --- GAMES LOGIC ---
+        const Mines = {
+            act: false, grid: [], bet: 0, mult: 1,
+            init: function(){ 
+                let g=document.getElementById('m-grid'); g.innerHTML='';
+                for(let i=0;i<25;i++){ let d=document.createElement('div');d.className='mc';d.onclick=()=>this.hit(i,d);g.appendChild(d); }
+            },
+            start: function() {
+                let b = +document.getElementById('m-bet').value;
+                if(b > state.bal) return alert("Мало денег");
+                this.bet = b; this.act = true; this.mult=1;
+                this.grid = Array(25).fill(0);
+                // 3 bombs simple logic client-side (demo)
+                let c=0; while(c<3){let r=Math.floor(Math.random()*25); if(!this.grid[r]){this.grid[r]=1;c++}}
+                
+                // Server logic: deduct bet
+                App.playGame('Mines Start', -b);
+                
+                document.getElementById('m-btn').style.display='none'; document.getElementById('m-cash').style.display='block';
+                document.querySelectorAll('.mc').forEach(e=>{e.className='mc';e.innerText=''});
+            },
+            hit: function(i, el) {
+                if(!this.act || el.classList.contains('gem')) return;
+                if(this.grid[i]) {
+                    el.classList.add('boom'); el.innerText='💣'; this.act=false;
+                    tg.showAlert("Взрыв!");
+                    this.end(0);
+                } else {
+                    el.classList.add('gem'); el.innerText='💎';
+                    this.mult *= 1.2;
+                    document.getElementById('m-kef').innerText = "x"+this.mult.toFixed(2);
+                }
+            },
+            cash: function() { 
+                this.act=false; 
+                let win = Math.floor(this.bet * this.mult);
+                // Server logic: add win (bet was already deducted)
+                // We need to add (bet + profit) = win
+                App.playGame('Mines Win', win); 
+                this.end(win); 
+            },
+            end: function(win) {
+                document.getElementById('m-btn').style.display='block'; document.getElementById('m-cash').style.display='none';
             }
-        }
+        };
 
-        function cashoutMines() {
-            if(!minesActive) return;
-            const winAmount = minesBetAmount * minesMultiplier;
-            // Возвращаем ставку + выигрыш (т.к. мы списали ставку в начале)
-            // Но в changeBalanceServer мы списали, значит нужно начислить winAmount
-            changeBalanceServer(winAmount); // Это добавит баланс
-            
-            minesActive = false;
-            tg.showAlert(`Вы забрали ${winAmount.toFixed(2)}!`);
-            resetMinesUI();
-        }
+        const Dice = {
+            type: null,
+            roll: function() {
+                let b = +document.getElementById('d-bet').value;
+                if(!this.type || b > state.bal) return alert("Ошибка или баланс");
+                let r = Math.floor(Math.random()*6)+1;
+                
+                let c = document.getElementById('cube');
+                c.style.transform = `rotateX(${r*90}deg) rotateY(${r*90}deg)`;
+                
+                setTimeout(()=>{
+                    let w = (this.type==='odd' && r%2!==0) || (this.type==='even' && r%2===0);
+                    let change = w ? Math.floor(b*0.9) : -b; // Win = bet * 1.9 - bet = bet * 0.9
+                    
+                    App.playGame('Dice', change);
+                    if(w) tg.showAlert("Победа!");
+                }, 1000);
+            }
+        };
 
-        function resetMinesUI() {
-            document.getElementById('startMinesBtn').style.display = 'block';
-            document.getElementById('cashoutMinesBtn').style.display = 'none';
-        }
-
-        // Init App
-        init();
-
+        window.onload = () => App.init();
     </script>
 </body>
 </html>
