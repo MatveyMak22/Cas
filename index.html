@@ -27,7 +27,7 @@
         .bal-badge { background: rgba(255,255,255,0.05); border: 1px solid var(--border); padding: 5px 12px; border-radius: 20px; font-weight: 600; font-size: 14px; }
         
         .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 80px; background: rgba(28, 31, 38, 0.95); border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding-bottom: 15px; z-index: 1000; }
-        .nav-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: var(--text-muted); font-size: 10px; width: 25%; height: 100%; }
+        .nav-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: var(--text-muted); font-size: 10px; width: 20%; height: 100%; transition: 0.2s; }
         .nav-btn.active { color: var(--text-main); }
         .nav-btn.active i { color: var(--primary); transform: translateY(-2px); }
         .nav-btn i { font-size: 20px; }
@@ -39,7 +39,6 @@
         /* CARDS & UI */
         .card { background: var(--bg-card); border-radius: 16px; padding: 15px; margin-bottom: 12px; border: 1px solid var(--border); }
         .btn { background: var(--gradient); color: #000; border: none; width: 100%; padding: 14px; border-radius: 12px; font-weight: 800; font-size: 16px; margin-top: 10px; }
-        .btn-sec { background: rgba(255,255,255,0.1); color: #fff; margin-top: 0; }
         input { width: 100%; background: rgba(0,0,0,0.3); border: 1px solid var(--border); padding: 12px; border-radius: 10px; color: #fff; font-size: 16px; outline: none; margin-bottom: 10px; }
 
         /* TABS */
@@ -69,15 +68,13 @@
         .crash-area { position: relative; height: 200px; background: #15181e; border-radius: 12px; overflow: hidden; margin-bottom: 15px; display: flex; align-items: flex-end; }
         #crashCanvas { width: 100%; height: 100%; }
         .crash-val { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 40px; font-weight: 900; color: #fff; text-shadow: 0 0 20px rgba(0,0,0,0.5); }
-        .crash-val.crashed { color: var(--danger); }
         
-        /* MINES */
+        /* MINES & DICE */
         .mines-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin: 15px 0; }
         .mine-cell { aspect-ratio: 1; background: rgba(255,255,255,0.05); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 20px; cursor: pointer; }
         .mine-cell.gem { background: rgba(0,255,136,0.2); border: 1px solid var(--primary); }
         .mine-cell.boom { background: rgba(255,59,59,0.2); border: 1px solid var(--danger); }
 
-        /* DICE */
         .dice-3d { perspective: 600px; height: 120px; display: flex; align-items: center; justify-content: center; margin: 20px 0; }
         .cube { width: 60px; height: 60px; position: relative; transform-style: preserve-3d; transition: 1s; }
         .face { position: absolute; width: 60px; height: 60px; background: #fff; color: #000; border: 2px solid #999; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold; }
@@ -95,7 +92,7 @@
         <div class="bal-badge"><span style="color:var(--primary)">₽</span> <span id="header-bal">...</span></div>
     </header>
 
-    <!-- SPORT -->
+    <!-- 1. SPORT -->
     <div id="p-sport" class="page active">
         <div class="sport-tabs">
             <div class="s-tab active" onclick="filterSport('football', this)">Футбол</div>
@@ -107,7 +104,7 @@
         <div id="matches-feed"></div>
     </div>
 
-    <!-- GAMES HUB -->
+    <!-- 2. GAMES HUB -->
     <div id="p-games-hub" class="page">
         <h2>Игры</h2>
         <div class="game-grid">
@@ -126,7 +123,7 @@
         </div>
     </div>
 
-    <!-- GAME: CRASH -->
+    <!-- INDIVIDUAL GAMES -->
     <div id="p-game-crash" class="page">
         <div class="back-btn" onclick="openGame('hub')"><i class="fas fa-arrow-left"></i> Назад</div>
         <div class="card">
@@ -140,7 +137,6 @@
         </div>
     </div>
 
-    <!-- GAME: MINES -->
     <div id="p-game-mines" class="page">
         <div class="back-btn" onclick="openGame('hub')"><i class="fas fa-arrow-left"></i> Назад</div>
         <div class="card">
@@ -155,7 +151,6 @@
         </div>
     </div>
 
-    <!-- GAME: DICE -->
     <div id="p-game-dice" class="page">
         <div class="back-btn" onclick="openGame('hub')"><i class="fas fa-arrow-left"></i> Назад</div>
         <div class="card">
@@ -175,8 +170,9 @@
         </div>
     </div>
 
-    <!-- BETS -->
+    <!-- 3. BETS -->
     <div id="p-bets" class="page">
+        <h2>Ставки</h2>
         <div class="sport-tabs">
             <div class="s-tab active" onclick="loadBets('active', this)">Активные</div>
             <div class="s-tab" onclick="loadBets('history', this)">История</div>
@@ -184,34 +180,56 @@
         <div id="bets-list"></div>
     </div>
 
-    <!-- NAV -->
+    <!-- 4. PROFILE (ВЕРНУЛ!) -->
+    <div id="p-profile" class="page">
+        <div class="card" style="text-align:center; padding:30px;">
+            <div style="font-size:50px; margin-bottom:10px;">👑</div>
+            <h2 id="u-name">Guest</h2>
+            <div style="color:var(--text-muted); font-size:14px; margin-bottom:20px;">ID: <span id="u-id">...</span></div>
+            <div style="background:rgba(0,255,136,0.1); color:var(--primary); padding:15px; border-radius:12px; display:inline-block; font-size:18px; font-weight:700">
+                <span id="p-bal">...</span> ₽
+            </div>
+        </div>
+    </div>
+
+    <!-- NAVIGATION -->
     <nav class="bottom-nav">
         <div class="nav-btn active" onclick="nav('sport', this)"><i class="fas fa-trophy"></i><span>Спорт</span></div>
         <div class="nav-btn" onclick="nav('games-hub', this)"><i class="fas fa-gamepad"></i><span>Игры</span></div>
         <div class="nav-btn" onclick="nav('bets', this)"><i class="fas fa-ticket-alt"></i><span>Ставки</span></div>
+        <div class="nav-btn" onclick="nav('profile', this)"><i class="fas fa-user-circle"></i><span>Профиль</span></div>
     </nav>
 
     <script>
         const tg = window.Telegram.WebApp;
-        const API_URL = "https://backend-4jag.onrender.com"; // УКАЖИ СВОЙ URL
+        // 👇 ВСТАВЬ СВОЮ ССЫЛКУ С RENDER 👇
+        const API_URL = "https://backend-4jag.onrender.com"; 
 
-        let user = { id: tg.initDataUnsafe?.user?.id || 12345, username: "Guest" };
+        let user = { id: tg.initDataUnsafe?.user?.id || 12345, username: tg.initDataUnsafe?.user?.username || "Guest" };
         let state = { matches: [], balance: 0 };
         let currentSport = 'football';
 
         const App = {
             init: async () => {
                 tg.expand();
+                tg.headerColor = '#0e1015';
+                
+                // Set Profile Data
+                document.getElementById('u-id').innerText = user.id;
+                document.getElementById('u-name').innerText = user.username;
+
                 App.poll();
                 setInterval(App.poll, 5000);
             },
             poll: async () => {
                 // User Info
                 try {
-                    let res = await fetch(`${API_URL}/api/init?tg_id=${user.id}`);
+                    let res = await fetch(`${API_URL}/api/init?tg_id=${user.id}&username=${user.username}`);
                     let d = await res.json();
                     state.balance = d.balance;
-                    document.getElementById('header-bal').innerText = Math.floor(d.balance).toLocaleString();
+                    let balStr = Math.floor(d.balance).toLocaleString();
+                    document.getElementById('header-bal').innerText = balStr;
+                    document.getElementById('p-bal').innerText = balStr;
                 } catch(e){}
 
                 // Matches
@@ -236,7 +254,6 @@
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
             
-            // Если переходим в hub, скрываем конкретные игры
             if(page === 'games-hub') {
                 document.getElementById('p-games-hub').classList.add('active');
             } else {
@@ -274,12 +291,11 @@
                 let isLive = m.status === 'live';
                 let time = isLive ? `<span style="color:var(--danger)">LIVE</span>` : new Date(m.start_time).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
                 
-                // RENDER TABLE FOR TENNIS
                 if(currentSport === 'tennis' || currentSport === 'table_tennis') {
-                    let sets = m.score_details || []; // [[6,4], [2,1], [0,0]]
+                    let sets = m.score_details || [];
                     let maxSets = currentSport === 'tennis' ? 3 : 5;
                     let cols = '';
-                    for(let i=0; i<maxSets; i++) cols += `<th>${i+1} сет</th>`;
+                    for(let i=0; i<maxSets; i++) cols += `<th>${i+1}</th>`;
                     
                     let row1 = '', row2 = '';
                     for(let i=0; i<maxSets; i++) {
@@ -313,7 +329,6 @@
                         </div>
                     </div>`;
                 } else {
-                    // STANDARD (Football/Hockey)
                     html += `
                     <div class="card">
                         <div class="match-row">
@@ -344,7 +359,7 @@
             }
         }
 
-        // --- CRASH LOGIC ---
+        // --- CRASH ---
         const Crash = {
             active: false, ctx: null, x: 0, val: 1.00, animReq: null,
             initCanvas: () => {
@@ -355,7 +370,6 @@
             play: async () => {
                 let b = document.getElementById('crash-bet').value;
                 if(b > state.balance) return;
-                
                 let res = await App.api('crash/start', {bet: parseFloat(b)});
                 if(res.status !== 'started') return tg.showAlert("Ошибка");
 
@@ -369,33 +383,20 @@
                 if(!Crash.active) return;
                 let c = document.getElementById('crashCanvas');
                 let ctx = Crash.ctx;
-                
-                // Physics sim
-                Crash.val += 0.005 * Crash.val; // Exp growth
+                Crash.val += 0.005 * Crash.val;
                 Crash.x += 1;
-                
-                // Draw
                 ctx.clearRect(0,0,c.width,c.height);
                 ctx.beginPath();
                 ctx.moveTo(0, c.height);
-                // Simple curve calc
-                ctx.quadraticCurveTo(c.width/2, c.height, Crash.x % c.width, c.height - (Crash.val*20)); 
+                ctx.quadraticCurveTo(c.width/2, c.height, Crash.x % c.width, c.height - (Crash.val*15)); 
                 ctx.strokeStyle = '#00ff88'; ctx.lineWidth = 3; ctx.stroke();
-
                 document.getElementById('crash-val').innerText = Crash.val.toFixed(2) + 'x';
-
-                // Auto fail local sim (server handles real logic)
-                // Just keep running until cashout or server response logic (in real app we use socket)
-                // For this demo, we rely on user clicking Cashout. 
-                // If user doesn't click, we don't know when to stop visual without server info.
-                // Hack: We don't stop visually until cashout.
                 Crash.animReq = requestAnimationFrame(Crash.loop);
             },
             cashout: async () => {
                 Crash.active = false;
                 cancelAnimationFrame(Crash.animReq);
                 let mult = parseFloat(document.getElementById('crash-val').innerText);
-                
                 let res = await App.api('crash/cashout', {multiplier: mult});
                 
                 if(res.status === 'won') {
@@ -404,9 +405,8 @@
                 } else {
                     document.getElementById('crash-val').innerText = "CRASH @ " + res.crash_point + "x";
                     document.getElementById('crash-val').style.color = 'red';
-                    tg.showAlert("Самолет улетел раньше!");
+                    tg.showAlert("Краш!");
                 }
-                
                 setTimeout(() => {
                     document.getElementById('crash-val').style.color = '#fff';
                     document.getElementById('crash-val').innerText = "1.00x";
@@ -417,7 +417,7 @@
             }
         };
 
-        // --- MINES & DICE (Simplified for brevity, same logic as before) ---
+        // --- MINES & DICE ---
         const Mines = {
             active: false, grid: [], bet:0, mult:1,
             start: async () => {
@@ -426,7 +426,6 @@
                 Mines.bet = parseFloat(b); Mines.mult = 1; Mines.active = true;
                 Mines.grid = Array(25).fill(0);
                 for(let i=0;i<3;i++) Mines.grid[Math.floor(Math.random()*25)] = 1;
-                
                 document.getElementById('mines-grid').innerHTML = Mines.grid.map((v,i)=>
                     `<div class="mine-cell" onclick="Mines.click(${i}, ${v}, this)"></div>`
                 ).join('');
@@ -437,8 +436,7 @@
                 if(!Mines.active || el.classList.contains('gem')) return;
                 if(isBomb) {
                     el.classList.add('boom'); el.innerHTML='💣';
-                    Mines.active = false; tg.showAlert("Взрыв!");
-                    Mines.reset();
+                    Mines.active = false; tg.showAlert("Взрыв!"); Mines.reset();
                 } else {
                     el.classList.add('gem'); el.innerHTML='💎';
                     Mines.mult *= 1.2;
@@ -465,7 +463,6 @@
                 if(!Dice.sel) return tg.showAlert("Выберите исход");
                 let r = Math.floor(Math.random()*6)+1;
                 document.getElementById('dice-cube').style.transform = `rotateX(${r*90}deg) rotateY(${r*90}deg)`;
-                
                 setTimeout(async () => {
                     let isOdd = r%2!==0;
                     let win = (Dice.sel==='odd' && isOdd) || (Dice.sel==='even' && !isOdd);
