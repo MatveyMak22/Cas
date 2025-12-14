@@ -2,561 +2,387 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Royal Bet 🎮</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мой Mini App</title>
     <style>
         :root {
-            --bg-primary: #0e1015; --bg-secondary: #15181f; --bg-tertiary: #1c1f2a;
-            --accent-green: #00ff88; --accent-blue: #00a8ff; --accent-red: #ff4757;
-            --text-primary: #ffffff; --text-secondary: #8c94a3;
+            --bg-dark: #121212;
+            --bg-medium: #1e1e1e;
+            --bg-light: #2c2c2c;
+            --text-primary: #e0e0e0;
+            --text-secondary: #b0b0b0;
+            --accent-color: #00bcd4; /* Teal for highlights */
+            --accent-color-dark: #008ba3;
+            --border-color: #333;
+            --shadow-color: rgba(0, 0, 0, 0.4);
+            --font-family: 'Inter', sans-serif;
         }
-        body { margin: 0; padding: 0; font-family: -apple-system, sans-serif; background: var(--bg-primary); color: var(--text-primary); padding-bottom: 80px; overflow-x: hidden; }
-        .container { padding: 16px; max-width: 600px; margin: 0 auto; }
-        .hidden { display: none !important; }
-        
-        /* Access Denied Screen */
-        #accessDenied { position: fixed; top:0; left:0; width:100%; height:100%; background: var(--bg-primary); z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
-        
-        .header { display: flex; justify-content: space-between; align-items: center; padding: 16px 0; border-bottom: 1px solid #2a2f3d; }
-        .balance { background: var(--bg-tertiary); padding: 8px 16px; border-radius: 20px; color: var(--accent-green); font-weight: bold; border: 1px solid #2a2f3d; }
-        
-        .card { background: var(--bg-secondary); border-radius: 12px; padding: 16px; margin-bottom: 16px; border: 1px solid #2a2f3d; }
-        .btn { width: 100%; padding: 14px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; margin-top: 8px; font-size: 16px; transition: transform 0.1s; }
-        .btn:active { transform: scale(0.98); }
-        .btn-primary { background: var(--accent-green); color: #000; }
-        .btn-secondary { background: var(--bg-tertiary); color: #fff; border: 1px solid #2a2f3d; }
-        .btn-danger { background: var(--accent-red); color: #fff; }
-        
-        /* Mines */
-        .mines-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin: 20px 0; }
-        .mine-cell { aspect-ratio: 1; background: var(--bg-tertiary); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 24px; cursor: pointer; border: 2px solid transparent; transition: all 0.2s; }
-        .mine-cell:active { transform: scale(0.9); }
-        .mine-cell.revealed { background: #2d3446; }
-        .mine-cell.safe { background: rgba(0, 255, 136, 0.2); border-color: var(--accent-green); }
-        .mine-cell.boom { background: rgba(255, 71, 87, 0.2); border-color: var(--accent-red); }
-        
-        /* Crash */
-        .crash-canvas { width: 100%; height: 250px; background: var(--bg-tertiary); border-radius: 12px; margin-bottom: 15px; position: relative; overflow: hidden; }
-        #crashCanvas { width: 100%; height: 100%; }
-        .crash-overlay { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 40px; font-weight: bold; color: var(--accent-green); text-shadow: 0 0 10px rgba(0,255,136,0.3); }
-        .crash-crashed { color: var(--accent-red); text-shadow: 0 0 10px rgba(255,71,87,0.3); }
 
-        /* Nav */
-        .nav { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(21,24,31,0.95); backdrop-filter: blur(10px); display: flex; justify-content: space-around; padding: 12px; border-top: 1px solid #2a2f3d; z-index: 100; }
-        .nav-item { color: var(--text-secondary); text-decoration: none; font-size: 11px; display: flex; flex-direction: column; align-items: center; }
-        .nav-item.active { color: var(--accent-green); }
-        .nav-item i { font-size: 20px; margin-bottom: 4px; }
+        /* Basic Reset & Body Styling */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: var(--font-family);
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            overflow-x: hidden;
+        }
+
+        /* Global Typography */
+        h1, h2, h3 {
+            color: var(--accent-color);
+            margin-top: 0;
+        }
+
+        h1 {
+            font-size: 2.2em;
+            text-shadow: 0 0 8px var(--accent-color), 0 0 15px rgba(0, 188, 212, 0.3);
+        }
+
+        h2 {
+            font-size: 1.8em;
+            color: var(--text-primary);
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        p {
+            line-height: 1.6;
+            color: var(--text-secondary);
+        }
+
+        /* Header */
+        header {
+            background-color: var(--bg-medium);
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 10px var(--shadow-color);
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Content Area */
+        .content {
+            flex-grow: 1;
+            padding: 20px;
+            margin-bottom: 70px; /* Space for fixed navigation */
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        /* Navigation */
+        nav {
+            display: flex;
+            justify-content: space-around;
+            background-color: var(--bg-medium);
+            padding: 10px 0;
+            box-shadow: 0 -4px 10px var(--shadow-color);
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            z-index: 1000;
+            border-top: 1px solid var(--border-color);
+        }
+
+        nav button {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.1em;
+            padding: 12px 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: bold;
+        }
+
+        nav button:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px var(--accent-color);
+        }
+
+        nav button.active {
+            color: var(--accent-color);
+            border-bottom: 3px solid var(--accent-color);
+            background-color: var(--bg-light);
+        }
+
+        nav button:hover:not(.active) {
+            color: var(--accent-color);
+            background-color: #2a2a2a;
+        }
+
+        /* Tab Content */
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Cards */
+        .category-card, .article-card {
+            background-color: var(--bg-light);
+            border-radius: 12px;
+            padding: 18px 25px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px var(--shadow-color);
+            font-size: 1.1em;
+            font-weight: 600;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .category-card:hover, .article-card:hover {
+            background-color: var(--accent-color-dark);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px var(--shadow-color);
+            color: #fff;
+        }
         
-        /* Modal */
-        .modal { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.8); z-index: 2000; display: flex; justify-content: center; align-items: center; }
-        .modal-content { background: var(--bg-secondary); width: 90%; max-width: 400px; padding: 20px; border-radius: 16px; border: 1px solid #2a2f3d; }
-        
-        .row { display: flex; justify-content: space-between; margin-bottom: 10px; }
-        input[type="number"] { background: var(--bg-primary); border: 1px solid #2a2f3d; color: #fff; padding: 8px; border-radius: 6px; width: 80px; text-align: center; }
-        
-        .notif { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #333; padding: 10px 20px; border-radius: 20px; z-index: 3000; border: 1px solid #444; box-shadow: 0 4px 10px rgba(0,0,0,0.5); animation: slideDown 0.3s; display: flex; align-items: center; gap: 8px; }
-        .notif.error { border-color: var(--accent-red); color: var(--accent-red); }
-        .notif.success { border-color: var(--accent-green); color: var(--accent-green); }
-        @keyframes slideDown { from { transform: translate(-50%, -100%); } to { transform: translate(-50%, 0); } }
+        .category-card:hover::after, .article-card:hover::after {
+            content: '→';
+            margin-left: 10px;
+            font-size: 1.2em;
+        }
+
+        /* Article Detail */
+        .article-detail {
+            background-color: var(--bg-light);
+            border-radius: 12px;
+            padding: 25px;
+            margin-top: 20px;
+            box-shadow: 0 2px 8px var(--shadow-color);
+        }
+
+        .article-detail h2 {
+            color: var(--accent-color);
+            margin-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+
+        .article-detail p {
+            color: var(--text-secondary);
+            font-size: 1em;
+        }
+
+        /* Buttons */
+        button:not(nav button) {
+            background-color: var(--accent-color);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 20px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            margin-top: 15px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        button:not(nav button):hover {
+            background-color: var(--accent-color-dark);
+            transform: translateY(-2px);
+        }
+
+        button:not(nav button):active {
+            transform: translateY(0);
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8em;
+            }
+            h2 {
+                font-size: 1.5em;
+            }
+            .content {
+                padding: 15px;
+            }
+            nav button {
+                font-size: 0.9em;
+                padding: 10px 8px;
+            }
+            .category-card, .article-card {
+                padding: 15px 20px;
+                font-size: 1em;
+            }
+        }
+
+        @media (max-width: 480px) {
+            header {
+                padding: 15px;
+            }
+            h1 {
+                font-size: 1.5em;
+            }
+            h2 {
+                font-size: 1.3em;
+            }
+            .content {
+                padding: 10px;
+            }
+            nav button {
+                font-size: 0.8em;
+                padding: 8px 5px;
+            }
+        }
     </style>
 </head>
 <body>
+    <header>
+        <h1>Мой Проект по Заработку</h1>
+    </header>
 
-<!-- Access Denied Screen -->
-<div id="accessDenied">
-    <i class="fas fa-lock" style="font-size: 48px; color: var(--accent-red); margin-bottom: 20px;"></i>
-    <h2>Доступ запрещен</h2>
-    <p style="color: #888;">Зайдите через Telegram бота</p>
-</div>
-
-<div id="app" class="hidden">
-    <div id="notifContainer"></div>
-
-    <div class="container">
-        <div class="header">
-            <div style="font-weight: 800; font-size: 22px;">Royal Bet <span style="color:var(--accent-green)">.</span></div>
-            <div class="balance" id="userBalance">0.00 ₽</div>
+    <div class="content">
+        <div id="home-tab" class="tab-content active">
+            <h2>Добро пожаловать!</h2>
+            <p>Здесь вы найдете информацию о различных способах заработка.</p>
+            <div id="categories-list"></div>
         </div>
 
-        <!-- SPORTS -->
-        <div id="sportsTab" class="tab-content">
-            <h2 style="margin-top: 0;">Матчи</h2>
-            <div id="matchesContainer">Loading...</div>
+        <div id="articles-tab" class="tab-content">
+            <button onclick="showHome()">← Назад к категориям</button>
+            <h2 id="articles-category-title"></h2>
+            <div id="articles-list"></div>
         </div>
 
-        <!-- GAMES -->
-        <div id="gamesTab" class="tab-content hidden">
-            <!-- Game Selector -->
-            <div id="gameSelector">
-                <div class="card" onclick="openMines()">
-                    <h3><i class="fas fa-bomb" style="color:var(--accent-red)"></i> Mines</h3>
-                    <p style="font-size: 12px; color:#888">Найди алмазы, избегай мин</p>
-                </div>
-                <div class="card" onclick="openCrash()">
-                    <h3><i class="fas fa-plane" style="color:var(--accent-blue)"></i> Crash</h3>
-                    <p style="font-size: 12px; color:#888">Успей забрать до краха</p>
-                </div>
-            </div>
-
-            <!-- Mines Game -->
-            <div id="minesGame" class="hidden">
-                <button class="btn btn-secondary" onclick="closeGame()" style="width:auto; padding: 8px 16px; margin-bottom: 10px;"><i class="fas fa-arrow-left"></i> Назад</button>
-                <div class="card">
-                    <div class="row" style="align-items: center;">
-                        <span>Ставка: <input type="number" id="minesAmount" value="100"> ₽</span>
-                        <span>Мины: <select id="minesCount" style="padding: 8px; border-radius:6px; background:var(--bg-primary); color:#fff; border:1px solid #2a2f3d;"><option value="3">3</option><option value="5">5</option><option value="10">10</option></select></span>
-                    </div>
-                    <div class="mines-grid" id="minesGrid"></div>
-                    <button class="btn btn-primary" id="minesBtn">Играть</button>
-                </div>
-            </div>
-
-            <!-- Crash Game -->
-            <div id="crashGame" class="hidden">
-                <button class="btn btn-secondary" onclick="closeGame()" style="width:auto; padding: 8px 16px; margin-bottom: 10px;"><i class="fas fa-arrow-left"></i> Назад</button>
-                <div class="card">
-                    <div class="crash-canvas">
-                        <canvas id="crashCanvas"></canvas>
-                        <div class="crash-overlay" id="crashMultiplier">1.00x</div>
-                    </div>
-                    <div class="row" style="margin-top: 15px;">
-                        <input type="number" id="crashAmount" value="100" style="width: 100%;">
-                    </div>
-                    <button class="btn btn-primary" id="crashBtn">Старт</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- PROFILE -->
-        <div id="profileTab" class="tab-content hidden">
-            <div class="profile-header">
-                <div class="profile-avatar"><i class="fas fa-user"></i></div>
-                <h2 id="userName">User</h2>
-                <p style="color:#888; font-size:12px;">ID: <span id="userId">...</span></p>
-            </div>
-            <h3>История ставок</h3>
-            <div id="historyContainer"></div>
+        <div id="article-detail-tab" class="tab-content">
+            <button onclick="showArticles()">← Назад к статьям</button>
+            <h2 id="article-detail-title"></h2>
+            <div id="article-detail-content"></div>
         </div>
     </div>
 
-    <!-- Nav -->
-    <nav class="nav">
-        <a href="#" class="nav-item active" onclick="switchTab('sports', this)"><i class="fas fa-futbol"></i>Спорт</a>
-        <a href="#" class="nav-item" onclick="switchTab('games', this)"><i class="fas fa-gamepad"></i>Игры</a>
-        <a href="#" class="nav-item" onclick="switchTab('profile', this)"><i class="fas fa-user"></i>Профиль</a>
+    <nav>
+        <button id="nav-home" class="active">Главная</button>
+        <!-- Дополнительные кнопки навигации можно добавить здесь -->
     </nav>
-</div>
 
-<!-- Match Details Modal -->
-<div id="detailModal" class="modal hidden">
-    <div class="modal-content">
-        <h3 id="modalTitle">Match</h3>
-        <div id="modalBody"></div>
-        <button class="btn btn-secondary" onclick="document.getElementById('detailModal').classList.add('hidden')">Закрыть</button>
-    </div>
-</div>
+    <script>
+        const BACKEND_URL = "https://backend-1-4dqs.onrender.com"; // Замените на ваш URL бэкенда Render.com
 
-<script>
-    const API_URL = 'https://backend-4jag.onrender.com'; // ВАЖНО: Твой URL
-    let currentUser = null;
-    
-    // --- Mines State ---
-    let minesActive = false;
-    let minesId = null;
-    let minesField = []; // We get this, but only reveal visually on click
-    let minesOpened = 0;
+        document.addEventListener('DOMContentLoaded', () => {
+            loadCategories();
 
-    // --- Crash State ---
-    let crashActive = false;
-    let crashId = null;
-    let crashPoint = 0;
-    let crashCurrent = 1.0;
-    let crashAnim = null;
-
-    // INIT
-    window.onload = async () => {
-        // Strict Check
-        if(!window.Telegram || !window.Telegram.WebApp || !window.Telegram.WebApp.initData) {
-            // Если открыли не в ТГ -> стоп
-            return; 
-        }
-        
-        // Hide Access Denied, Show App
-        document.getElementById('accessDenied').classList.add('hidden');
-        document.getElementById('app').classList.remove('hidden');
-        
-        window.Telegram.WebApp.ready();
-        window.Telegram.WebApp.expand();
-        
-        await login();
-    };
-
-    async function login() {
-        const initData = window.Telegram.WebApp.initData;
-        try {
-            const res = await fetch(`${API_URL}/api/init`, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ initData })
-            });
-            const data = await res.json();
-            if(data.success) {
-                currentUser = data.user;
-                updateHeader();
-                loadMatches();
-                renderMinesGrid(true);
-            } else {
-                alert("Ошибка авторизации");
-            }
-        } catch(e) { console.error(e); }
-    }
-
-    function updateHeader() {
-        if(currentUser) {
-            document.getElementById('userBalance').textContent = currentUser.balance.toFixed(2) + ' ₽';
-            document.getElementById('userName').textContent = currentUser.username;
-            document.getElementById('userId').textContent = currentUser.id;
-        }
-    }
-
-    function notify(msg, type='success') {
-        const div = document.createElement('div');
-        div.className = `notif ${type}`;
-        div.innerHTML = `<i class="fas fa-${type==='error'?'exclamation-circle':'check-circle'}"></i> ${msg}`;
-        document.getElementById('notifContainer').appendChild(div);
-        setTimeout(() => div.remove(), 3000);
-    }
-
-    // --- TABS ---
-    function switchTab(tab, el) {
-        document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
-        document.getElementById(tab+'Tab').classList.remove('hidden');
-        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        el.classList.add('active');
-        if(tab === 'profile') loadHistory();
-    }
-
-    function closeGame() {
-        document.getElementById('minesGame').classList.add('hidden');
-        document.getElementById('crashGame').classList.add('hidden');
-        document.getElementById('gameSelector').classList.remove('hidden');
-    }
-
-    // --- SPORTS ---
-    async function loadMatches() {
-        const res = await fetch(`${API_URL}/api/matches`);
-        const data = await res.json();
-        const c = document.getElementById('matchesContainer');
-        c.innerHTML = '';
-        data.matches.forEach(m => {
-            const d = document.createElement('div');
-            d.className = 'card';
-            d.innerHTML = `
-                <div style="font-size:12px; color:#888; margin-bottom:5px;">${m.sport.toUpperCase()} • ${m.start_time.slice(0,10)}</div>
-                <div class="row" style="align-items:center; margin-bottom:15px;">
-                    <span style="font-weight:bold">${m.team_home}</span>
-                    <span style="background:var(--bg-tertiary); padding:4px 8px; border-radius:4px; font-weight:bold; color:var(--accent-green)">${m.score_home}:${m.score_away}</span>
-                    <span style="font-weight:bold">${m.team_away}</span>
-                </div>
-                <div class="row" style="gap:5px;">
-                    <button class="btn btn-secondary" style="margin:0" onclick="betMatch(${m.id}, 'home', ${m.odds_home})">1 (${m.odds_home})</button>
-                    <button class="btn btn-secondary" style="margin:0" onclick="betMatch(${m.id}, 'draw', ${m.odds_draw})">X (${m.odds_draw||'-'})</button>
-                    <button class="btn btn-secondary" style="margin:0" onclick="betMatch(${m.id}, 'away', ${m.odds_away})">2 (${m.odds_away})</button>
-                </div>
-                <button class="btn btn-secondary" style="margin-top:8px; font-size:12px; padding:8px;" onclick='openDetails(${JSON.stringify(m)})'>Детали</button>
-            `;
-            c.appendChild(d);
-        });
-    }
-
-    async function betMatch(mid, outcome, odds) {
-        if(!confirm(`Ставка 100₽ на коэф ${odds}?`)) return;
-        const res = await fetch(`${API_URL}/api/bet`, {
-            method:'POST',
-            headers:{'Content-Type':'application/json'},
-            body: JSON.stringify({user_id:currentUser.id, match_id:mid, amount:100, odds:odds, outcome:outcome})
-        });
-        const d = await res.json();
-        if(d.success) {
-            notify("Ставка принята!");
-            currentUser.balance = d.new_balance;
-            updateHeader();
-        } else notify(d.message, 'error');
-    }
-
-    function openDetails(m) {
-        const det = m.details;
-        document.getElementById('modalTitle').textContent = `${m.team_home} vs ${m.team_away}`;
-        document.getElementById('modalBody').innerHTML = `
-            <div class="row"><span>Тотал > ${det.total_val}</span> <b>${det.total_over}</b></div>
-            <div class="row"><span>Тотал < ${det.total_val}</span> <b>${det.total_under}</b></div>
-            <div class="row"><span>Обе забьют</span> <b>${det.both_score_yes}</b></div>
-        `;
-        document.getElementById('detailModal').classList.remove('hidden');
-    }
-
-    // --- MINES ---
-    function openMines() {
-        document.getElementById('gameSelector').classList.add('hidden');
-        document.getElementById('minesGame').classList.remove('hidden');
-        renderMinesGrid(true); // Clear grid
-    }
-
-    function renderMinesGrid(reset=false) {
-        const grid = document.getElementById('minesGrid');
-        grid.innerHTML = ''; // IMPORTANT: Clears field
-        for(let i=0; i<25; i++) {
-            const cell = document.createElement('div');
-            cell.className = 'mine-cell';
-            if(!reset) {
-                // If checking history or result
-            } else {
-                cell.innerHTML = '';
-            }
-            cell.onclick = () => clickMine(i, cell);
-            grid.appendChild(cell);
-        }
-    }
-
-    const minesBtn = document.getElementById('minesBtn');
-    minesBtn.onclick = async () => {
-        if(!minesActive) {
-            // Start
-            const amt = document.getElementById('minesAmount').value;
-            const cnt = document.getElementById('minesCount').value;
-            
-            const res = await fetch(`${API_URL}/api/game`, {
-                method:'POST',
-                headers:{'Content-Type':'application/json'},
-                body: JSON.stringify({user_id:currentUser.id, game_type:'mines', amount:amt, mines_count:cnt})
-            });
-            const d = await res.json();
-            if(d.success) {
-                minesActive = true;
-                minesId = d.bet_id;
-                minesField = d.field; // Store internally
-                minesOpened = 0;
-                currentUser.balance = d.new_balance;
-                updateHeader();
-                
-                renderMinesGrid(true); // Clear visual
-                minesBtn.textContent = "Забрать (Возврат 80%)";
-                minesBtn.className = "btn btn-secondary";
-            } else notify(d.message, 'error');
-        } else {
-            // Cashout
-            const res = await fetch(`${API_URL}/api/mines/cashout`, {
-                method:'POST',
-                headers:{'Content-Type':'application/json'},
-                body: JSON.stringify({user_id:currentUser.id, crash_id:minesId})
-            });
-            const d = await res.json();
-            if(d.success) {
-                endMines(true, d.win_amount);
-            }
-        }
-    };
-
-    async function clickMine(idx, cell) {
-        if(!minesActive || cell.classList.contains('revealed')) return;
-        
-        // 1. Send update to server (Anti-cheat)
-        fetch(`${API_URL}/api/mines/update`, {
-            method:'POST',
-            headers:{'Content-Type':'application/json'},
-            body:JSON.stringify({crash_id:minesId})
+            document.getElementById('nav-home').addEventListener('click', () => showHome());
+            // Добавьте обработчики для других кнопок навигации, если они появятся
         });
 
-        // 2. Visual Logic
-        cell.classList.add('revealed');
-        
-        if(minesField[idx] === 1) {
-            // Boom
-            cell.classList.add('boom');
-            cell.innerHTML = '💣';
-            endMines(false);
-        } else {
-            // Safe
-            cell.classList.add('safe');
-            cell.innerHTML = '💎';
-            minesOpened++;
-            minesBtn.textContent = "Забрать выигрыш";
-            minesBtn.className = "btn btn-primary";
+        async function loadCategories() {
+            try {
+                const response = await fetch(`${BACKEND_URL}/categories`);
+                const categories = await response.json();
+                const categoriesList = document.getElementById('categories-list');
+                categoriesList.innerHTML = '';
+                categories.forEach(category => {
+                    const card = document.createElement('div');
+                    card.className = 'category-card';
+                    card.textContent = category.name;
+                    card.onclick = () => showArticles(category.id, category.name);
+                    categoriesList.appendChild(card);
+                });
+            } catch (error) {
+                console.error('Ошибка при загрузке категорий:', error);
+                document.getElementById('categories-list').innerHTML = '<p>Не удалось загрузить категории.</p>';
+            }
         }
-    }
 
-    function endMines(win, amount=0) {
-        minesActive = false;
-        minesBtn.textContent = "Играть";
-        minesBtn.className = "btn btn-primary";
-        
-        if(win) {
-            currentUser.balance += amount; // Sync locally for speed
-            // Actually balance comes from server response in real implementation
-            // But here we rely on the cashout response
-            updateHeader();
-            
-            if(minesOpened === 0) notify(`Возврат: ${amount.toFixed(2)}₽`);
-            else notify(`Победа! +${amount.toFixed(2)}₽`);
-        } else {
-            notify("Взрыв!", 'error');
-            // Show all mines
-            const cells = document.querySelectorAll('.mine-cell');
-            minesField.forEach((isMine, i) => {
-                if(isMine) {
-                    cells[i].classList.add('revealed', 'boom');
-                    cells[i].innerHTML = '💣';
+        async function showArticles(categoryId = null, categoryName = '') {
+            hideAllTabs();
+            document.getElementById('articles-tab').classList.add('active');
+            document.getElementById('articles-category-title').textContent = categoryName;
+
+            if (categoryId) {
+                try {
+                    const response = await fetch(`${BACKEND_URL}/articles/${categoryId}`);
+                    const articles = await response.json();
+                    const articlesList = document.getElementById('articles-list');
+                    articlesList.innerHTML = '';
+                    if (articles.length === 0) {
+                        articlesList.innerHTML = '<p>В этой категории пока нет статей.</p>';
+                    } else {
+                        articles.forEach(article => {
+                            const card = document.createElement('div');
+                            card.className = 'article-card';
+                            card.textContent = article.title;
+                            card.onclick = () => showArticleDetail(article.id);
+                            articlesList.appendChild(card);
+                        });
+                    }
+                } catch (error) {
+                    console.error('Ошибка при загрузке статей:', error);
+                    document.getElementById('articles-list').innerHTML = '<p>Не удалось загрузить статьи.</p>';
                 }
-            });
-        }
-        // Force refresh balance
-        login(); 
-    }
-
-    // --- CRASH ---
-    function openCrash() {
-        document.getElementById('gameSelector').classList.add('hidden');
-        document.getElementById('crashGame').classList.remove('hidden');
-        initCrashCanvas();
-    }
-
-    function initCrashCanvas() {
-        const c = document.getElementById('crashCanvas');
-        c.width = c.offsetWidth;
-        c.height = c.offsetHeight;
-        const ctx = c.getContext('2d');
-        ctx.fillStyle = "#1c1f2a";
-        ctx.fillRect(0,0,c.width,c.height);
-        
-        // Draw grid
-        ctx.strokeStyle = "#2a2f3d";
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        for(let i=0; i<c.width; i+=50) { ctx.moveTo(i,0); ctx.lineTo(i,c.height); }
-        for(let i=0; i<c.height; i+=50) { ctx.moveTo(0,i); ctx.lineTo(c.width,i); }
-        ctx.stroke();
-    }
-
-    const crashBtn = document.getElementById('crashBtn');
-    crashBtn.onclick = async () => {
-        if(!crashActive) {
-            // Start
-            const amt = document.getElementById('crashAmount').value;
-            const res = await fetch(`${API_URL}/api/crash/start`, {
-                method:'POST',
-                headers:{'Content-Type':'application/json'},
-                body: JSON.stringify({user_id:currentUser.id, amount:amt})
-            });
-            const d = await res.json();
-            if(d.success) {
-                crashActive = true;
-                crashId = d.game_id;
-                crashPoint = d.crash_point;
-                currentUser.balance = d.new_balance;
-                updateHeader();
-                
-                crashBtn.textContent = "ЗАБРАТЬ";
-                crashBtn.className = "btn btn-secondary";
-                
-                startCrashAnim();
-            } else notify(d.message, 'error');
-        } else {
-            // Cashout
-            const res = await fetch(`${API_URL}/api/crash/cashout`, {
-                method:'POST',
-                headers:{'Content-Type':'application/json'},
-                body: JSON.stringify({user_id:currentUser.id, crash_id:crashId})
-            });
-            const d = await res.json();
-            if(d.success) {
-                crashActive = false; // Stop internal tracker
-                // Animation loop handles the rest
-                notify(`Вывел на ${d.multiplier}x (+${d.win_amount}₽)`);
-                currentUser.balance = d.new_balance;
-                updateHeader();
             }
         }
-    };
 
-    function startCrashAnim() {
-        const c = document.getElementById('crashCanvas');
-        const ctx = c.getContext('2d');
-        let startTime = Date.now();
-        crashCurrent = 1.0;
-        
-        function loop() {
-            if(!crashActive && crashCurrent >= crashPoint) return; // End handled elsewhere if lost
-            
-            let now = Date.now();
-            let elapsed = (now - startTime) / 1000;
-            crashCurrent = 1.0 + Math.pow(elapsed, 2) * 0.1; // Simple exponential curve
-            
-            // UI Update
-            document.getElementById('crashMultiplier').textContent = crashCurrent.toFixed(2) + 'x';
-            
-            // Draw
-            ctx.fillStyle = "#1c1f2a";
-            ctx.fillRect(0,0,c.width,c.height);
-            
-            // Draw Curve
-            ctx.beginPath();
-            ctx.moveTo(0, c.height);
-            // Draw quadratic curve based on time
-            let x = (elapsed * 50) % c.width;
-            let y = c.height - (Math.pow(elapsed, 2) * 20);
-            if(y < 50) y = 50; // clamp top
-            
-            ctx.quadraticCurveTo(x/2, c.height, x, y);
-            ctx.strokeStyle = "#00ff88";
-            ctx.lineWidth = 3;
-            ctx.stroke();
-            
-            // Plane Emoji
-            ctx.font = "24px Arial";
-            ctx.fillText("✈️", x-10, y-10);
-            
-            // Check Crash
-            if(crashCurrent >= crashPoint) {
-                crashActive = false;
-                crashBtn.textContent = "Старт";
-                crashBtn.className = "btn btn-primary";
-                document.getElementById('crashMultiplier').classList.add('crash-crashed');
-                document.getElementById('crashMultiplier').textContent = "CRASHED @ " + crashPoint.toFixed(2) + "x";
-                
-                // Boom visual
-                ctx.fillText("💥", x-10, y-10);
-                return; 
-            }
-            
-            if(crashActive) requestAnimationFrame(loop);
-            else {
-                // If user cashed out
-                crashBtn.textContent = "Старт";
-                crashBtn.className = "btn btn-primary";
-                document.getElementById('crashMultiplier').style.color = "#fff";
-                document.getElementById('crashMultiplier').textContent = "WON!";
+        async function showArticleDetail(articleId) {
+            hideAllTabs();
+            document.getElementById('article-detail-tab').classList.add('active');
+
+            try {
+                const response = await fetch(`${BACKEND_URL}/article/${articleId}`);
+                const article = await response.json();
+                document.getElementById('article-detail-title').textContent = article.title;
+                document.getElementById('article-detail-content').innerHTML = `<p>${article.content.replace(/\n/g, '<br>')}</p>`;
+            } catch (error) {
+                console.error('Ошибка при загрузке статьи:', error);
+                document.getElementById('article-detail-content').innerHTML = '<p>Не удалось загрузить статью.</p>';
             }
         }
-        document.getElementById('crashMultiplier').classList.remove('crash-crashed');
-        document.getElementById('crashMultiplier').style.color = "#00ff88";
-        loop();
-    }
 
-    async function loadHistory() {
-        const res = await fetch(`${API_URL}/api/history?user_id=${currentUser.id}`);
-        const d = await res.json();
-        document.getElementById('historyContainer').innerHTML = d.history.map(h => `
-            <div style="background:var(--bg-tertiary); padding:10px; margin-bottom:8px; border-radius:8px; border-left:4px solid ${h.status==='won'?'var(--accent-green)':'var(--accent-red)'}">
-                <div class="row" style="margin:0">
-                    <span>${h.game_type.toUpperCase()}</span>
-                    <span>${h.amount}₽</span>
-                </div>
-                <div style="font-size:12px; color:#888; text-align:right">${h.status} | x${h.odds}</div>
-            </div>
-        `).join('');
-    }
-</script>
+        function showHome() {
+            hideAllTabs();
+            document.getElementById('home-tab').classList.add('active');
+            setActiveNav('nav-home');
+            loadCategories(); // Перезагружаем категории при возвращении на главную
+        }
+
+        function hideAllTabs() {
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+        }
+
+        function setActiveNav(navId) {
+            document.querySelectorAll('nav button').forEach(button => {
+                button.classList.remove('active');
+            });
+            document.getElementById(navId).classList.add('active');
+        }
+
+    </script>
 </body>
 </html>
